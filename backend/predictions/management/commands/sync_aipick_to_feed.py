@@ -16,10 +16,8 @@ class Command(BaseCommand):
         created = 0
         for pick in AIPick.objects.filter(feed='STANDARD').select_related('match').order_by('-created_at')[:50]:
             match = pick.match
-            card_type = "BIG_MATCH" if match.is_big_match else "AI_PICK"
-
             Card.objects.create(
-                type=card_type,
+                type="AI_PICK",
                 match_id=match.id,
                 data={
                     'match': {
@@ -30,9 +28,12 @@ class Command(BaseCommand):
                         'away_team_crest_url': match.away_team.crest_url if match.away_team else None,
                         'kickoff_at': match.kickoff_at.isoformat(),
                         'league': pick.league,
+                        'is_big_match': match.is_big_match,
                     },
                     'ai_pick': {
                         'option_key': pick.selection.lower(),
+                        'selection': pick.selection,
+                        'selection_label': get_selection_label(pick.selection),
                         'market_label': get_market_label(pick.market),
                         'probability_percent': pick.probability_percent,  # This is the percentage (82.7)
                         'tier': pick.tier,

@@ -197,8 +197,8 @@ def generate_ai_picks(feed_type="STANDARD"):
                         kickoff_at=match.kickoff_at,
                         market=best_pick['market'],
                         selection=best_pick['selection'],
-                        probability=best_pick['probability'] / 100,  # Store as decimal (0.827)
-                        probability_percent=round(best_pick['probability'], 1),  # Store as percentage (82.7)
+                        probability=best_pick['probability'],  # Store raw probability as decimal (0.827)
+                        probability_percent=round(best_pick['probability'] * 100, 1),  # Store display percentage (82.7)
                         tier=best_pick['tier'],
                         feed=feed_type,
                         status='PENDING',
@@ -210,9 +210,8 @@ def generate_ai_picks(feed_type="STANDARD"):
                     picks_created += 1
 
                     # Create corresponding feed card for display
-                    card_type = "BIG_MATCH" if match.is_big_match else "AI_PICK"
                     Card.objects.create(
-                        type=card_type,
+                        type="AI_PICK",
                         match_id=match.id,
                         data={
                             'match': {
@@ -223,11 +222,14 @@ def generate_ai_picks(feed_type="STANDARD"):
                                 'away_team_crest_url': match.away_team.crest_url,
                                 'kickoff_at': match.kickoff_at.isoformat(),
                                 'league': match.league.name,
+                                'is_big_match': match.is_big_match,
                             },
                             'ai_pick': {
                                 'option_key': best_pick['selection'].lower(),
+                                'selection': best_pick['selection'],
+                                'selection_label': get_selection_label(best_pick['selection']),
                                 'market_label': get_market_label(best_pick['market']),
-                                'confidence': round(best_pick['probability'] * 100, 1),
+                                'probability_percent': round(best_pick['probability'] * 100, 1),
                                 'tier': best_pick['tier'],
                                 'status': 'PENDING',
                                 'pick_id': str(pick.pick_id),

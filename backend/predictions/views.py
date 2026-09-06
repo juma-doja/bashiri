@@ -680,15 +680,8 @@ class AIPerformanceStatsView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        from django.core.cache import cache
         from datetime import timedelta
         from .models import AIPick
-
-        # Cache for 5 minutes
-        cache_key = "ai_performance_stats"
-        cached_data = cache.get(cache_key)
-        if cached_data is not None:
-            return Response(cached_data)
 
         today = timezone.localdate()
         week_ago = today - timedelta(days=7)
@@ -703,7 +696,7 @@ class AIPerformanceStatsView(APIView):
 
         # Calculate daily accuracy
         daily_decisions = daily_won + daily_lost
-        daily_accuracy = round((daily_won / daily_decisions * 100), 1) if daily_decisions > 0 else None
+        daily_accuracy = round((daily_won / daily_decisions * 100), 1) if daily_decisions > 0 else 0.0
 
         # Daily market-specific accuracy
         daily_1x2_picks = daily_picks.filter(market__startswith='1x2')
@@ -716,7 +709,7 @@ class AIPerformanceStatsView(APIView):
         daily_btts_lost = daily_btts_picks.filter(status='LOST').count()
         daily_btts_accuracy = round((daily_btts_won / (daily_btts_won + daily_btts_lost) * 100), 1) if (daily_btts_won + daily_btts_lost) > 0 else None
 
-        daily_ou_picks = daily_picks.filter(market__startswith='over')
+        daily_ou_picks = daily_picks.filter(market__in=['over_2_5', 'under_2_5'])
         daily_ou_won = daily_ou_picks.filter(status='WON').count()
         daily_ou_lost = daily_ou_picks.filter(status='LOST').count()
         daily_ou_accuracy = round((daily_ou_won / (daily_ou_won + daily_ou_lost) * 100), 1) if (daily_ou_won + daily_ou_lost) > 0 else None
@@ -727,39 +720,23 @@ class AIPerformanceStatsView(APIView):
         daily_elite_lost = daily_elite_picks.filter(status='LOST').count()
         daily_elite_accuracy = round((daily_elite_won / (daily_elite_won + daily_elite_lost) * 100), 1) if (daily_elite_won + daily_elite_lost) > 0 else None
 
-        # Daily market-specific accuracy
-        daily_1x2_picks = daily_picks.filter(market__startswith='1x2')
-        daily_1x2_won = daily_1x2_picks.filter(status='WON').count()
-        daily_1x2_lost = daily_1x2_picks.filter(status='LOST').count()
-        daily_1x2_accuracy = round((daily_1x2_won / (daily_1x2_won + daily_1x2_lost) * 100), 1) if (daily_1x2_won + daily_1x2_lost) > 0 else None
-
-        daily_btts_picks = daily_picks.filter(market__startswith='btts')
-        daily_btts_won = daily_btts_picks.filter(status='WON').count()
-        daily_btts_lost = daily_btts_picks.filter(status='LOST').count()
-        daily_btts_accuracy = round((daily_btts_won / (daily_btts_won + daily_btts_lost) * 100), 1) if (daily_btts_won + daily_btts_lost) > 0 else None
-
-        daily_ou_picks = daily_picks.filter(market__startswith='over')
-        daily_ou_won = daily_ou_picks.filter(status='WON').count()
-        daily_ou_lost = daily_ou_picks.filter(status='LOST').count()
-        daily_ou_accuracy = round((daily_ou_won / (daily_ou_won + daily_ou_lost) * 100), 1) if (daily_ou_won + daily_ou_lost) > 0 else None
-
         # Additional daily market calculations
         daily_dc_picks = daily_picks.filter(market__startswith='dc')
         daily_dc_won = daily_dc_picks.filter(status='WON').count()
         daily_dc_lost = daily_dc_picks.filter(status='LOST').count()
         daily_dc_accuracy = round((daily_dc_won / (daily_dc_won + daily_dc_lost) * 100), 1) if (daily_dc_won + daily_dc_lost) > 0 else None
 
-        daily_ou15_picks = daily_picks.filter(market__contains='1.5')
+        daily_ou15_picks = daily_picks.filter(market__in=['over_1_5', 'under_1_5'])
         daily_ou15_won = daily_ou15_picks.filter(status='WON').count()
         daily_ou15_lost = daily_ou15_picks.filter(status='LOST').count()
         daily_ou15_accuracy = round((daily_ou15_won / (daily_ou15_won + daily_ou15_lost) * 100), 1) if (daily_ou15_won + daily_ou15_lost) > 0 else None
 
-        daily_home_goals_picks = daily_picks.filter(market__contains='home')
+        daily_home_goals_picks = daily_picks.filter(market__startswith='home_')
         daily_home_goals_won = daily_home_goals_picks.filter(status='WON').count()
         daily_home_goals_lost = daily_home_goals_picks.filter(status='LOST').count()
         daily_home_goals_accuracy = round((daily_home_goals_won / (daily_home_goals_won + daily_home_goals_lost) * 100), 1) if (daily_home_goals_won + daily_home_goals_lost) > 0 else None
 
-        daily_away_goals_picks = daily_picks.filter(market__contains='away')
+        daily_away_goals_picks = daily_picks.filter(market__startswith='away_')
         daily_away_goals_won = daily_away_goals_picks.filter(status='WON').count()
         daily_away_goals_lost = daily_away_goals_picks.filter(status='LOST').count()
         daily_away_goals_accuracy = round((daily_away_goals_won / (daily_away_goals_won + daily_away_goals_lost) * 100), 1) if (daily_away_goals_won + daily_away_goals_lost) > 0 else None
@@ -860,7 +837,7 @@ class AIPerformanceStatsView(APIView):
         weekly_btts_lost = weekly_btts_picks.filter(status='LOST').count()
         weekly_btts_accuracy = round((weekly_btts_won / (weekly_btts_won + weekly_btts_lost) * 100), 1) if (weekly_btts_won + weekly_btts_lost) > 0 else None
 
-        weekly_ou_picks = weekly_picks.filter(market__startswith='over')
+        weekly_ou_picks = weekly_picks.filter(market__in=['over_2_5', 'under_2_5'])
         weekly_ou_won = weekly_ou_picks.filter(status='WON').count()
         weekly_ou_lost = weekly_ou_picks.filter(status='LOST').count()
         weekly_ou_accuracy = round((weekly_ou_won / (weekly_ou_won + weekly_ou_lost) * 100), 1) if (weekly_ou_won + weekly_ou_lost) > 0 else None
@@ -871,17 +848,17 @@ class AIPerformanceStatsView(APIView):
         weekly_dc_lost = weekly_dc_picks.filter(status='LOST').count()
         weekly_dc_accuracy = round((weekly_dc_won / (weekly_dc_won + weekly_dc_lost) * 100), 1) if (weekly_dc_won + weekly_dc_lost) > 0 else None
 
-        weekly_ou15_picks = weekly_picks.filter(market__contains='1.5')
+        weekly_ou15_picks = weekly_picks.filter(market__in=['over_1_5', 'under_1_5'])
         weekly_ou15_won = weekly_ou15_picks.filter(status='WON').count()
         weekly_ou15_lost = weekly_ou15_picks.filter(status='LOST').count()
         weekly_ou15_accuracy = round((weekly_ou15_won / (weekly_ou15_won + weekly_ou15_lost) * 100), 1) if (weekly_ou15_won + weekly_ou15_lost) > 0 else None
 
-        weekly_home_goals_picks = weekly_picks.filter(market__contains='home')
+        weekly_home_goals_picks = weekly_picks.filter(market__startswith='home_')
         weekly_home_goals_won = weekly_home_goals_picks.filter(status='WON').count()
         weekly_home_goals_lost = weekly_home_goals_picks.filter(status='LOST').count()
         weekly_home_goals_accuracy = round((weekly_home_goals_won / (weekly_home_goals_won + weekly_home_goals_lost) * 100), 1) if (weekly_home_goals_won + weekly_home_goals_lost) > 0 else None
 
-        weekly_away_goals_picks = weekly_picks.filter(market__contains='away')
+        weekly_away_goals_picks = weekly_picks.filter(market__startswith='away_')
         weekly_away_goals_won = weekly_away_goals_picks.filter(status='WON').count()
         weekly_away_goals_lost = weekly_away_goals_picks.filter(status='LOST').count()
         weekly_away_goals_accuracy = round((weekly_away_goals_won / (weekly_away_goals_won + weekly_away_goals_lost) * 100), 1) if (weekly_away_goals_won + weekly_away_goals_lost) > 0 else None
@@ -979,7 +956,7 @@ class AIPerformanceStatsView(APIView):
 
             if day_total > 0:
                 day_decisions = day_won + day_lost
-                day_accuracy = round((day_won / day_decisions * 100), 1) if day_decisions > 0 else None
+                day_accuracy = round((day_won / day_decisions * 100), 1) if day_decisions > 0 else 0.0
                 weekly_trend.append({
                     "date": date.isoformat(),
                     "accuracy_percentage": day_accuracy,
@@ -989,7 +966,7 @@ class AIPerformanceStatsView(APIView):
                 # Add placeholder for days with no data
                 weekly_trend.append({
                     "date": date.isoformat(),
-                    "accuracy_percentage": None,
+                    "accuracy_percentage": 0.0,
                     "total_predictions": 0,
                 })
 
@@ -1001,7 +978,6 @@ class AIPerformanceStatsView(APIView):
             "weekly_trend": list(reversed(weekly_trend)),
         }
 
-        cache.set(cache_key, data, timeout=300)  # 5 minutes cache
         return Response(data)
 
 

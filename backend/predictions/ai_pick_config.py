@@ -92,18 +92,16 @@ def qualify_ai_pick(market_key, probability, feed_type="STANDARD"):
     Returns:
         "ELITE", "STRONG", "MINIMUM", or None
     """
-    probability_percent = probability * 100
-
     # Check Elite qualification first
     if market_key in ELITE_MARKETS:
         elite_threshold = AI_PICK_THRESHOLDS["elite"].get(market_key)
-        if elite_threshold and probability_percent >= elite_threshold:
+        if elite_threshold is not None and probability >= elite_threshold:
             return "ELITE"
 
     # Check Free/Standard qualification
     if market_key in FREE_MARKETS:
         free_threshold = AI_PICK_THRESHOLDS["free"].get(market_key)
-        if free_threshold and probability_percent >= free_threshold:
+        if free_threshold is not None and probability >= free_threshold:
             return "STRONG"
 
     # Premium feed only accepts Elite picks
@@ -113,7 +111,7 @@ def qualify_ai_pick(market_key, probability, feed_type="STANDARD"):
     # Check if it meets minimum threshold for standard feed
     if market_key in FREE_MARKETS:
         free_threshold = AI_PICK_THRESHOLDS["free"].get(market_key)
-        if free_threshold and probability_percent >= free_threshold:
+        if free_threshold is not None and probability >= free_threshold:
             return "MINIMUM"
 
     return None
@@ -126,4 +124,21 @@ def get_market_label(market_key):
 
 def get_selection_label(selection_key):
     """Get display label for selection key."""
-    return SELECTION_LABELS.get(selection_key, selection_key)
+    if selection_key is None:
+        return ""
+    key = str(selection_key)
+    for canonical_key, label in SELECTION_LABELS.items():
+        if canonical_key.casefold() == key.casefold():
+            return label
+    return key
+
+
+def normalize_probability_percent(value):
+    """Return a probability in display units (0-100), including legacy decimals."""
+    try:
+        probability = float(value)
+    except (TypeError, ValueError):
+        return 0.0
+    if 0 <= probability <= 1:
+        probability *= 100
+    return round(max(0.0, min(probability, 100.0)), 1)

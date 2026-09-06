@@ -17,7 +17,7 @@ from datetime import timedelta, datetime
 import uuid
 
 from .models import AIPick, Match
-from .ai_pick_config import qualify_ai_pick, get_market_label, get_selection_label
+from .ai_pick_config import get_market_label, get_selection_label, normalize_probability_percent
 from .settlement_engine import settle_ai_pick
 
 
@@ -131,7 +131,7 @@ class AIPickListView(APIView):
                 'selection': pick.selection,
                 'selection_label': get_selection_label(pick.selection),
                 'probability': pick.probability,
-                'probability_percent': pick.probability_percent,
+                'probability_percent': normalize_probability_percent(pick.probability_percent),
                 'tier': pick.tier,
                 'feed': pick.feed,
                 'status': pick.status,
