@@ -56,17 +56,30 @@ export function searchMatches(q: string, date?: string, league?: string) {
   if (league) params.append("league", league);
   return apiClient<{ results: Match[] }>(`/predictions/search/?${params}`, { skipAuth: true });
 }
+
+export interface MatchFormEntry {
+  opponent: string;
+  result: string;
+  date: string;
+  opponent_crest?: string;
+  is_home?: boolean;
+  team_goals?: number;
+  opponent_goals?: number;
+}
+
+export interface MatchOverview {
+  match: Match;
+  home_form: { sequence: string; avg_goals_scored: number; matches: MatchFormEntry[] };
+  away_form: { sequence: string; avg_goals_scored: number; matches: MatchFormEntry[] };
+  head_to_head: { date: string; home_team: string; away_team: string; home_score: number; away_score: number }[];
+}
+
 export function getMatchOverview(matchId: number, formRange?: number, h2hRange?: number) {
   const params = new URLSearchParams();
   if (formRange) params.append("form_range", formRange.toString());
   if (h2hRange) params.append("h2h_range", h2hRange.toString());
   const query = params.toString();
-  return apiClient<{
-    match: Match;
-    home_form: { sequence: string; avg_goals_scored: number; matches: Array<{ opponent: string; result: string; date: string }> };
-    away_form: { sequence: string; avg_goals_scored: number; matches: Array<{ opponent: string; result: string; date: string }> };
-    head_to_head: { date: string; home_team: string; away_team: string; home_score: number; away_score: number }[];
-  }>(`/predictions/matches/${matchId}/overview/${query ? '?' + query : ''}`, { skipAuth: true });
+  return apiClient<MatchOverview>(`/predictions/matches/${matchId}/overview/${query ? '?' + query : ''}`, { skipAuth: true });
 }
 
 export interface MarketOption {
@@ -125,9 +138,24 @@ export function saveMarket(matchId: number, marketKey: string) {
 export function unsaveMarket(matchId: number, marketKey: string) {
   return apiClient("/predictions/save-market/", { method: "DELETE", body: JSON.stringify({ match_id: matchId, market_key: marketKey }) });
 }
+export interface SavedMarket {
+  id: number;
+  match: {
+    id: number;
+    home_team: { name: string };
+    away_team: { name: string };
+    kickoff_at: string;
+    league: { name: string };
+  };
+  market_key: string;
+  created_at: string;
+  ai_pick?: string;
+  ai_confidence?: number;
+}
+
 export function getSavedMarkets(matchId?: number) {
   const query = matchId ? `?match_id=${matchId}` : "";
-  return apiClient<any[]>(`/predictions/saved-markets/${query}`);
+  return apiClient<SavedMarket[]>(`/predictions/saved-markets/${query}`);
 }
 export function generateSavedMarketsPDF(tabName: string) {
   return apiClient("/predictions/saved-markets/pdf/", { 

@@ -1,48 +1,86 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { getMatchOverview, getTeamDetail } from "@/lib/api/predictions";
+import { getMatchOverview, getTeamDetail, type MatchFormEntry, type MatchOverview, type TeamStanding } from "@/lib/api/predictions";
 import { BookButton } from "@/components/ui/BookButton";
 import { CardSkeleton } from "@/components/ui/Skeleton";
 import { PremiumCard } from "@/components/ui/GlassCard";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { MatchHubTabs } from "@/components/match-hub/MatchHubTabs";
 import { DerbyThemeProvider } from "@/components/match-hub/DerbyThemeProvider";
-import { TrendingUp, Calendar, Trophy, Flag, ArrowLeft, BookOpen, Target } from "lucide-react";
+import { TrendingUp, Calendar, Trophy, Flag, ArrowLeft, BookOpen, RefreshCw } from "lucide-react";
+import Image from "next/image";
 
 export default function MatchOverviewPage() {
   const router = useRouter();
   const params = useParams();
   const matchId = Number(params.matchId);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<MatchOverview | null>(null);
   const [formRange, setFormRange] = useState(5);
   const [h2hRange, setH2hRange] = useState(5);
-  const [homeStandings, setHomeStandings] = useState<any>(null);
-  const [awayStandings, setAwayStandings] = useState<any>(null);
+  const [homeStandings, setHomeStandings] = useState<TeamStanding | null>(null);
+  const [awayStandings, setAwayStandings] = useState<TeamStanding | null>(null);
+  const [standingsLoading, setStandingsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    getMatchOverview(matchId, formRange, h2hRange)
-      .then(setData)
-      .catch((err) => {
-        setError("Mechi hii haipatikani. Rudi nyuma ujaribu mechi nyingine.");
-        console.error("Match overview error:", err);
-      })
-      .finally(() => setLoading(false));
-  }, [matchId, formRange, h2hRange]);
-
-  useEffect(() => {
-    if (data?.match) {
-      getTeamDetail(data.match.home_team.id).then((teamData) => {
-        setHomeStandings(teamData.standings);
-      });
-      getTeamDetail(data.match.away_team.id).then((teamData) => {
-        setAwayStandings(teamData.standings);
-      });
+    if (!Number.isFinite(matchId) || matchId <= 0) {
+      const invalidIdTimer = window.setTimeout(() => {
+        setError("Kitambulisho cha mechi si sahihi.");
+        setLoading(false);
+      }, 0);
+      return () => window.clearTimeout(invalidIdTimer);
     }
+
+    let cancelled = false;
+    const loadTimeout = window.setTimeout(() => {
+      setLoading(true);
+      setError(null);
+      getMatchOverview(matchId, formRange, h2hRange)
+        .then((overview) => {
+          if (!cancelled) setData(overview);
+        })
+        .catch((err) => {
+          if (!cancelled) setError("Mechi hii haipatikani. Jaribu tena au rudi nyuma.");
+          console.error("Match overview error:", err);
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    }, 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(loadTimeout);
+    };
+  }, [matchId, formRange, h2hRange, retryKey]);
+
+  useEffect(() => {
+    if (!data?.match) return;
+
+    let cancelled = false;
+    const standingsTimeout = window.setTimeout(() => {
+      setHomeStandings(null);
+      setAwayStandings(null);
+      setStandingsLoading(true);
+
+      Promise.allSettled([
+        getTeamDetail(data.match.home_team.id),
+        getTeamDetail(data.match.away_team.id),
+      ]).then(([homeResult, awayResult]) => {
+        if (cancelled) return;
+        setHomeStandings(homeResult.status === "fulfilled" ? homeResult.value.standings : null);
+        setAwayStandings(awayResult.status === "fulfilled" ? awayResult.value.standings : null);
+        setStandingsLoading(false);
+      });
+    }, 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(standingsTimeout);
+    };
   }, [data?.match]);
 
   if (loading) return <div className="px-4 pt-safe pt-6"><CardSkeleton /></div>;
@@ -59,9 +97,19 @@ export default function MatchOverviewPage() {
       </div>
       <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
         <p className="text-red-400 text-sm">{error}</p>
+            <button
+              type="button"
+              onClick={() => setRetryKey((value) => value + 1)}
+              className="mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-black"
+              style={{ background: "var(--brand-accent)" }}
+            >
+              <RefreshCw size={16} /> Jaribu tena
+            </button>
       </div>
     </div>
   );
+
+  if (!data) return null;
 
   const { match, home_form, away_form, head_to_head } = data;
   const isFinished = match.status === "FINISHED";
@@ -129,6 +177,7 @@ export default function MatchOverviewPage() {
                   <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.5)" }}>Form Guide</p>
                 </div>
                 <select 
+                  aria-label="Idadi ya mechi za kuonyesha kwenye form"
                   value={formRange}
                   onChange={(e) => setFormRange(Number(e.target.value))}
                   className="bg-[#050508]/90 text-white text-xs rounded px-2 py-1 border border-white/20 focus:outline-none focus:border-[#00FF87]"
@@ -155,7 +204,7 @@ export default function MatchOverviewPage() {
                   </div>
                   {home_form.matches && home_form.matches.length > 0 ? (
                     <div className="space-y-2 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
-                      {home_form.matches.map((m: any, i: number) => (
+                      {home_form.matches.map((m: MatchFormEntry, i: number) => (
                         <div key={i} className="flex items-center gap-3 text-xs bg-white/5 rounded-lg p-3 border border-white/5 hover:border-white/10 transition-all">
                           <span className={`w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded text-[11px] sm:text-[12px] font-bold shadow-lg ${
                             m.result === 'W' ? 'bg-green-500/30 text-green-400 shadow-green-500/20' : 
@@ -167,7 +216,7 @@ export default function MatchOverviewPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               {m.opponent_crest && (
-                                <img src={m.opponent_crest} alt="" className="w-5 h-5 object-contain" />
+                                <Image src={m.opponent_crest} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
                               )}
                               <span className="text-white/70 truncate font-medium">{m.opponent}</span>
                             </div>
@@ -210,7 +259,7 @@ export default function MatchOverviewPage() {
                   </div>
                   {away_form.matches && away_form.matches.length > 0 ? (
                     <div className="space-y-2 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
-                      {away_form.matches.map((m: any, i: number) => (
+                      {away_form.matches.map((m: MatchFormEntry, i: number) => (
                         <div key={i} className="flex items-center gap-3 text-xs bg-white/5 rounded-lg p-3 border border-white/5 hover:border-white/10 transition-all">
                           <span className={`w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded text-[11px] sm:text-[12px] font-bold shadow-lg ${
                             m.result === 'W' ? 'bg-green-500/30 text-green-400 shadow-green-500/20' : 
@@ -222,7 +271,7 @@ export default function MatchOverviewPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               {m.opponent_crest && (
-                                <img src={m.opponent_crest} alt="" className="w-5 h-5 object-contain" />
+                                <Image src={m.opponent_crest} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
                               )}
                               <span className="text-white/70 truncate font-medium">{m.opponent}</span>
                             </div>
@@ -267,6 +316,7 @@ export default function MatchOverviewPage() {
                   <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.5)" }}>Head to Head</p>
                 </div>
                 <select 
+                  aria-label="Idadi ya mechi za kuonyesha kwenye historia"
                   value={h2hRange}
                   onChange={(e) => setH2hRange(Number(e.target.value))}
                   className="bg-[#050508]/90 text-white text-xs rounded px-2 py-1 border border-white/20 focus:outline-none focus:border-[#FFD600]"
@@ -284,7 +334,7 @@ export default function MatchOverviewPage() {
                 </div>
               ) : (
                 <div className="space-y-3 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
-                  {head_to_head.map((h: any, i: number) => (
+                  {head_to_head.map((h: MatchOverview["head_to_head"][number], i: number) => (
                     <div key={i} className="bg-gradient-to-r from-yellow-500/10 to-transparent rounded-xl p-4 border border-yellow-500/20 hover:border-yellow-500/30 transition-all">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div className="flex items-center gap-3">
@@ -346,6 +396,13 @@ export default function MatchOverviewPage() {
                       </div>
                     </div>
                   </div>
+                ) : standingsLoading ? (
+                  <div className="rounded-xl border border-green-500/10 bg-white/5 p-4 animate-pulse" aria-label="Inapakia standings">
+                    <div className="mb-4 h-4 w-2/3 rounded bg-white/10" />
+                    <div className="grid grid-cols-4 gap-3">
+                      {[1, 2, 3, 4].map((item) => <div key={item} className="h-14 rounded-lg bg-white/10" />)}
+                    </div>
+                  </div>
                 ) : (
                   <div className="bg-gradient-to-br from-green-500/5 to-transparent rounded-xl p-4 border border-green-500/10">
                     <div className="flex items-center gap-2 mb-3">
@@ -383,6 +440,13 @@ export default function MatchOverviewPage() {
                         <div className="text-xl font-bold text-white">{awayStandings.matches_played}</div>
                         <div className="text-[10px] text-white/40 uppercase tracking-wider">P</div>
                       </div>
+                    </div>
+                  </div>
+                ) : standingsLoading ? (
+                  <div className="rounded-xl border border-yellow-500/10 bg-white/5 p-4 animate-pulse" aria-label="Inapakia standings">
+                    <div className="mb-4 h-4 w-2/3 rounded bg-white/10" />
+                    <div className="grid grid-cols-4 gap-3">
+                      {[1, 2, 3, 4].map((item) => <div key={item} className="h-14 rounded-lg bg-white/10" />)}
                     </div>
                   </div>
                 ) : (

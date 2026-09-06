@@ -55,14 +55,18 @@ export function MatchHubTabs({ matchId, active, isFinished = false }: Props) {
   }
 
   return (
-    <div className="flex gap-2 px-5 pb-4 overflow-x-auto">
+    <div className="flex gap-2 px-5 pb-4 overflow-x-auto" role="tablist" aria-label="Sehemu za mechi">
       {BASE_TABS.map((tab) => {
         const isActive = tab.key === active;
         const badge = badgeFor(tab.key);
         return (
           <button
             key={tab.key}
+            type="button"
             onClick={() => navigateTo(tab.key)}
+            role="tab"
+            aria-selected={isActive}
+            aria-current={isActive ? "page" : undefined}
             className="px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap flex items-center gap-1.5"
             style={{
               background: isActive ? "var(--success)" : "rgba(255,255,255,0.06)",

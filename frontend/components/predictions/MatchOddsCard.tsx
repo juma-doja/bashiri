@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
+import { TrendingUp, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { getMatchOdds, type OddsBookmaker } from "@/lib/api/predictions";
 import { shouldReduceMotion } from "@/utils/animation";
 
@@ -16,21 +16,25 @@ export function MatchOddsCard({ matchId, homeTeam, awayTeam, compact = false }: 
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [odds, setOdds] = useState<OddsBookmaker[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const toggleExpand = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (expanded) {
+    if (expanded && !error) {
       setExpanded(false);
       return;
     }
 
+    if (loading) return;
+    setExpanded(true);
     setLoading(true);
+    setError(null);
     try {
       const data = await getMatchOdds(matchId);
       setOdds(data.odds || []);
-      setExpanded(true);
     } catch (error) {
       console.error("Failed to fetch odds:", error);
+      setError(error instanceof Error ? error.message : "Imeshindikana kupakia odds.");
     } finally {
       setLoading(false);
     }
@@ -53,7 +57,10 @@ export function MatchOddsCard({ matchId, homeTeam, awayTeam, compact = false }: 
       style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
     >
       <button
+        type="button"
         onClick={(e) => toggleExpand(e)}
+        aria-expanded={expanded}
+        aria-controls={`odds-${matchId}`}
         className="w-full flex items-center justify-between px-4 py-3 transition-colors hover:bg-white/5"
       >
         <div className="flex items-center gap-2">
@@ -81,6 +88,7 @@ export function MatchOddsCard({ matchId, homeTeam, awayTeam, compact = false }: 
       <AnimatePresence initial={false}>
         {expanded && (
           <motion.div
+            id={`odds-${matchId}`}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -90,6 +98,18 @@ export function MatchOddsCard({ matchId, homeTeam, awayTeam, compact = false }: 
             {loading ? (
               <div className="text-center py-4 text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
                 Loading odds...
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center gap-2 py-4 text-center">
+                <p className="text-xs" style={{ color: "#FDA4AF" }}>{error}</p>
+                <button
+                  type="button"
+                  onClick={(event) => toggleExpand(event)}
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold text-black"
+                  style={{ background: "var(--brand-accent)" }}
+                >
+                  <RefreshCw size={14} /> Jaribu tena
+                </button>
               </div>
             ) : odds.length === 0 ? (
               <div className="text-center py-4 text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>

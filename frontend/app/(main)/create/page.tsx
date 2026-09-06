@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getFixtures, getLeagues, Match, League } from "@/lib/api/predictions";
 import { CardSkeleton } from "@/components/ui/Skeleton";
@@ -8,12 +8,15 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { Calendar, ChevronDown, ArrowLeft, ChevronDown as LoadMoreIcon, Target, TrendingUp, Flame } from "lucide-react";
 import { MatchOddsCard } from "@/components/predictions/MatchOddsCard";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function CreatePredictionStep1() {
   const router = useRouter();
   const [matches, setMatches] = useState<Match[]>([]);
   const [leagues, setLeagues] = useState<League[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
   const [activeFilter, setActiveFilter] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('create_active_filter');
@@ -39,8 +42,9 @@ export default function CreatePredictionStep1() {
     { id: "this_month", label: "Mwezi Huu" },
   ];
 
-  const loadMatches = async (filter: string, newOffset = 0) => {
+  const loadMatches = useCallback(async (filter: string, newOffset = 0) => {
     setLoading(true);
+    if (newOffset === 0) setError(null);
     try {
       const leagueParam = selectedLeague === "all" ? undefined : selectedLeague;
       const data = await getFixtures(undefined, filter, newOffset, 50, leagueParam);
@@ -53,17 +57,19 @@ export default function CreatePredictionStep1() {
       setOffset(newOffset);
     } catch (error) {
       console.error("Failed to load matches:", error);
+      setError(error instanceof Error ? error.message : "Imeshindikana kupakia mechi.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedLeague]);
 
   useEffect(() => {
     // Load leagues
     getLeagues().then(setLeagues);
     // Load matches
-    loadMatches(activeFilter, 0);
-  }, [activeFilter, selectedLeague]);
+    const loadTimeout = window.setTimeout(() => { void loadMatches(activeFilter, 0); }, 0);
+    return () => window.clearTimeout(loadTimeout);
+  }, [activeFilter, loadMatches, retryKey]);
 
   // Save filter preference to localStorage
   useEffect(() => {
@@ -100,7 +106,7 @@ export default function CreatePredictionStep1() {
     <div>
       <div className="px-5 pt-safe pt-10 pb-4" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 32px)" }}>
         <div className="flex items-center gap-3 mb-2">
-          <button onClick={() => router.back()} aria-label="Rudi nyuma">
+          <button type="button" onClick={() => router.back()} aria-label="Rudi nyuma">
             <ArrowLeft size={20} style={{ color: "rgba(255,255,255,0.6)" }} />
           </button>
           <h1 className="text-2xl font-black text-white">Chagua Mechi</h1>
@@ -122,7 +128,8 @@ export default function CreatePredictionStep1() {
             />
             <select
               value={selectedLeague}
-              onChange={(e) => setSelectedLeague(e.target.value)}
+                onChange={(e) => setSelectedLeague(e.target.value)}
+                aria-label="Chagua ligi"
               className="w-full pl-4 pr-12 py-3.5 rounded-xl text-sm font-semibold appearance-none cursor-pointer transition-all duration-300 relative z-10"
               style={{
                 background: "rgba(15, 15, 20, 0.8)",
@@ -166,7 +173,9 @@ export default function CreatePredictionStep1() {
             {filters.map((filter) => (
               <button
                 key={filter.id}
+                type="button"
                 onClick={() => setActiveFilter(filter.id)}
+                aria-pressed={activeFilter === filter.id}
                 className="px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-all snap-start shrink-0"
                 style={{
                   background: activeFilter === filter.id ? "rgba(212, 175, 55, 0.2)" : "rgba(255,255,255,0.05)",
@@ -195,6 +204,18 @@ export default function CreatePredictionStep1() {
       <div className="px-4 md:px-6 lg:px-8 space-y-5">
         {loading ? (
           [1, 2].map((i) => <CardSkeleton key={i} />)
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center min-h-[18rem] text-center pt-10">
+            <p className="text-sm font-semibold text-red-300">{error}</p>
+            <button
+              type="button"
+              onClick={() => setRetryKey((value) => value + 1)}
+              className="mt-4 rounded-xl px-4 py-2 text-sm font-bold text-black"
+              style={{ background: "#D4AF37" }}
+            >
+              Jaribu tena
+            </button>
+          </div>
         ) : matches.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-dvh text-center pt-20">
             <div className="text-6xl mb-4">🏟️</div>
@@ -252,9 +273,11 @@ export default function CreatePredictionStep1() {
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-white/5 flex-shrink-0">
                               {m.home_team.crest_url ? (
-                                <img 
+                                <Image
                                   src={m.home_team.crest_url} 
                                   alt={m.home_team.name}
+                                  width={40}
+                                  height={40}
                                   className="w-full h-full object-contain p-1"
                                   onError={(e) => {
                                     e.currentTarget.style.display = 'none';
@@ -277,9 +300,11 @@ export default function CreatePredictionStep1() {
                             <span className="text-sm font-bold text-white truncate text-right">{m.away_team.name}</span>
                             <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-white/5 flex-shrink-0">
                               {m.away_team.crest_url ? (
-                                <img 
+                                <Image
                                   src={m.away_team.crest_url} 
                                   alt={m.away_team.name}
+                                  width={40}
+                                  height={40}
                                   className="w-full h-full object-contain p-1"
                                   onError={(e) => {
                                     e.currentTarget.style.display = 'none';
@@ -319,7 +344,7 @@ export default function CreatePredictionStep1() {
       </div>
 
       {/* Load More Button */}
-      {hasMore && (
+      {hasMore && !error && (
         <div className="flex justify-center py-8">
           <BookButton onClick={handleLoadMore} icon={LoadMoreIcon} loading={loading} disabled={loading}>
             Pakia Zaidi

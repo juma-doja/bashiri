@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getMatchDashboard, saveMatch, saveMarket, unsaveMarket, getSavedMarkets, Dashboard } from "@/lib/api/predictions";
+import { getMatchDashboard, saveMarket, unsaveMarket, getSavedMarkets, Dashboard } from "@/lib/api/predictions";
 import { useAuthStore } from "@/stores/auth.store";
 import { MarketRow } from "@/components/predictions/MarketRow";
 import { TopPickCard } from "@/components/predictions/TopPickCard";
@@ -9,11 +9,11 @@ import { ConfidenceLegend } from "@/components/predictions/ConfidenceLegend";
 import { SubscriptionSheet } from "@/components/predictions/SubscriptionSheet";
 import { Spinner } from "@/components/ui/Spinner";
 import { CardSkeleton } from "@/components/ui/Skeleton";
-import { Bookmark, ArrowRight, ArrowLeft, Trophy } from "lucide-react";
+import { Bookmark, ArrowRight, ArrowLeft, Trophy, RefreshCw } from "lucide-react";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { MatchHubTabs } from "@/components/match-hub/MatchHubTabs";
 import { DerbyThemeProvider } from "@/components/match-hub/DerbyThemeProvider";
-import { usePWAInstallStore } from "@/stores/pwaInstall.store";
+import Image from "next/image";
 
 export default function PredictDashboardPage() {
   const params = useParams();
@@ -27,10 +27,17 @@ export default function PredictDashboardPage() {
   const [selectedMarkets, setSelectedMarkets] = useState<Set<string>>(new Set());
   const [bulkSaving, setBulkSaving] = useState(false);
   const [predictionError, setPredictionError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
   const isSubscriptionActive = useAuthStore((s) => s.user?.is_subscription_active ?? false);
   const prevSubscriptionActive = useRef(isSubscriptionActive);
 
   const loadDashboard = useCallback(async () => {
+    if (!Number.isFinite(matchId) || matchId <= 0) {
+      setPredictionError("Kitambulisho cha mechi si sahihi.");
+      return;
+    }
+
     try {
       setPredictionError(null);
       const data = await getMatchDashboard(matchId);
@@ -48,16 +55,20 @@ export default function PredictDashboardPage() {
   const loadSavedMarkets = useCallback(async () => {
     try {
       const markets = await getSavedMarkets(matchId);
-      setSavedMarkets(new Set(markets.map((m: { market_key: string }) => m.market_key)));
+      if (markets) setSavedMarkets(new Set(markets.map((market) => market.market_key)));
     } catch {
       // User might not be logged in
     }
   }, [matchId]);
 
   useEffect(() => {
-    loadDashboard();
-    loadSavedMarkets();
-  }, [matchId, loadDashboard, loadSavedMarkets]);
+    const loadTimeout = window.setTimeout(() => {
+      void loadDashboard();
+      void loadSavedMarkets();
+    }, 0);
+
+    return () => window.clearTimeout(loadTimeout);
+  }, [matchId, loadDashboard, loadSavedMarkets, retryKey]);
 
   useEffect(() => {
     if (isSubscriptionActive && !prevSubscriptionActive.current) {
@@ -68,15 +79,18 @@ export default function PredictDashboardPage() {
 
   async function handleSaveMarket(marketKey: string) {
     if (!requireAuth("Ingia ili kuhifadhi soko hili.")) return;
+    setActionError(null);
     try {
       await saveMarket(matchId, marketKey);
       setSavedMarkets(prev => new Set([...prev, marketKey]));
     } catch (error) {
       console.error("Failed to save market:", error);
+      setActionError(error instanceof Error ? error.message : "Imeshindikana kuhifadhi soko.");
     }
   }
 
   async function handleUnsaveMarket(marketKey: string) {
+    setActionError(null);
     try {
       await unsaveMarket(matchId, marketKey);
       setSavedMarkets(prev => {
@@ -86,6 +100,7 @@ export default function PredictDashboardPage() {
       });
     } catch (error) {
       console.error("Failed to unsave market:", error);
+      setActionError(error instanceof Error ? error.message : "Imeshindikana kuondoa soko.");
     }
   }
 
@@ -103,6 +118,7 @@ export default function PredictDashboardPage() {
 
   async function handleBulkSave() {
     if (!requireAuth("Ingia ili kuhifadhi masoko yaliyochaguliwa.")) return;
+    setActionError(null);
     setBulkSaving(true);
     try {
       for (const marketKey of selectedMarkets) {
@@ -113,6 +129,7 @@ export default function PredictDashboardPage() {
       setSelectionMode(false);
     } catch (error) {
       console.error("Failed to bulk save markets:", error);
+      setActionError(error instanceof Error ? error.message : "Imeshindikana kuhifadhi masoko.");
     } finally {
       setBulkSaving(false);
     }
@@ -139,6 +156,15 @@ export default function PredictDashboardPage() {
             {predictionError}
           </p>
           <button
+            type="button"
+            onClick={() => setRetryKey((value) => value + 1)}
+            className="mb-3 inline-flex w-full items-center justify-center gap-2 rounded-xl py-3 font-bold transition-all"
+            style={{ background: "rgba(212, 175, 55, 0.15)", color: "#D4AF37", border: "1px solid rgba(212, 175, 55, 0.35)" }}
+          >
+            <RefreshCw size={16} /> Jaribu tena
+          </button>
+          <button
+            type="button"
             onClick={() => router.back()}
             className="w-full py-3 rounded-xl font-bold transition-all"
             style={{ background: "#D4AF37", color: "#000" }}
@@ -164,20 +190,22 @@ export default function PredictDashboardPage() {
     <DerbyThemeProvider matchId={matchId}>
       <div className="px-5 pt-safe pt-10 pb-4" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 32px)" }}>
         <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-3">
-            <button onClick={() => router.back()} aria-label="Rudi nyuma">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <button type="button" onClick={() => router.back()} aria-label="Rudi nyuma">
               <ArrowLeft size={20} style={{ color: "rgba(255,255,255,0.6)" }} />
             </button>
-            <h1 className="text-xl font-black text-white">
+            <h1 className="min-w-0 truncate text-xl font-black text-white">
               {dashboard.match.home_team.name} vs {dashboard.match.away_team.name}
             </h1>
           </div>
           <button 
+            type="button"
             onClick={() => router.push('/saved-markets')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 shrink-0 transition-all hover:bg-white/10"
+            aria-label="Fungua masoko yaliyohifadhiwa"
+            className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-xl bg-white/5 shrink-0 transition-all hover:bg-white/10"
           >
             <Bookmark size={16} style={{ color: "#D4AF37" }} />
-            <span className="text-xs font-bold" style={{ color: "#D4AF37" }}>Saved Markets</span>
+            <span className="hidden sm:inline text-xs font-bold" style={{ color: "#D4AF37" }}>Saved Markets</span>
             <ArrowRight size={14} style={{ color: "rgba(255,255,255,0.4)" }} />
           </button>
         </div>
@@ -186,12 +214,20 @@ export default function PredictDashboardPage() {
       <MatchHubTabs matchId={matchId} active="predict" isFinished={isFinished} />
 
       <div className="px-5 pb-8">
+        {actionError && (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3">
+            <p className="text-xs text-red-300">{actionError}</p>
+            <button type="button" onClick={() => setActionError(null)} aria-label="Funga ujumbe wa kosa" className="text-white/60">&times;</button>
+          </div>
+        )}
         <TopPickCard topPick={dashboard.top_pick} onLockedClick={() => setShowSub(true)} />
 
         {/* Multi-selection controls */}
         <div className="flex items-center justify-between mb-4">
           <button
+            type="button"
             onClick={() => setSelectionMode(!selectionMode)}
+            aria-pressed={selectionMode}
             className="text-sm font-bold px-3 py-1.5 rounded-lg transition-all"
             style={{ 
               background: selectionMode ? "rgba(212, 175, 55, 0.2)" : "rgba(255,255,255,0.05)",
@@ -204,6 +240,7 @@ export default function PredictDashboardPage() {
           
           {selectionMode && selectedMarkets.size > 0 && (
             <button
+              type="button"
               onClick={handleBulkSave}
               disabled={bulkSaving}
               className="text-sm font-bold px-4 py-1.5 rounded-lg transition-all flex items-center gap-2"
@@ -224,14 +261,16 @@ export default function PredictDashboardPage() {
 
         {/* HOME TEAM SECTION */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4 pb-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-            <h2 className="text-2xl font-black text-white">HOME</h2>
-            <img 
+          <div className="flex flex-wrap items-center gap-3 mb-4 pb-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+            <h2 className="text-xl sm:text-2xl font-black text-white">HOME</h2>
+            <Image
               src={dashboard.match.home_team.crest_url} 
               alt={dashboard.match.home_team.name}
+              width={32}
+              height={32}
               className="w-8 h-8 object-contain"
             />
-            <span className="text-lg font-bold" style={{ color: "rgba(255,255,255,0.8)" }}>
+            <span className="min-w-0 truncate text-base sm:text-lg font-bold" style={{ color: "rgba(255,255,255,0.8)" }}>
               {dashboard.match.home_team.name}
             </span>
           </div>
@@ -255,14 +294,16 @@ export default function PredictDashboardPage() {
 
         {/* AWAY TEAM SECTION */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4 pb-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-            <h2 className="text-2xl font-black text-white">AWAY TEAM</h2>
-            <img 
+          <div className="flex flex-wrap items-center gap-3 mb-4 pb-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+            <h2 className="text-xl sm:text-2xl font-black text-white">AWAY TEAM</h2>
+            <Image
               src={dashboard.match.away_team.crest_url} 
               alt={dashboard.match.away_team.name}
+              width={32}
+              height={32}
               className="w-8 h-8 object-contain"
             />
-            <span className="text-lg font-bold" style={{ color: "rgba(255,255,255,0.8)" }}>
+            <span className="min-w-0 truncate text-base sm:text-lg font-bold" style={{ color: "rgba(255,255,255,0.8)" }}>
               {dashboard.match.away_team.name}
             </span>
           </div>
@@ -286,8 +327,8 @@ export default function PredictDashboardPage() {
 
         {/* FULL MATCH SECTION */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4 pb-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-            <h2 className="text-2xl font-black text-white">FULL MATCH</h2>
+          <div className="flex flex-wrap items-center gap-3 mb-4 pb-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+            <h2 className="text-xl sm:text-2xl font-black text-white">FULL MATCH</h2>
             <span className="text-sm font-bold" style={{ color: "rgba(255,255,255,0.5)" }}>
               Overall Markets
             </span>

@@ -123,7 +123,7 @@ export function BottomNav() {
 
   return (
     <motion.nav
-      className="fixed bottom-4 left-0 right-0 z-30 px-4 pb-safe"
+      className="fixed bottom-4 left-0 right-0 z-30 px-2 sm:px-4 pb-safe"
       initial={{ y: 0 }}
       animate={{ y: isVisible ? 0 : 100 }}
       transition={{
@@ -142,7 +142,7 @@ export function BottomNav() {
           backdropFilter: "blur(20px)",
         }}
       >
-        <div className="flex items-center gap-1 px-3 py-2.5">
+        <div className="flex items-center gap-0 px-1 sm:px-3 py-2.5">
           {NAV_ITEMS.slice(0, 2).map((item) => (
             <NavButton key={item.href} item={item} />
           ))}
@@ -155,7 +155,7 @@ export function BottomNav() {
               router.push("/create");
             }}
             onTouchStart={vibrate}
-            className="w-14 h-14 rounded-full flex items-center justify-center -mt-6 mx-2 shrink-0"
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center -mt-6 mx-1 sm:mx-2 shrink-0"
             style={{
               background: "linear-gradient(135deg, var(--brand-primary), var(--brand-accent))",
               boxShadow: "0 8px 24px rgba(212,175,55,0.3), 0 0 0 3px #0B0B0B",

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSavedMarkets, generateSavedMarketsPDF, unsaveMarket } from "@/lib/api/predictions";
 import { Spinner } from "@/components/ui/Spinner";
@@ -27,6 +27,8 @@ export default function SavedMarketsPage() {
   const { user } = useAuthStore();
   const [savedMarkets, setSavedMarkets] = useState<SavedMarket[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
   const [activeTab, setActiveTab] = useState("all");
   const [generatingPDF, setGeneratingPDF] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -46,25 +48,6 @@ export default function SavedMarketsPage() {
   const [selectedMarkets, setSelectedMarkets] = useState<Set<number>>(new Set());
   const [showMultiDeleteModal, setShowMultiDeleteModal] = useState(false);
   const [isSelectMode, setIsSelectMode] = useState(false);
-
-  // Check authentication
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-5" style={{ background: "#0a0a0a" }}>
-        <div className="text-center">
-          <Bookmark size={48} style={{ color: "#D4AF37", opacity: 0.5 }} className="mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">Tafadhali Jiunge Ndogo</h2>
-          <p className="text-sm text-white/50 mb-6">Unahitaji kuwa na akaunti ili kuona saved markets zako.</p>
-          <button
-            onClick={() => router.push('/login')}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition"
-          >
-            Ingia / Jisajili
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   // Convert market key to readable label
   const getMarketLabel = (key: string) => {
@@ -90,19 +73,38 @@ export default function SavedMarketsPage() {
     return labels[key] || key;
   };
 
-  useEffect(() => {
-    loadSavedMarkets();
-  }, []);
-
-  async function loadSavedMarkets() {
+  const loadSavedMarkets = useCallback(async () => {
+    setLoadError(null);
+    setLoading(true);
     try {
       const markets = await getSavedMarkets();
-      setSavedMarkets(markets);
+      setSavedMarkets(markets || []);
     } catch (error) {
       console.error("Failed to load saved markets:", error);
+      setLoadError(error instanceof Error ? error.message : "Imeshindikana kupakia saved markets.");
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    const loadTimeout = window.setTimeout(() => { void loadSavedMarkets(); }, 0);
+    return () => window.clearTimeout(loadTimeout);
+  }, [loadSavedMarkets, retryKey]);
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-5" style={{ background: "#0a0a0a" }}>
+        <div className="text-center">
+          <Bookmark size={48} style={{ color: "#D4AF37", opacity: 0.5 }} className="mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-white mb-2">Tafadhali Jiunge Ndogo</h2>
+          <p className="text-sm text-white/50 mb-6">Unahitaji kuwa na akaunti ili kuona saved markets zako.</p>
+          <button type="button" onClick={() => router.push('/login')} className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition">
+            Ingia / Jisajili
+          </button>
+        </div>
+      </div>
+    );
   }
 
   async function handleGeneratePDF() {
@@ -353,7 +355,7 @@ export default function SavedMarketsPage() {
       {/* Header */}
       <div className="px-5 pt-safe pt-10 pb-4" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 32px)" }}>
         <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => router.back()} aria-label="Rudi nyuma">
+          <button type="button" onClick={() => router.back()} aria-label="Rudi nyuma">
             <ArrowLeft size={20} style={{ color: "rgba(255,255,255,0.6)" }} />
           </button>
           <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(212, 175, 55, 0.2)" }}>
@@ -368,11 +370,14 @@ export default function SavedMarketsPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-5 px-5 scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-5 px-5 scrollbar-hide" role="tablist" aria-label="Aina za saved markets">
           {tabs.map((tab) => (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveTab(tab.id)}
+              role="tab"
+              aria-selected={activeTab === tab.id}
               className="px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-all"
               style={{
                 background: activeTab === tab.id ? "rgba(212, 175, 55, 0.2)" : "rgba(255,255,255,0.05)",
@@ -459,7 +464,19 @@ export default function SavedMarketsPage() {
 
       {/* Content */}
       <div className="px-5 pb-8">
-        {currentMarkets.length === 0 ? (
+        {loadError ? (
+          <div className="py-12 text-center">
+            <p className="text-sm font-semibold text-red-300">{loadError}</p>
+            <button
+              type="button"
+              onClick={() => setRetryKey((value) => value + 1)}
+              className="mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-black"
+              style={{ background: "#D4AF37" }}
+            >
+              Jaribu tena
+            </button>
+          </div>
+        ) : currentMarkets.length === 0 ? (
           <div className="text-center py-12">
             <Bookmark size={48} style={{ color: "rgba(255,255,255,0.2)" }} />
             <p className="text-sm mt-4" style={{ color: "rgba(255,255,255,0.4)" }}>

@@ -25,7 +25,7 @@ export function BookButton({
   const [isOpening, setIsOpening] = useState(false);
 
   const handleClick = () => {
-    if (loading || disabled) return;
+    if (loading || disabled || isOpening) return;
     setIsOpening(true);
     setTimeout(() => {
       setIsOpening(false);
@@ -44,7 +44,7 @@ export function BookButton({
       style={{
         perspective: "1000px",
       }}
-      disabled={loading || disabled}
+      disabled={loading || disabled || isOpening}
     >
       {/* Book Container */}
       <motion.div

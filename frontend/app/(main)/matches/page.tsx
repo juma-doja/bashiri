@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getFixtures, getLiveMatches, getFinishedMatches, searchMatches, Match, getLeagues, League } from "@/lib/api/predictions";
 import { commandSearch, CommandSearchResults } from "@/lib/api/command-search";
-import { Search, ChevronDown, ArrowLeft, ChevronDown as LoadMoreIcon, X, Target, Calendar, TrendingUp, Flame, Plus } from "lucide-react";
+import { Search, ChevronDown, ArrowLeft, ChevronDown as LoadMoreIcon, X, Target, Calendar, Flame, Plus, RefreshCw } from "lucide-react";
 import { CardSkeleton } from "@/components/ui/Skeleton";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { BookButton } from "@/components/ui/BookButton";
@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { MatchOddsCard } from "@/components/predictions/MatchOddsCard";
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { useAuthStore } from "@/stores/auth.store";
+import Image from "next/image";
 
 function formatMatchDate(kickoffAt: string): string {
   const date = new Date(kickoffAt);
@@ -36,9 +37,11 @@ export default function MatchesPage() {
   );
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [selectedDate, setSelectedDate] = useState(() =>
     searchParams.get("date") ? new Date(searchParams.get("date")!) : new Date()
   );
@@ -53,35 +56,40 @@ export default function MatchesPage() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refreshInFlightRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const savedTab = localStorage.getItem('matches_tab');
-    if (savedTab) setTab(savedTab as "fixtures" | "live" | "finished");
+    const hydrationTimeout = window.setTimeout(() => {
+      const savedTab = localStorage.getItem('matches_tab');
+      if (savedTab) setTab(savedTab as "fixtures" | "live" | "finished");
 
-    const savedQuery = localStorage.getItem('matches_query');
-    if (savedQuery) setQuery(savedQuery);
+      const savedQuery = localStorage.getItem('matches_query');
+      if (savedQuery) setQuery(savedQuery);
 
-    const savedDate = localStorage.getItem('matches_date');
-    if (savedDate) setSelectedDate(new Date(savedDate));
+      const savedDate = localStorage.getItem('matches_date');
+      if (savedDate) setSelectedDate(new Date(savedDate));
 
-    const savedUseDate = localStorage.getItem('matches_useDate');
-    if (savedUseDate) setUseDateInSearch(savedUseDate === 'true');
+      const savedUseDate = localStorage.getItem('matches_useDate');
+      if (savedUseDate) setUseDateInSearch(savedUseDate === 'true');
 
-    const savedLeague = localStorage.getItem('matches_league');
-    if (savedLeague) setSelectedLeague(savedLeague);
+      const savedLeague = localStorage.getItem('matches_league');
+      if (savedLeague) setSelectedLeague(savedLeague);
+    }, 0);
+
+    return () => window.clearTimeout(hydrationTimeout);
   }, []);
 
   // Intelligent search handler
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (query.trim().length < 2) {
-      setSearchResults(null);
-      return;
+      const clearResultsTimeout = window.setTimeout(() => setSearchResults(null), 0);
+      return () => window.clearTimeout(clearResultsTimeout);
     }
-    setSearchLoading(true);
     debounceRef.current = setTimeout(() => {
+      setSearchLoading(true);
       commandSearch(query).then((data) => {
         setSearchResults(data);
         setSearchLoading(false);
@@ -148,23 +156,36 @@ export default function MatchesPage() {
   };
 
   const handleRefresh = async () => {
+    if (refreshInFlightRef.current) return;
+    refreshInFlightRef.current = true;
     setLoading(true);
-    if (tab === "fixtures") {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      const data = await getFixtures(dateStr);
-      const filtered = selectedLeague ? data.filter(m => m.league.code === selectedLeague) : data;
-      setMatches(filtered);
-    } else if (tab === "live") {
-      const data = await getLiveMatches();
-      const filtered = selectedLeague ? data.filter(m => m.league.code === selectedLeague) : data;
-      setMatches(filtered);
-    } else if (tab === "finished") {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      const data = await getFinishedMatches(20, 0, selectedLeague || undefined, undefined, dateStr);
-      setMatches(data.results);
-      setHasMore(data.count > 20);
+    setError(null);
+    try {
+      if (query.trim().length >= 2) {
+        const dateStr = useDateInSearch ? format(selectedDate, 'yyyy-MM-dd') : undefined;
+        const data = await searchMatches(query.trim(), dateStr, selectedLeague || undefined);
+        setMatches(data.results);
+      } else if (tab === "fixtures") {
+        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        const data = await getFixtures(dateStr);
+        const filtered = selectedLeague ? data.filter(m => m.league.code === selectedLeague) : data;
+        setMatches(filtered);
+      } else if (tab === "live") {
+        const data = await getLiveMatches();
+        const filtered = selectedLeague ? data.filter(m => m.league.code === selectedLeague) : data;
+        setMatches(filtered);
+      } else {
+        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        const data = await getFinishedMatches(20, 0, selectedLeague || undefined, undefined, dateStr);
+        setMatches(data.results);
+        setHasMore(data.results.length > 0 && data.count > data.results.length);
+      }
+    } catch (refreshError) {
+      setError(refreshError instanceof Error ? refreshError.message : "Imeshindikana kupakia mechi.");
+    } finally {
+      setLoading(false);
+      refreshInFlightRef.current = false;
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -199,51 +220,78 @@ export default function MatchesPage() {
   }, [selectedLeague]);
 
   useEffect(() => {
-    setLoading(true);
-    setOffset(0);
-    if (tab === "fixtures") {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      getFixtures(dateStr).then((data) => { 
-        const filtered = selectedLeague ? data.filter(m => m.league.code === selectedLeague) : data;
-        setMatches(filtered); 
-        setLoading(false); 
-      });
-    } else if (tab === "live") {
-      getLiveMatches().then((data) => { 
-        const filtered = selectedLeague ? data.filter(m => m.league.code === selectedLeague) : data;
-        setMatches(filtered); 
-        setLoading(false); 
-      });
-    } else if (tab === "finished") {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      getFinishedMatches(20, 0, selectedLeague || undefined, undefined, dateStr).then((data) => {
-        setMatches(data.results);
-        setHasMore(data.count > 20);
-        setLoading(false);
-      });
-    }
+    let cancelled = false;
+
+    const loadMatches = async () => {
+      setLoading(true);
+      setError(null);
+      setOffset(0);
+      setHasMore(false);
+      try {
+        if (query.trim().length >= 2) {
+          const dateStr = useDateInSearch ? format(selectedDate, 'yyyy-MM-dd') : undefined;
+          const data = await searchMatches(query.trim(), dateStr, selectedLeague || undefined);
+          if (!cancelled) setMatches(data.results);
+          return;
+        }
+
+        if (tab === "fixtures") {
+          const dateStr = format(selectedDate, 'yyyy-MM-dd');
+          const data = await getFixtures(dateStr);
+          if (!cancelled) setMatches(selectedLeague ? data.filter(m => m.league.code === selectedLeague) : data);
+        } else if (tab === "live") {
+          const data = await getLiveMatches();
+          if (!cancelled) setMatches(selectedLeague ? data.filter(m => m.league.code === selectedLeague) : data);
+        } else {
+          const dateStr = format(selectedDate, 'yyyy-MM-dd');
+          const data = await getFinishedMatches(20, 0, selectedLeague || undefined, undefined, dateStr);
+          if (!cancelled) {
+            setMatches(data.results);
+            setHasMore(data.results.length > 0 && data.count > data.results.length);
+          }
+        }
+      } catch (loadError) {
+        if (!cancelled) {
+          setMatches([]);
+          setError(loadError instanceof Error ? loadError.message : "Imeshindikana kupakia mechi.");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    loadMatches();
+    return () => { cancelled = true; };
   }, [tab, selectedDate, selectedLeague, query, useDateInSearch]);
 
   // Poll matches for all tabs
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
-    // Only poll for fixtures and live - finished matches don't need polling
-    if (tab === "fixtures" || tab === "live") {
-      interval = setInterval(() => {
+    const pollMatches = async () => {
+      if (query.trim().length >= 2 || refreshInFlightRef.current) return;
+      refreshInFlightRef.current = true;
+      try {
         if (tab === "fixtures") {
           const dateStr = format(selectedDate, 'yyyy-MM-dd');
-          getFixtures(dateStr).then((data) => { 
-            const filtered = selectedLeague ? data.filter(m => m.league.code === selectedLeague) : data;
-            setMatches(filtered); 
-          });
+          const data = await getFixtures(dateStr);
+          const filtered = selectedLeague ? data.filter(m => m.league.code === selectedLeague) : data;
+          setMatches(filtered);
         } else if (tab === "live") {
-          getLiveMatches().then((data) => {
-            const filtered = selectedLeague ? data.filter(m => m.league.code === selectedLeague) : data;
-            setMatches(filtered);
-          });
+          const data = await getLiveMatches();
+          const filtered = selectedLeague ? data.filter(m => m.league.code === selectedLeague) : data;
+          setMatches(filtered);
         }
-      }, 30000); // Poll every 30 seconds
+      } catch {
+        // Keep the current matches visible when a background poll fails.
+      } finally {
+        refreshInFlightRef.current = false;
+      }
+    };
+
+    // Only poll for fixtures and live - finished matches don't need polling
+    if (tab === "fixtures" || tab === "live") {
+      interval = setInterval(() => { void pollMatches(); }, 30000); // Poll every 30 seconds
     }
 
     // Pause polling when page loses focus
@@ -255,20 +303,7 @@ export default function MatchesPage() {
         }
       } else {
         if (!interval && (tab === "fixtures" || tab === "live")) {
-          interval = setInterval(() => {
-            if (tab === "fixtures") {
-              const dateStr = format(selectedDate, 'yyyy-MM-dd');
-              getFixtures(dateStr).then((data) => { 
-                const filtered = selectedLeague ? data.filter(m => m.league.code === selectedLeague) : data;
-                setMatches(filtered); 
-              });
-            } else if (tab === "live") {
-              getLiveMatches().then((data) => {
-                const filtered = selectedLeague ? data.filter(m => m.league.code === selectedLeague) : data;
-                setMatches(filtered);
-              });
-            }
-          }, 30000);
+          interval = setInterval(() => { void pollMatches(); }, 30000);
         }
       }
     };
@@ -279,22 +314,27 @@ export default function MatchesPage() {
       if (interval) clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [tab, selectedDate, selectedLeague]);
+  }, [tab, selectedDate, selectedLeague, query]);
 
   async function loadMoreFinished() {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
     const newOffset = offset + 20;
-    const data = await getFinishedMatches(20, newOffset);
-    setMatches((prev) => [...prev, ...data.results]);
-    setOffset(newOffset);
-    setHasMore(newOffset + 20 < data.count);
+    try {
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const data = await getFinishedMatches(20, newOffset, selectedLeague || undefined, undefined, dateStr);
+      setMatches((prev) => [...prev, ...data.results]);
+      setOffset(newOffset);
+      setHasMore(newOffset + data.results.length < data.count);
+    } catch (loadMoreError) {
+      setError(loadMoreError instanceof Error ? loadMoreError.message : "Imeshindikana kupakia mechi zaidi.");
+    } finally {
+      setLoadingMore(false);
+    }
   }
 
-  async function handleSearch(q: string) {
+  function handleSearch(q: string) {
     updateQuery(q);
-    if (q.length < 2) return;
-    const dateStr = useDateInSearch ? format(selectedDate, 'yyyy-MM-dd') : undefined;
-    const data = await searchMatches(q, dateStr, selectedLeague || undefined);
-    setMatches(data.results);
   }
 
   return (
@@ -302,7 +342,7 @@ export default function MatchesPage() {
       <div>
         <div className="px-5 pt-safe pt-10 pb-3 max-w-7xl mx-auto" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 32px)" }}>
         <div className="flex items-center gap-3 mb-4">
-          <button onClick={() => router.back()} aria-label="Rudi nyuma">
+          <button type="button" onClick={() => router.back()} aria-label="Rudi nyuma">
             <ArrowLeft size={20} style={{ color: "rgba(255,255,255,0.6)" }} />
           </button>
           <h1 className="text-2xl font-black text-white">Matches</h1>
@@ -311,7 +351,8 @@ export default function MatchesPage() {
           <Search size={16} style={{ color: "rgba(255,255,255,0.4)" }} />
           <input
             ref={searchInputRef}
-            className="bg-transparent outline-none text-sm text-white flex-1"
+            className="bg-transparent outline-none text-sm text-white flex-1 min-w-0"
+            aria-label="Tafuta timu, ligi, au mechi"
             placeholder="Tafuta timu, ligi, au mechi..."
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
@@ -319,14 +360,17 @@ export default function MatchesPage() {
             onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
           />
           {query && (
-            <button onClick={() => { updateQuery(''); setSearchResults(null); }}>
+            <button type="button" onClick={() => { updateQuery(''); setSearchResults(null); }} aria-label="Futa utafutaji">
               <X size={16} style={{ color: "rgba(255,255,255,0.4)" }} />
             </button>
           )}
           {/* Date filter toggle for search */}
           <button
+            type="button"
             onClick={() => updateUseDateInSearch(!useDateInSearch)}
-            className="px-4 py-2 rounded-full text-xs font-bold transition-colors"
+            aria-pressed={useDateInSearch}
+            aria-label="Tumia tarehe kwenye utafutaji"
+            className="shrink-0 px-2 sm:px-4 py-2 rounded-full text-xs font-bold transition-colors whitespace-nowrap"
             style={{ 
               background: useDateInSearch ? "var(--brand-accent)" : "rgba(255,255,255,0.06)", 
               color: useDateInSearch ? "#000" : "rgba(255,255,255,0.5)" 
@@ -363,9 +407,11 @@ export default function MatchesPage() {
                           >
                             <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ background: "rgba(212,175,55,0.15)" }}>
                               {t.crest_url ? (
-                                <img 
+                                <Image
                                   src={t.crest_url} 
                                   alt={t.name}
+                                  width={40}
+                                  height={40}
                                   className="w-full h-full object-contain p-1"
                                   onError={(e) => {
                                     e.currentTarget.style.display = 'none';
@@ -396,9 +442,11 @@ export default function MatchesPage() {
                           >
                             <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ background: "rgba(212,175,55,0.15)" }}>
                               {l.logo_url ? (
-                                <img 
+                                <Image
                                   src={l.logo_url} 
                                   alt={l.name}
+                                  width={40}
+                                  height={40}
                                   className="w-full h-full object-contain p-1"
                                   onError={(e) => {
                                     e.currentTarget.style.display = 'none';
@@ -429,9 +477,11 @@ export default function MatchesPage() {
                             <div className="flex items-center gap-2">
                               <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ background: "rgba(212,175,55,0.15)" }}>
                                 {m.home_team.crest_url ? (
-                                  <img 
+                                  <Image
                                     src={m.home_team.crest_url} 
                                     alt={m.home_team.name}
+                                    width={32}
+                                    height={32}
                                     className="w-full h-full object-contain p-1"
                                     onError={(e) => {
                                       e.currentTarget.style.display = 'none';
@@ -444,9 +494,11 @@ export default function MatchesPage() {
                               <span className="text-xs" style={{ color: "var(--text-secondary)" }}>vs</span>
                               <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ background: "rgba(212,175,55,0.15)" }}>
                                 {m.away_team.crest_url ? (
-                                  <img 
+                                  <Image
                                     src={m.away_team.crest_url} 
                                     alt={m.away_team.name}
+                                    width={32}
+                                    height={32}
                                     className="w-full h-full object-contain p-1"
                                     onError={(e) => {
                                       e.currentTarget.style.display = 'none';
@@ -486,7 +538,14 @@ export default function MatchesPage() {
         {/* League filter dropdown */}
         <div className="mb-4 relative max-w-md mx-auto sm:mx-0">
             <button
+              type="button"
               onClick={() => setShowLeagueDropdown(!showLeagueDropdown)}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setShowLeagueDropdown(false);
+              }}
+              aria-expanded={showLeagueDropdown}
+              aria-haspopup="listbox"
+              aria-controls="league-options"
               className="w-full flex items-center justify-between px-4 py-4 rounded-2xl"
               style={{ background: "#151515" }}
             >
@@ -498,9 +557,14 @@ export default function MatchesPage() {
             
             {showLeagueDropdown && (
               <div className="absolute top-full left-0 right-0 mt-2 p-2 rounded-2xl z-50 max-h-60 overflow-y-auto"
+                   id="league-options"
+                   role="listbox"
                    style={{ background: "#151515", border: "1px solid rgba(255,255,255,0.1)" }}>
                 <button
+                  type="button"
                   onClick={() => { updateSelectedLeague(""); setShowLeagueDropdown(false); }}
+                  role="option"
+                  aria-selected={!selectedLeague}
                   className="w-full text-left px-4 py-3 rounded-xl text-sm font-bold text-white hover:bg-white/5 transition-colors"
                 >
                   All Leagues
@@ -508,7 +572,10 @@ export default function MatchesPage() {
                 {leagues.map((league) => (
                   <button
                     key={league.code}
+                    type="button"
                     onClick={() => { updateSelectedLeague(league.code); setShowLeagueDropdown(false); }}
+                    role="option"
+                    aria-selected={selectedLeague === league.code}
                     className="w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-colors"
                     style={{ 
                       color: selectedLeague === league.code ? "var(--brand-accent)" : "rgba(255,255,255,0.6)",
@@ -522,11 +589,14 @@ export default function MatchesPage() {
             )}
           </div>
         
-        <div className="flex gap-2 flex-wrap max-w-lg mx-auto sm:max-w-none justify-center sm:justify-start">
+        <div className="flex gap-2 flex-wrap max-w-lg mx-auto sm:max-w-none justify-center sm:justify-start" role="tablist" aria-label="Aina ya mechi">
           {(["fixtures", "live", "finished"] as const).map((t) => (
             <button
               key={t}
+              type="button"
               onClick={() => updateTab(t)}
+              role="tab"
+              aria-selected={tab === t}
               className="px-4 py-3 rounded-full text-sm font-bold sm:flex-none sm:w-28"
               style={{
                 background: tab === t ? "var(--brand-accent)" : "rgba(255,255,255,0.06)",
@@ -539,12 +609,35 @@ export default function MatchesPage() {
         </div>
       </div>
 
-      <div className="px-5 pb-6 max-w-7xl mx-auto">
+      <div className="px-4 sm:px-5 pb-6 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {loading ? (
             [1, 2, 3].map((i) => <CardSkeleton key={i} />)
+          ) : error ? (
+            <div className="col-span-full flex flex-col items-center gap-3 py-12 text-center">
+              <p className="text-sm font-semibold text-red-300">{error}</p>
+              <button
+                type="button"
+                onClick={handleRefresh}
+                className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-black"
+                style={{ background: "var(--brand-accent)" }}
+              >
+                <RefreshCw size={16} /> Jaribu tena
+              </button>
+            </div>
           ) : matches.length === 0 ? (
-            <p className="col-span-full text-center text-sm py-10" style={{ color: "rgba(255,255,255,0.4)" }}>Hakuna mechi kwa sasa.</p>
+            <div className="col-span-full py-12 text-center">
+              <p className="text-sm font-semibold text-white/70">
+                {query.trim().length >= 2
+                  ? "Hakuna mechi zinazolingana na utafutaji wako."
+                  : tab === "live"
+                    ? "Hakuna mechi zinazoendelea sasa."
+                    : tab === "finished"
+                      ? "Hakuna mechi zilizomalizika kwa tarehe hii."
+                      : "Hakuna mechi zilizopangwa kwa tarehe hii."}
+              </p>
+              <p className="mt-1 text-xs text-white/40">Badilisha tarehe, ligi, au utafute timu nyingine.</p>
+            </div>
           ) : (
             matches.map((m, index) => (
               <motion.div
@@ -581,9 +674,11 @@ export default function MatchesPage() {
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-white/5 flex-shrink-0">
                             {m.home_team.crest_url ? (
-                              <img 
+                              <Image
                                 src={m.home_team.crest_url} 
                                 alt={m.home_team.name}
+                                width={40}
+                                height={40}
                                 className="w-full h-full object-contain p-1"
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';
@@ -612,9 +707,11 @@ export default function MatchesPage() {
                           <span className="text-sm font-bold text-white truncate text-right">{m.away_team.name}</span>
                           <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-white/5 flex-shrink-0">
                             {m.away_team.crest_url ? (
-                              <img 
+                              <Image
                                 src={m.away_team.crest_url} 
                                 alt={m.away_team.name}
+                                width={40}
+                                height={40}
                                 className="w-full h-full object-contain p-1"
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';
@@ -680,7 +777,7 @@ export default function MatchesPage() {
           )}
         </div>
         {tab === "finished" && hasMore && !loading && (
-          <BookButton onClick={loadMoreFinished} icon={LoadMoreIcon}>
+          <BookButton onClick={loadMoreFinished} icon={LoadMoreIcon} loading={loadingMore}>
             Pakia Zaidi
           </BookButton>
         )}
