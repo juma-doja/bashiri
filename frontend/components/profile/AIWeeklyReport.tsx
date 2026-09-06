@@ -9,10 +9,6 @@ export function AIWeeklyReport() {
   const [aiStats, setAiStats] = useState<AIPerformanceStats | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchAIStats()
-  }, [])
-
   async function fetchAIStats() {
     try {
       const data = await getAIPerformanceStats()
@@ -23,6 +19,11 @@ export function AIWeeklyReport() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    const loadTimeout = window.setTimeout(() => { void fetchAIStats() }, 0)
+    return () => window.clearTimeout(loadTimeout)
+  }, [])
 
   if (loading) {
     return (
@@ -61,7 +62,7 @@ export function AIWeeklyReport() {
             AI Weekly Report
           </span>
         </div>
-        {weekly.accuracy_percentage >= 70 && (
+        {(weekly.accuracy_percentage ?? 0) >= 70 && (
           <div className="flex items-center gap-1 px-2 py-1 rounded-full" style={{ background: "rgba(76,175,80,0.2)", border: "1px solid rgba(76,175,80,0.3)" }}>
             <Award size={10} className="text-green-400" />
             <span className="text-[10px] font-bold text-green-400">Hot</span>
@@ -74,7 +75,7 @@ export function AIWeeklyReport() {
           {weekly.accuracy_percentage ?? 0}%
         </p>
         <div className="flex items-center gap-1 pb-1">
-          {weekly.accuracy_percentage >= 70 ? (
+          {(weekly.accuracy_percentage ?? 0) >= 70 ? (
             <TrendingUp size={16} className="text-green-400" />
           ) : (
             <Target size={16} className="text-white/50" />

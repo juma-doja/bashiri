@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 
 interface MarketData {
   market: string;
-  accuracy: number;
+  accuracy: number | null;
   predictions: number;
 }
 
@@ -49,15 +49,15 @@ export const MarketMasteryHeatmap: React.FC<MarketMasteryHeatmapProps> = ({ data
             className="relative group"
           >
             <div
-              className={`rounded-xl p-4 bg-gradient-to-br ${getHeatColor(item.accuracy)} transition-all duration-300`}
+              className={`rounded-xl p-4 transition-all duration-300 ${item.accuracy === null ? 'bg-white/5' : `bg-gradient-to-br ${getHeatColor(item.accuracy)}`}`}
               style={{
-                opacity: 0.3 + (getIntensity(item.accuracy) * 0.7),
+                opacity: item.accuracy === null ? 1 : 0.3 + (getIntensity(item.accuracy) * 0.7),
               }}
             >
               <div className="relative z-10">
-                <p className={`text-xs font-bold mb-1 ${getTextColor(item.accuracy)}`}>{item.market}</p>
-                <p className={`text-2xl font-black ${getTextColor(item.accuracy)}`}>{item.accuracy.toFixed(1)}%</p>
-                <p className={`text-[10px] mt-1 ${getTextColor(item.accuracy)}/80`}>{item.predictions} picks</p>
+                <p className={`text-xs font-bold mb-1 ${item.accuracy === null ? 'text-white/60' : getTextColor(item.accuracy)}`}>{item.market}</p>
+                <p className={`text-2xl font-black ${item.accuracy === null ? 'text-white/50' : getTextColor(item.accuracy)}`}>{item.accuracy === null ? "—" : `${item.accuracy.toFixed(1)}%`}</p>
+                <p className="text-[10px] mt-1 text-white/50">{item.predictions} picks</p>
               </div>
               
               {/* Glow effect on hover */}
@@ -67,7 +67,7 @@ export const MarketMasteryHeatmap: React.FC<MarketMasteryHeatmapProps> = ({ data
             {/* Tooltip */}
             <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
               <div className="px-3 py-2 rounded-lg bg-black/90 backdrop-blur-sm border border-white/20">
-                <p className="text-xs font-bold text-white">{item.accuracy.toFixed(1)}% Accuracy</p>
+                <p className="text-xs font-bold text-white">{item.accuracy === null ? "No data" : `${item.accuracy.toFixed(1)}% Accuracy`}</p>
               </div>
             </div>
           </motion.div>

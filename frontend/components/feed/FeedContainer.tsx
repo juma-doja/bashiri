@@ -15,7 +15,7 @@ import { DidYouKnowCard } from "./cards/DidYouKnowCard";
 import { DebateCard } from "./cards/DebateCard";
 import { MicWinnerCard } from "./cards/MicWinnerCard";
 import { BestStreakCard } from "./cards/BestStreakCard";
-import { ChevronDown, RefreshCw } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 function renderCard(card: Card) {
   switch (card.type) {
@@ -37,32 +37,50 @@ function renderCard(card: Card) {
 export function FeedContainer({ externalRefreshKey }: { externalRefreshKey?: number }) {
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
-  const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [feedError, setFeedError] = useState<string | null>(null);
   const [showTutorial, setShowTutorial] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [isPageVisible, setIsPageVisible] = useState(true);
   
   const feedRef = useRef<HTMLDivElement>(null);
-  const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastRefreshTimeRef = useRef<number>(0);
+  const loadMoreInFlightRef = useRef(false);
+  const offsetRef = useRef(0);
 
-  async function loadMore(reset = false) {
-    const currentOffset = reset ? 0 : offset;
-    const data = await getFeed(20, currentOffset);
-    setCards((prev) => (reset ? data.results : [...prev, ...data.results]));
-    setOffset(currentOffset + 20);
-    setHasMore(currentOffset + 20 < data.count);
-    setLoading(false);
-  }
+  const loadMore = useCallback(async (reset = false) => {
+    if (loadMoreInFlightRef.current && !reset) return;
+    loadMoreInFlightRef.current = true;
+    if (reset) setFeedError(null);
+    else setLoadingMore(true);
+    const currentOffset = reset ? 0 : offsetRef.current;
+    try {
+      const data = await getFeed(20, currentOffset);
+      setCards((prev) => {
+        if (reset) return data.results;
+        const existingIds = new Set(prev.map((card) => card.id));
+        return [...prev, ...data.results.filter((card) => !existingIds.has(card.id))];
+      });
+      offsetRef.current = currentOffset + data.results.length;
+      setHasMore(currentOffset + data.results.length < data.count);
+    } catch (error) {
+      console.error("Failed to load feed:", error);
+      setFeedError(error instanceof Error ? error.message : "Imeshindikana kupakia feed.");
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+      loadMoreInFlightRef.current = false;
+    }
+  }, []);
 
   // Trigger full refresh when externalRefreshKey changes
   useEffect(() => {
     if (externalRefreshKey && externalRefreshKey > 0) {
-      loadMore(true);
+      const refreshTimeout = window.setTimeout(() => { void loadMore(true); }, 0);
+      return () => window.clearTimeout(refreshTimeout);
     }
-  }, [externalRefreshKey]);
+  }, [externalRefreshKey, loadMore]);
 
   // Smart refresh: append new data without reset
   const smartRefresh = useCallback(async () => {
@@ -73,7 +91,6 @@ export function FeedContainer({ externalRefreshKey }: { externalRefreshKey?: num
     const now = Date.now();
     if (now - lastRefreshTimeRef.current < 10000) return;
     
-    setIsRefreshing(true);
     lastRefreshTimeRef.current = now;
     
     try {
@@ -91,8 +108,6 @@ export function FeedContainer({ externalRefreshKey }: { externalRefreshKey?: num
       });
     } catch (error) {
       console.error('Smart refresh failed:', error);
-    } finally {
-      setIsRefreshing(false);
     }
   }, [isVisible, isPageVisible]);
 
@@ -132,18 +147,16 @@ export function FeedContainer({ externalRefreshKey }: { externalRefreshKey?: num
     };
 
     // Initial load
-    loadMore(true);
+    const initialLoadTimeout = window.setTimeout(() => { void loadMore(true); }, 0);
 
     // Set up smart polling (every 30 seconds instead of 15)
     const interval = setInterval(poll, 30000);
 
     return () => {
       clearInterval(interval);
-      if (refreshTimeoutRef.current) {
-        clearTimeout(refreshTimeoutRef.current);
-      }
+      window.clearTimeout(initialLoadTimeout);
     };
-  }, [isVisible, isPageVisible]);
+  }, [isVisible, isPageVisible, loadMore, smartRefresh]);
 
   if (loading) {
     return (
@@ -193,9 +206,21 @@ export function FeedContainer({ externalRefreshKey }: { externalRefreshKey?: num
           <div key={card.id}>{renderCard(card)}</div>
         ))}
       </div>
-      {hasMore && (
+      {feedError ? (
+        <div className="mt-8 flex flex-col items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 py-8 text-center">
+          <p className="text-sm text-red-300">{feedError}</p>
+          <button
+            type="button"
+            onClick={() => { void loadMore(true); }}
+            className="rounded-xl px-4 py-2 text-sm font-bold text-black"
+            style={{ background: "var(--brand-accent)" }}
+          >
+            Jaribu tena
+          </button>
+        </div>
+      ) : hasMore && (
         <div className="mt-8">
-          <BookButton onClick={() => loadMore()} icon={ChevronDown}>
+          <BookButton onClick={() => { void loadMore(); }} icon={ChevronDown} loading={loadingMore}>
             Pakia Zaidi
           </BookButton>
         </div>

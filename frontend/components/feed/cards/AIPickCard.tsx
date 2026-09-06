@@ -1,10 +1,42 @@
 "use client";
 import { motion } from "framer-motion";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { Brain, Sparkles, Target, AlertCircle, Check, X, Minus, Clock } from "lucide-react";
+import { Brain, Sparkles, Target, AlertCircle, Check, X, Minus, Clock, type LucideIcon } from "lucide-react";
 
-export function AIPickCard({ data }: { data: any }) {
+interface AIPickMatch {
+  home_team?: string;
+  away_team?: string;
+  home_team_crest_url?: string;
+  away_team_crest_url?: string;
+  kickoff_at?: string;
+}
+
+interface AIPick {
+  status?: string;
+  tier?: string;
+  probability_percent?: number | string | null;
+  actual_home_score?: number | null;
+  actual_away_score?: number | null;
+  option_key?: string | null;
+  selection?: string | null;
+  selection_label?: string | null;
+  market_label?: string | null;
+}
+
+interface AIPickData {
+  match?: AIPickMatch;
+  ai_pick?: AIPick | null;
+}
+
+function normalizeProbability(value: number | string | null | undefined): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return 0;
+  return Math.round(Math.max(0, Math.min(parsed <= 1 ? parsed * 100 : parsed, 100)) * 10) / 10;
+}
+
+export function AIPickCard({ data }: { data: AIPickData }) {
   const { match, ai_pick } = data;
+  if (!match) return null;
 
   // Handle case where ai_pick might be null (NO_STRONG_PICK)
   if (!ai_pick) {
@@ -85,9 +117,9 @@ export function AIPickCard({ data }: { data: any }) {
   }
 
   const selectionLabel: Record<string, string> = {
-    "Home": match.home_team,
+    "Home": match.home_team || "Home",
     "Draw": "Sare",
-    "Away": match.away_team,
+    "Away": match.away_team || "Away",
     "Yes": "Ndiyo (BTTS)",
     "No": "Hapana (BTTS)",
     "1X": "1X (Home au Draw)",
@@ -97,7 +129,7 @@ export function AIPickCard({ data }: { data: any }) {
     "Under": "Under",
   };
 
-  const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
+  const statusConfig: Record<string, { label: string; color: string; icon: LucideIcon }> = {
     "PENDING": { label: "PENDING", color: "rgba(255, 255, 255, 0.1)", icon: Clock },
     "LIVE": { label: "LIVE", color: "rgba(239, 68, 68, 0.2)", icon: Target },
     "WON": { label: "WON", color: "rgba(76, 175, 80, 0.2)", icon: Check },
@@ -116,6 +148,8 @@ export function AIPickCard({ data }: { data: any }) {
   const isMinimum = ai_pick.tier === "MINIMUM";
 
   const isSettled = ["WON", "LOST", "PUSH", "VOID"].includes(status);
+  const probability = normalizeProbability(ai_pick.probability_percent);
+  const selection = ai_pick.selection || ai_pick.option_key;
 
   const tierLabel = isElite ? "Elite" : isStrong ? "Strong" : isMinimum ? "Std" : "Low";
 
@@ -148,7 +182,7 @@ export function AIPickCard({ data }: { data: any }) {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
-                {ai_pick.probability_percent}%
+                {probability}%
               </span>
               {isSettled && (
                 <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg" style={{ background: status === "WON" ? "rgba(76, 175, 80, 0.15)" : status === "LOST" ? "rgba(239, 68, 68, 0.15)" : "rgba(255, 193, 7, 0.15)" }}>
@@ -215,7 +249,7 @@ export function AIPickCard({ data }: { data: any }) {
           {/* Prediction Section - Main Focal Point */}
           <div className="mb-4">
             <p className="text-2xl font-bold mb-1" style={{ color: "var(--text-primary)" }}>
-              {ai_pick.selection_label || selectionLabel[ai_pick.selection] || ai_pick.selection}
+              {ai_pick.selection_label || (selection ? selectionLabel[selection] : null) || selection || "Hakuna pick"}
             </p>
             <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
               {ai_pick.market_label}

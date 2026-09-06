@@ -4,11 +4,10 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { FeedContainer } from "@/components/feed/FeedContainer";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
-import { PulseIndicatorButton } from "@/components/pulse/PulseIndicatorButton";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { getNotifications } from "@/lib/api/notifications";
 import { useAuthStore } from "@/stores/auth.store";
-import { Bell, Target, Search, X, TrendingUp, User, Brain } from "lucide-react";
+import { Bell, Target, Search, X, TrendingUp, Brain } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ReviewPromptModal } from "@/components/review/ReviewPromptModal";
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
@@ -34,11 +33,11 @@ export default function HomePage() {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (searchQuery.trim().length < 2) {
-      setSearchResults(null);
-      return;
+      const clearResultsTimeout = window.setTimeout(() => setSearchResults(null), 0);
+      return () => window.clearTimeout(clearResultsTimeout);
     }
-    setSearchLoading(true);
     debounceRef.current = setTimeout(() => {
+      setSearchLoading(true);
       commandSearch(searchQuery).then((data) => {
         setSearchResults(data);
         setSearchLoading(false);
@@ -53,8 +52,11 @@ export default function HomePage() {
     if (showSearch) {
       setTimeout(() => searchInputRef.current?.focus(), 100);
     } else {
-      setSearchQuery("");
-      setSearchResults(null);
+      const clearSearchTimeout = window.setTimeout(() => {
+        setSearchQuery("");
+        setSearchResults(null);
+      }, 0);
+      return () => window.clearTimeout(clearSearchTimeout);
     }
   }, [showSearch]);
 
@@ -93,8 +95,8 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!user) {
-      setUnreadCount(0);
-      return;
+      const clearUnreadTimeout = window.setTimeout(() => setUnreadCount(0), 0);
+      return () => window.clearTimeout(clearUnreadTimeout);
     }
 
     let active = true;

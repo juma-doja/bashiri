@@ -9,13 +9,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import { updateAvatar, completeProfile, deleteAccount } from "@/lib/api/auth";
 import { getUserTips } from "@/lib/api/tips";
-import { getAIPerformanceStats } from "@/lib/api/predictions";
+import type { UserTipList } from "@/lib/types/tips";
+import { getAIPerformanceStats, type AIPerformanceStats } from "@/lib/api/predictions";
 import { ShareProfileModal } from "@/components/profile/ShareProfileModal";
 import { QRCodeModal } from "@/components/profile/QRCodeModal";
 import { AlertModal } from "@/components/ui/AlertModal";
 import { useMobileTooltip } from "@/hooks/useMobileTooltip";
 import { AccuracySphere } from "@/components/profile/AccuracySphere";
 import { MarketMasteryHeatmap } from "@/components/profile/MarketMasteryHeatmap";
+
+const PROFILE_PARTICLES = [
+  { startX: 8, startY: 18, endX: 74, endY: 64, duration: 12, delay: 0.4, size: 5, alpha: 0.55 },
+  { startX: 22, startY: 76, endX: 86, endY: 28, duration: 16, delay: 1.2, size: 7, alpha: 0.65 },
+  { startX: 38, startY: 12, endX: 12, endY: 82, duration: 14, delay: 2.1, size: 4, alpha: 0.5 },
+  { startX: 54, startY: 88, endX: 92, endY: 44, duration: 17, delay: 0.8, size: 6, alpha: 0.6 },
+  { startX: 67, startY: 24, endX: 32, endY: 72, duration: 13, delay: 2.6, size: 5, alpha: 0.45 },
+  { startX: 79, startY: 68, endX: 48, endY: 10, duration: 15, delay: 1.7, size: 7, alpha: 0.6 },
+  { startX: 91, startY: 36, endX: 18, endY: 54, duration: 18, delay: 0.1, size: 4, alpha: 0.5 },
+  { startX: 46, startY: 52, endX: 70, endY: 92, duration: 11, delay: 2.9, size: 6, alpha: 0.65 },
+];
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -26,9 +38,9 @@ export default function ProfilePage() {
   const [editUsername, setEditUsername] = useState("");
   const [editDob, setEditDob] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [aiPerformance, setAiPerformance] = useState<any>(null);
+  const [aiPerformance, setAiPerformance] = useState<AIPerformanceStats | null>(null);
   const [loadingAI, setLoadingAI] = useState(true);
-  const [userTips, setUserTips] = useState<any[]>([]);
+  const [userTips, setUserTips] = useState<UserTipList[]>([]);
   const [loadingTips, setLoadingTips] = useState(true);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
@@ -78,14 +90,14 @@ export default function ProfilePage() {
 
   // Calculate user tip stats
   const totalTips = userTips.length;
-  const settledTips = userTips.filter((tip: any) => ['CORRECT', 'INCORRECT', 'VOID'].includes(tip.status));
-  const correctTips = userTips.filter((tip: any) => tip.status === 'CORRECT');
+  const settledTips = userTips.filter((tip) => ['CORRECT', 'INCORRECT', 'VOID'].includes(tip.status));
+  const correctTips = userTips.filter((tip) => tip.status === 'CORRECT');
   const accuracy = settledTips.length > 0 ? Math.round((correctTips.length / settledTips.length) * 100) : 0;
   
   // Calculate current streak
   const calculateStreak = () => {
     let streak = 0;
-    const sortedTips = [...userTips].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    const sortedTips = [...userTips].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     for (const tip of sortedTips) {
       if (tip.status === 'CORRECT') {
         streak++;
@@ -100,13 +112,6 @@ export default function ProfilePage() {
   if (!user) return null;
 
   // Initialize edit values when user is available
-  if (editUsername === "" && user.username) {
-    setEditUsername(user.username);
-  }
-  if (editDob === "" && user.date_of_birth) {
-    setEditDob(user.date_of_birth);
-  }
-
   async function handleAvatarUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -279,11 +284,7 @@ export default function ProfilePage() {
 
               {/* Optimized floating particles - reduced from 24 to 8 */}
               <div className="absolute inset-0">
-                {[...Array(8)].map((_, i) => {
-                  const startX = Math.random() * 100;
-                  const startY = Math.random() * 100;
-                  const endX = Math.random() * 100;
-                  const endY = Math.random() * 100;
+                {PROFILE_PARTICLES.map((particle, i) => {
 
                   // Cycle through three colors: gold, green, sea blue/silver
                   const colorIndex = i % 3;
@@ -299,21 +300,21 @@ export default function ProfilePage() {
                       key={i}
                       className="absolute rounded-full"
                       animate={{
-                        x: [`${startX}%`, `${endX}%`, `${startX}%`],
-                        y: [`${startY}%`, `${endY}%`, `${startY}%`],
+                        x: [`${particle.startX}%`, `${particle.endX}%`, `${particle.startX}%`],
+                        y: [`${particle.startY}%`, `${particle.endY}%`, `${particle.startY}%`],
                         opacity: [0, 0.7, 0.3, 0.7, 0],
                         scale: [0, 1.2, 0.8, 1, 0],
                       }}
                       transition={{
-                        duration: 10 + Math.random() * 8,
+                        duration: particle.duration,
                         repeat: Infinity,
-                        delay: Math.random() * 3,
+                        delay: particle.delay,
                         ease: "easeInOut",
                       }}
                       style={{
-                        width: `${3 + Math.random() * 5}px`,
-                        height: `${3 + Math.random() * 5}px`,
-                        background: `rgba(${color.r}, ${color.g}, ${color.b}, ${0.4 + Math.random() * 0.3})`,
+                        width: `${particle.size}px`,
+                        height: `${particle.size}px`,
+                        background: `rgba(${color.r}, ${color.g}, ${color.b}, ${particle.alpha})`,
                         filter: "blur(2px)",
                         willChange: "transform",
                       }}
@@ -592,13 +593,13 @@ export default function ProfilePage() {
             </div>
             <MarketMasteryHeatmap
               data={[
-                { market: '1X2', accuracy: aiPerformance?.weekly?.market_accuracy?.["1x2"] || 0, predictions: aiPerformance?.weekly?.market_counts?.["1x2"] || 0 },
-                { market: 'BTTS', accuracy: aiPerformance?.weekly?.market_accuracy?.["btts"] || 0, predictions: aiPerformance?.weekly?.market_counts?.["btts"] || 0 },
-                { market: 'O/U 2.5', accuracy: aiPerformance?.weekly?.market_accuracy?.["over_under"] || 0, predictions: aiPerformance?.weekly?.market_counts?.["over_under"] || 0 },
-                { market: 'Dbl Chance', accuracy: aiPerformance?.weekly?.market_accuracy?.["double_chance"] || 0, predictions: aiPerformance?.weekly?.market_counts?.["double_chance"] || 0 },
-                { market: 'O/U 1.5', accuracy: aiPerformance?.weekly?.market_accuracy?.["over_under_15"] || 0, predictions: aiPerformance?.weekly?.market_counts?.["over_under_15"] || 0 },
-                { market: 'Home Goals', accuracy: aiPerformance?.weekly?.market_accuracy?.["home_goals"] || 0, predictions: aiPerformance?.weekly?.market_counts?.["home_goals"] || 0 },
-                { market: 'Away Goals', accuracy: aiPerformance?.weekly?.market_accuracy?.["away_goals"] || 0, predictions: aiPerformance?.weekly?.market_counts?.["away_goals"] || 0 },
+                { market: '1X2', accuracy: aiPerformance?.weekly?.market_accuracy?.["1x2"] ?? null, predictions: aiPerformance?.weekly?.market_counts?.["1x2"] || 0 },
+                { market: 'BTTS', accuracy: aiPerformance?.weekly?.market_accuracy?.["btts"] ?? null, predictions: aiPerformance?.weekly?.market_counts?.["btts"] || 0 },
+                { market: 'O/U 2.5', accuracy: aiPerformance?.weekly?.market_accuracy?.["over_under"] ?? null, predictions: aiPerformance?.weekly?.market_counts?.["over_under"] || 0 },
+                { market: 'Dbl Chance', accuracy: aiPerformance?.weekly?.market_accuracy?.["double_chance"] ?? null, predictions: aiPerformance?.weekly?.market_counts?.["double_chance"] || 0 },
+                { market: 'O/U 1.5', accuracy: aiPerformance?.weekly?.market_accuracy?.["over_under_15"] ?? null, predictions: aiPerformance?.weekly?.market_counts?.["over_under_15"] || 0 },
+                { market: 'Home Goals', accuracy: aiPerformance?.weekly?.market_accuracy?.["home_goals"] ?? null, predictions: aiPerformance?.weekly?.market_counts?.["home_goals"] || 0 },
+                { market: 'Away Goals', accuracy: aiPerformance?.weekly?.market_accuracy?.["away_goals"] ?? null, predictions: aiPerformance?.weekly?.market_counts?.["away_goals"] || 0 },
               ]}
             />
           </div>
@@ -626,7 +627,7 @@ export default function ProfilePage() {
             </div>
             <div
               className="relative h-32 cursor-pointer chart-glass"
-              onClick={(e) => handleChartClick(e, { accuracy_percentage: aiPerformance.weekly_trend[aiPerformance.weekly_trend.length - 1]?.accuracy_percentage })}
+              onClick={(e) => handleChartClick(e, { accuracy_percentage: aiPerformance.weekly_trend[aiPerformance.weekly_trend.length - 1]?.accuracy_percentage ?? 0 })}
             >
               {/* Grid Lines */}
               <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
@@ -639,8 +640,9 @@ export default function ProfilePage() {
               </div>
               {/* Bars */}
               <div className="absolute inset-0 flex items-end gap-2 pt-6 pl-10">
-                {aiPerformance.weekly_trend.map((day: any, index: number) => {
-                  const height = Math.max(8, (day.accuracy_percentage / 100) * 100);
+                {aiPerformance.weekly_trend.map((day: AIPerformanceStats["weekly_trend"][number], index: number) => {
+                  const accuracy = day.accuracy_percentage ?? 0;
+                  const height = day.total_predictions > 0 ? Math.max(8, accuracy) : 8;
                   const isToday = index === aiPerformance.weekly_trend.length - 1;
                   return (
                     <motion.div
@@ -660,7 +662,7 @@ export default function ProfilePage() {
                       {/* Tooltip */}
                       <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                         <div className="px-2 py-1 rounded-lg bg-black/80 backdrop-blur-sm border border-white/10">
-                          <span className="text-xs font-bold text-white">{day.accuracy_percentage}%</span>
+                          <span className="text-xs font-bold text-white">{day.total_predictions > 0 ? `${accuracy}%` : "—"}</span>
                         </div>
                       </div>
                       <span className={`text-xs font-medium transition-colors ${isToday ? 'text-[var(--brand-primary)]' : 'text-white/40'}`}>

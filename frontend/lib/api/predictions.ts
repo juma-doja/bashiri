@@ -225,10 +225,10 @@ export function getAITrackRecord(league?: string) {
 
 export interface AIPerformanceStats {
   daily: {
-    accuracy_percentage: number;
+    accuracy_percentage: number | null;
     total_predictions: number;
     correct_predictions: number;
-    high_confidence_accuracy: number;
+    high_confidence_accuracy: number | null;
     market_accuracy: {
       "1x2": number | null;
       "btts": number | null;
@@ -251,10 +251,10 @@ export interface AIPerformanceStats {
     best_streak: number;
   };
   weekly: {
-    accuracy_percentage: number;
+    accuracy_percentage: number | null;
     total_predictions: number;
     correct_predictions: number;
-    high_confidence_accuracy: number;
+    high_confidence_accuracy: number | null;
     market_accuracy: {
       "1x2": number | null;
       "btts": number | null;
@@ -283,7 +283,7 @@ export interface AIPerformanceStats {
   };
   weekly_trend: {
     date: string;
-    accuracy_percentage: number;
+    accuracy_percentage: number | null;
     total_predictions: number;
   }[];
 }
