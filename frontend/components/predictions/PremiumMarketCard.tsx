@@ -54,7 +54,7 @@ export function PremiumMarketCard({ market, variant = "primary", onLockedClick }
             ) : market.ai_pick ? (
               <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[var(--brand-accent)]/10 border border-[var(--brand-accent)]/20">
                 <Check size={12} className="text-[var(--brand-accent)]" />
-                <span className="text-[10px] font-bold text-[var(--brand-accent)]">AI PICK</span>
+                <span className="text-[10px] font-bold text-[var(--brand-accent)]">BASHIRI PICK</span>
               </div>
             ) : null}
           </div>

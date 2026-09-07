@@ -76,7 +76,7 @@ export default function AIPicksPage() {
           <button onClick={() => router.back()} aria-label="Rudi nyuma">
             <ArrowLeft size={22} style={{ color: "rgba(255,255,255,0.6)" }} />
           </button>
-          <h1 className="text-[26px] font-black text-white">AI Picks</h1>
+          <h1 className="text-[26px] font-black text-white">Bashiri Picks</h1>
         </div>
 
         {/* Feed Type Tabs */}
@@ -159,13 +159,13 @@ export default function AIPicksPage() {
         <div className="px-5 py-10 text-center">
           <Target size={48} className="mx-auto mb-4" style={{ color: "rgba(255,255,255,0.2)" }} />
           <p className="text-[15px]" style={{ color: "rgba(255,255,255,0.4)" }}>
-            {feedType === "PREMIUM" ? "No Elite picks available yet." : "No AI picks available for this period."}
+            {feedType === "PREMIUM" ? "No Elite picks available yet." : "No Bashiri picks available for this period."}
           </p>
         </div>
       ) : (
         <div className="px-5 space-y-5 pb-8">
           <p className="text-[13px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.5)" }}>
-            AI Picks ({picks.length})
+            Bashiri Picks ({picks.length})
           </p>
           {picks.map((pick) => {
             const statusInfo = statusConfig[pick.status] || statusConfig["PENDING"];

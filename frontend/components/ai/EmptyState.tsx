@@ -61,7 +61,7 @@ const CATEGORIES: SuggestionCategory[] = [
     description: "Get AI-powered match predictions",
     suggestions: [
       "Nani atashinda mechi kubwa ya leo?",
-      "Onesha AI Track Record ya wiki hii",
+      "Onesha Bashiri Track Record ya wiki hii",
       "Kuna Derby wiki hii?",
       "Simba wamekuwaje msimu huu?",
     ],

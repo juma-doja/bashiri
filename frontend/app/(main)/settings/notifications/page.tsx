@@ -7,7 +7,7 @@ import { CardSkeleton } from "@/components/ui/Skeleton";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 const TOGGLES: { key: keyof NotificationPreferences; label: string }[] = [
-  { key: "daily_picks_enabled", label: "AI Picks za Kila Siku" },
+  { key: "daily_picks_enabled", label: "Bashiri Picks za Kila Siku" },
   { key: "favorite_team_alerts_enabled", label: "Mechi za Timu Ninazopenda" },
   { key: "high_confidence_alerts_enabled", label: "High-Confidence Alerts" },
   { key: "result_alerts_enabled", label: "Matokeo ya Mechi" },

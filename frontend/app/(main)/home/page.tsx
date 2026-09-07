@@ -315,7 +315,7 @@ export default function HomePage() {
                   </button>
                 </div>
                 <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>
-                  Kuona AI Picks, accuracy stats, na zaidi - fungua account bure.
+                  Kuona Bashiri Picks, accuracy stats, na zaidi - fungua account bure.
                 </p>
                 <div className="space-y-3">
                   <motion.button

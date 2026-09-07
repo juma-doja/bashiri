@@ -149,7 +149,7 @@ export const AIMessage = memo(function AIMessage({ content, timestamp, state = "
       case "ai_track_record":
         return (
           <div className="mt-4 p-4 rounded-2xl border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
-            <h3 className="font-bold text-sm mb-3" style={{ color: "var(--text-primary)" }}>AI Track Record</h3>
+            <h3 className="font-bold text-sm mb-3" style={{ color: "var(--text-primary)" }}>Bashiri Track Record</h3>
             <div className="text-sm" style={{ color: "var(--text-secondary)" }}>
               Overall Accuracy: <span className="font-bold" style={{ color: "var(--brand-primary)" }}>{data.data.overall_accuracy}%</span>
             </div>

@@ -174,7 +174,7 @@ export function AIPickCard({ data }: { data: AIPickData }) {
                 ) : (
                   <Brain size={8} />
                 )}
-                AI PICK
+                BASHIRI PICK
               </div>
               <span className="text-[10px] font-medium" style={{ color: "rgba(212,175,55,0.7)" }}>
                 {tierLabel}

@@ -243,7 +243,7 @@ export default function AITrackRecordPage() {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Sparkles size={16} style={{ color: "var(--brand-primary)" }} />
-                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.5)" }}>AI Pick Live Accuracy</p>
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.5)" }}>Bashiri Pick Live Accuracy</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button

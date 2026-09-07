@@ -16,6 +16,9 @@ Tests:
 """
 
 import pytest
+from types import SimpleNamespace
+from unittest.mock import patch
+from predictions.services import build_match_analysis
 from predictions.recommendation_engine import (
     generate_recommendation,
     assess_data_quality,
@@ -470,6 +473,47 @@ class TestRecommendationObject:
         assert recommendation.confidence_score is None
         assert recommendation.recommendation_score is None
         assert recommendation.tier is None
+
+
+def test_build_match_analysis_includes_ai_recommendation_result():
+    """Finished-match analysis should include whether the leading AI recommendation was correct."""
+    prediction = {
+        "match_result": {"home_win": 60.0, "draw": 25.0, "away_win": 15.0},
+        "double_chance": {"1x": 85.0, "x2": 40.0, "12": 75.0},
+        "draw_no_bet": {"home_dnb": 70.0, "away_dnb": 18.0},
+        "btts": {"btts_yes": 55.0, "btts_no": 45.0},
+        "over_under": {"over_1_5": 70.0, "under_1_5": 30.0},
+        "home_goals": {
+            "home_over_0_5": 95.0, "home_under_0_5": 5.0,
+            "home_over_1_5": 70.0, "home_under_1_5": 30.0,
+        },
+        "away_goals": {
+            "away_over_0_5": 95.0, "away_under_0_5": 5.0,
+            "away_over_1_5": 70.0, "away_under_1_5": 30.0,
+        },
+        "model_version": "4.0.0",
+        "expected_goals": {"home_xg": 1.9, "away_xg": 0.8},
+    }
+
+    match = SimpleNamespace(
+        home_score=2,
+        away_score=0,
+        league=SimpleNamespace(poisson_key="BRA_SERIE_A"),
+        home_team=SimpleNamespace(name="São Paulo FC"),
+        away_team=SimpleNamespace(name="CA Mineiro"),
+    )
+
+    with patch("predictions.services.predict_fixture", return_value=prediction):
+        analysis = build_match_analysis(match, viewer_is_subscriber=True)
+
+    assert "ai_recommendation" in analysis
+    ai_recommendation = analysis["ai_recommendation"]
+    assert ai_recommendation["status"] == "STRONG"
+    assert ai_recommendation["market_key"] == "1X2"
+    assert ai_recommendation["option_key"] == "home_win"
+    assert ai_recommendation["was_correct"] is True
+    assert ai_recommendation["market_label"] == "Matokeo ya Mechi"
+    assert ai_recommendation["option_label"] == "Ushindi Nyumbani"
 
 
 class TestMarketDefinitions:

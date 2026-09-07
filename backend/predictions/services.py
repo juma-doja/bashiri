@@ -464,6 +464,40 @@ def build_match_analysis(match, viewer_is_subscriber: bool):
     locked_markets = set(settings.BASHIRI["LOCKED_MARKETS"])
     all_market_keys = list(free_markets) + list(locked_markets)
 
+    global_best = compute_global_top_pick(prediction)
+    ai_recommendation = {
+        "status": "NO_STRONG_PICK",
+        "market_key": None,
+        "option_key": None,
+        "market_label": None,
+        "option_label": None,
+        "confidence": 0,
+        "tier": None,
+        "data_quality": "LOW",
+        "reason": "Hakuna soko lenye uhakika wa kutosha kwa mechi hii.",
+        "was_correct": None,
+    }
+
+    if global_best is not None:
+        market_key = global_best["market_key"]
+        option_key = global_best["option_key"]
+        market_label = MARKET_DEFINITIONS[market_key]["label"]
+        option_label = global_best["option_label"]
+        was_correct = is_prediction_correct(market_key, option_key, home_score, away_score)
+
+        ai_recommendation = {
+            "status": global_best.get("status", "STRONG"),
+            "market_key": market_key,
+            "option_key": option_key,
+            "market_label": market_label,
+            "option_label": option_label,
+            "confidence": global_best.get("confidence", 0),
+            "tier": global_best.get("tier"),
+            "data_quality": global_best.get("data_quality", "LOW"),
+            "reason": global_best.get("reason", "Recommendation ya AI."),
+            "was_correct": bool(was_correct),
+        }
+
     markets = []
     correct_count = 0
 
@@ -533,6 +567,7 @@ def build_match_analysis(match, viewer_is_subscriber: bool):
     return {
         "model_version": prediction.get("model_version", prediction.get("pipeline_version", "unknown")),
         "ai_scorecard": {"correct": correct_count, "total": len(all_market_keys)},
+        "ai_recommendation": ai_recommendation,
         "expected_goals": prediction["expected_goals"],
         "actual_score": {"home": home_score, "away": away_score},
         "markets": markets,

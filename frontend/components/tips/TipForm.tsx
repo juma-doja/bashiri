@@ -93,7 +93,7 @@ export function TipForm({ match, onSubmit, isLoading, aiRecommendation, isLocked
   const selection = watch('selection')
   const selectedMarketObj = marketOptions.find((m) => m.key === selectedMarket)
 
-  // Check if current selection matches AI recommendation
+  // Check if current selection matches Bashiri Pick
   const matchesAI = aiRecommendation && 
     aiRecommendation.market_key === marketKey && 
     aiRecommendation.selection === selection
@@ -230,7 +230,7 @@ export function TipForm({ match, onSubmit, isLoading, aiRecommendation, isLocked
         )}
       </div>
 
-      {/* AI Recommendation Context */}
+      {/* Bashiri Pick Context */}
       {aiRecommendation && aiRecommendation.status === 'STRONG' && (
         <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg p-4 border border-blue-500/30">
           <div className="flex items-center gap-2 mb-3">
@@ -257,7 +257,7 @@ export function TipForm({ match, onSubmit, isLoading, aiRecommendation, isLocked
             </div>
           )}
           <p className="text-xs text-white/30 mt-2">
-            This is a high-confidence AI recommendation based on historical data and model analysis.
+            This is a high-confidence Bashiri Pick based on historical data and model analysis.
           </p>
         </div>
       )}
@@ -370,8 +370,8 @@ export function TipForm({ match, onSubmit, isLoading, aiRecommendation, isLocked
           </div>
           <p className="text-xs text-white/50">
             {matchesAI 
-              ? 'Your selection matches the Bashiri AI recommendation. The model has identified this as a strong pick.'
-              : 'Your selection differs from the Bashiri AI recommendation. This may represent a contrarian opportunity or higher risk.'}
+              ? 'Your selection matches the Bashiri Pick. The model has identified this as a strong pick.'
+              : 'Your selection differs from the Bashiri Pick. This may represent a contrarian opportunity or higher risk.'}
           </p>
         </div>
       )}

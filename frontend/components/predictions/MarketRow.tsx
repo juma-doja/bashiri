@@ -109,7 +109,7 @@ export function MarketRow({ market, onLockedClick, matchId, isSaved = false, onS
             >
               <TrendingUp size={12} style={{ color: "#00FF87" }} />
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(0,255,135,0.15)", color: "#00FF87" }}>
-                AI Pick
+                Bashiri Pick
               </span>
             </motion.div>
             {matchId && (

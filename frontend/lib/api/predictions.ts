@@ -185,9 +185,23 @@ export interface MarketAnalysis {
   ai_was_correct: boolean | null;
   options: MarketOptionAnalysis[];
 }
+export interface AIRecommendationResult {
+  status: "STRONG" | "NO_STRONG_PICK";
+  market_key: string | null;
+  option_key: string | null;
+  market_label: string | null;
+  option_label: string | null;
+  confidence: number;
+  tier?: "STRONG" | "ELITE" | null;
+  data_quality?: "HIGH" | "MEDIUM" | "LOW";
+  reason?: string;
+  was_correct: boolean | null;
+}
+
 export interface MatchAnalysis {
   model_version: string;
   ai_scorecard: { correct: number; total: number };
+  ai_recommendation: AIRecommendationResult;
   expected_goals: { home_xg: number; away_xg: number };
   actual_score: { home: number; away: number };
   markets: MarketAnalysis[];

@@ -61,7 +61,7 @@ export function PremiumHeroCard({
             <div className="text-xl sm:text-2xl">{icon}</div>
             <div>
               <h3 className="text-[10px] sm:text-xs font-semibold text-white/70 uppercase tracking-wider">
-                AI Recommendation
+                Bashiri Pick
               </h3>
               <p className="text-sm sm:text-base font-bold text-white">{market.label}</p>
             </div>

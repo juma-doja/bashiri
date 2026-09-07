@@ -720,7 +720,7 @@ export default function ProfilePage() {
               style={{ background: "#111111" }}
             >
               <Sparkles size={20} style={{ color: "var(--brand-accent)" }} />
-              <span className="text-xs font-bold text-white">AI Picks</span>
+              <span className="text-xs font-bold text-white">Bashiri Picks</span>
             </button>
           </motion.div>
 

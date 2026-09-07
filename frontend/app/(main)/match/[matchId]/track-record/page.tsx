@@ -43,8 +43,9 @@ export default function MatchTrackRecordPage() {
 
   if (!analysis) return <div className="px-4 pt-safe pt-10" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 32px)" }}><CardSkeleton /></div>;;
 
-  const { ai_scorecard, actual_score, expected_goals, match } = analysis;
+  const { ai_scorecard, ai_recommendation, actual_score, expected_goals, match } = analysis;
   const scoreColor = ai_scorecard.correct >= 6 ? "#00FF87" : ai_scorecard.correct >= 3 ? "#FFD600" : "#FF4757";
+  const recommendationWasCorrect = ai_recommendation.was_correct === true;
 
   return (
     <DerbyThemeProvider matchId={matchId}>
@@ -63,6 +64,46 @@ export default function MatchTrackRecordPage() {
       <MatchHubTabs matchId={matchId} active="predict" isFinished />
 
       <div className="px-5 pb-8">
+        <div
+          className="rounded-3xl p-4 mb-5"
+          style={{
+            background: ai_recommendation.status === "NO_STRONG_PICK"
+              ? "rgba(255,111,97,0.08)"
+              : recommendationWasCorrect
+                ? "rgba(0,255,135,0.08)"
+                : "rgba(255,71,87,0.08)",
+            border: `1px solid ${ai_recommendation.status === "NO_STRONG_PICK" ? "rgba(255,111,97,0.3)" : recommendationWasCorrect ? "rgba(0,255,135,0.35)" : "rgba(255,71,87,0.35)"}`,
+          }}
+        >
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: recommendationWasCorrect ? "#00FF87" : ai_recommendation.status === "NO_STRONG_PICK" ? "#ff9a85" : "#FF4757" }}>
+              Bashiri Pick
+            </p>
+            <span
+              className="rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-widest"
+              style={{
+                background: recommendationWasCorrect ? "rgba(0,255,135,0.12)" : ai_recommendation.status === "NO_STRONG_PICK" ? "rgba(255,154,133,0.12)" : "rgba(255,71,87,0.12)",
+                color: recommendationWasCorrect ? "#00FF87" : ai_recommendation.status === "NO_STRONG_PICK" ? "#ffb8a7" : "#FF9AAD",
+              }}
+            >
+              {ai_recommendation.status === "NO_STRONG_PICK" ? "No Pick" : recommendationWasCorrect ? "Sahihi" : "Sio sahihi"}
+            </span>
+          </div>
+
+          {ai_recommendation.status === "NO_STRONG_PICK" ? (
+            <p className="text-sm text-white/75">{ai_recommendation.reason}</p>
+          ) : (
+            <>
+              <p className="text-2xl font-black text-white mb-1">{ai_recommendation.option_label}</p>
+              <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.6)" }}>{ai_recommendation.market_label}</p>
+              <div className="flex items-center justify-between text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>
+                <span>Uhakika: {ai_recommendation.confidence}%</span>
+                <span>{ai_recommendation.tier || "STRONG"}</span>
+              </div>
+            </>
+          )}
+        </div>
+
         <div className="rounded-3xl p-6 mb-5 text-center" style={{ background: `${scoreColor}0F`, border: `1px solid ${scoreColor}33` }}>
           <p className="text-xs font-black uppercase tracking-widest mb-2" style={{ color: scoreColor }}>Bashiri Track Record</p>
           <p className="text-4xl font-black" style={{ color: scoreColor }}>{ai_scorecard.correct}/{ai_scorecard.total}</p>

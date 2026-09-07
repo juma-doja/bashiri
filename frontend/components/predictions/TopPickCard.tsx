@@ -49,7 +49,7 @@ export function TopPickCard({ topPick, onLockedClick }: { topPick: TopPick; onLo
             <Sparkles size={16} style={{ color: tier.color }} />
           )}
           <span className="text-xs font-black uppercase tracking-widest" style={{ color: isNoPick ? "#ff6464" : tier.color }}>
-            {isNoPick ? "Hakuna Pick Iliyothibitishwa" : "Recommendation Kuu ya AI"}
+            {isNoPick ? "Hakuna Bashiri Pick Iliyothibitishwa" : "Bashiri Pick"}
           </span>
           {isHighConfidence && !topPick.is_locked && !isNoPick && (
             <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${tier.color}30`, color: tier.color }}>

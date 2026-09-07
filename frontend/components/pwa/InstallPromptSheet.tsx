@@ -84,7 +84,7 @@ export function InstallPromptSheet() {
               </motion.div>
 
               <p className="text-sm text-white leading-6">
-                Sakinisha Bashiri kwenye simu yako upate AI Picks za haraka, live scores, na
+                Sakinisha Bashiri kwenye simu yako upate Bashiri Picks za haraka, live scores, na
                 notifications — bila kufungua browser kila wakati.
               </p>
 
