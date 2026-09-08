@@ -18,7 +18,7 @@ const PLAN_DETAILS: Record<string, { label: string; price: string }> = {
 };
 
 const POLL_INTERVAL_MS = 3000;
-const MAX_POLL_ATTEMPTS = 30; // dakika 1.5 (30 x 3s)
+const MAX_POLL_ATTEMPTS = 30; // dakika 1.5 ((30 x 3s))
 
 function SubscribeContent() {
   const router = useRouter();

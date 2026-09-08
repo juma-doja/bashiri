@@ -195,8 +195,8 @@ export default function MatchTrackRecordPage() {
           );
         })()}
 
-        <p className="text-center text-xs mt-5" style={{ color: "rgba(255,255,255,0.2)" }}>
-          Dixon-Coles Poisson Model v{analysis.model_version} • Kwa burudani tu — si ushauri wa kamari
+        <p className="text-center text-xs mt-5" style={{ color: "rgba(255,255,255,0.35)" }}>
+          Uchambuzi huu unakusaidia kuelewa mwenendo wa mechi. Tumia taarifa hizi kwa burudani na uamuzi wako binafsi.
         </p>
       </div>
 

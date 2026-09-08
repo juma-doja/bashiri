@@ -355,8 +355,8 @@ export default function PredictDashboardPage() {
           <ConfidenceLegend />
         </div>
 
-        <p className="text-center text-xs mt-5" style={{ color: "rgba(255,255,255,0.2)" }}>
-          Dixon-Coles Poisson Model v{dashboard.model_version} • Kwa burudani tu — si ushauri wa kamari
+        <p className="text-center text-xs mt-5" style={{ color: "rgba(255,255,255,0.35)" }}>
+          Makadirio haya yanakusaidia kuelewa mwenendo wa mechi. Tumia taarifa hizi kwa burudani na uamuzi wako binafsi.
         </p>
       </div>
 
