@@ -3,6 +3,7 @@ import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { Toaster } from "sonner";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { VisitorTracker } from "@/components/analytics/VisitorTracker";
 
 export const metadata: Metadata = {
   title: "Bashiri Elite",
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="safe-area-shell min-h-screen bg-[var(--background)] text-[var(--text-primary)] antialiased">
         <QueryProvider>
           {children}
+          <VisitorTracker />
           <ServiceWorkerRegister />
           <Toaster
             theme="dark"

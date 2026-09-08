@@ -207,7 +207,7 @@ export default function BashiriPickAnalyticsPage() {
               <select value={selectedLeague} onChange={(e) => setSelectedLeague(e.target.value)} className={fieldClass}>
                 <option value="">All Leagues</option>
                 {leagues.map((league) => (
-                  <option key={league.code} value={league.poisson_key}>
+                  <option key={league.code} value={league.name}>
                     {league.name}
                   </option>
                 ))}

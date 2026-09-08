@@ -142,3 +142,10 @@ export async function apiClient<T = Record<string, unknown>>(
   if (!text) return undefined as T;
   return JSON.parse(text) as Promise<T>;
 }
+
+export function trackVisit(visitorKey: string, path: string) {
+  return apiClient("/visits/", {
+    method: "POST",
+    body: JSON.stringify({ visitor_key: visitorKey, path }),
+  });
+}

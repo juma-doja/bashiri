@@ -99,6 +99,10 @@ export function getDashboardStats() {
   return adminFetch("/dashboard/stats/");
 }
 
+export function getVisitorAnalytics<T = Record<string, unknown>>() {
+  return adminFetch<T>("/dashboard/visitors/");
+}
+
 export function getUsers(params: { search?: string; is_subscriber?: boolean; is_active?: boolean; offset?: number } = {}) {
   const query = new URLSearchParams();
   if (params.search) query.set("search", params.search);

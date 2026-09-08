@@ -28,6 +28,7 @@ from feed.models import Card
 from payments.models import Subscription, Transaction
 from predictions.models import League, Match, Team
 from notifications.fcm import send_push_to_user
+from core.models import VisitorLog
 
 from .models import AdminActionLog
 from .permissions import IsBashiriAdmin
@@ -131,6 +132,56 @@ class DashboardStatsView(APIView):
             "matches_today": matches_today,
             "live_matches_now": live_matches_now,
             "pending_transactions": pending_transactions,
+        })
+
+
+class VisitorAnalyticsView(APIView):
+    """GET /api/dashboard/visitors/ - registered and guest traffic analytics."""
+    permission_classes = [IsBashiriAdmin]
+
+    def get(self, request):
+        now = timezone.now()
+        today = timezone.localdate()
+        start_date = today - timedelta(days=29)
+        logs = VisitorLog.objects.filter(visit_date__gte=start_date)
+
+        daily = []
+        for offset in range(29, -1, -1):
+            day = today - timedelta(days=offset)
+            day_logs = logs.filter(visit_date=day)
+            daily.append({
+                "date": day.isoformat(),
+                "registered": day_logs.filter(user__isnull=False).values("user_id").distinct().count(),
+                "guests": day_logs.filter(user__isnull=True).values("visitor_key").distinct().count(),
+            })
+
+        month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        month_logs = VisitorLog.objects.filter(visited_at__gte=month_start)
+        recent_logs = VisitorLog.objects.select_related("user").order_by("-visited_at")[:100]
+        recent = [{
+            "id": log.id,
+            "visitor_type": "registered" if log.user_id else "guest",
+            "user": log.user.username if log.user else None,
+            "user_id": log.user_id,
+            "path": log.path,
+            "visited_at": log.visited_at.isoformat(),
+        } for log in recent_logs]
+
+        return Response({
+            "today": {
+                "registered": logs.filter(visit_date=today, user__isnull=False).values("user_id").distinct().count(),
+                "guests": logs.filter(visit_date=today, user__isnull=True).values("visitor_key").distinct().count(),
+            },
+            "month": {
+                "registered": month_logs.filter(user__isnull=False).values("user_id").distinct().count(),
+                "guests": month_logs.filter(user__isnull=True).values("visitor_key").distinct().count(),
+            },
+            "all_time": {
+                "registered": VisitorLog.objects.filter(user__isnull=False).values("user_id").distinct().count(),
+                "guests": VisitorLog.objects.filter(user__isnull=True).values("visitor_key").distinct().count(),
+            },
+            "daily": daily,
+            "recent": recent,
         })
 
 

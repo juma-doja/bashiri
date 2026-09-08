@@ -7,6 +7,12 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from django.conf import settings
 import redis
+from django.utils import timezone
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .models import VisitorLog
 
 
 @require_GET
@@ -36,3 +42,24 @@ def health_check(request):
         http_status = 503
 
     return JsonResponse(status, status=http_status)
+
+
+class VisitorLogView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        visitor_key = str(request.data.get("visitor_key", "")).strip()
+        path = str(request.data.get("path", "/")).strip()[:500] or "/"
+        if len(visitor_key) < 16 or len(visitor_key) > 64:
+            return Response({"detail": "visitor_key is required."}, status=400)
+
+        VisitorLog.objects.update_or_create(
+            visitor_key=visitor_key,
+            visit_date=timezone.localdate(),
+            path=path,
+            defaults={
+                "user": request.user if request.user.is_authenticated else None,
+                "user_agent": request.META.get("HTTP_USER_AGENT", "")[:500],
+            },
+        )
+        return Response({"tracked": True}, status=201)

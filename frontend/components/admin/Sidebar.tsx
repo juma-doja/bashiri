@@ -1,11 +1,12 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Users, Calendar, CreditCard, Bell, Brain, LogOut, Flame, MessageSquare, ShieldAlert, Ticket, X, Image as ImageIcon, Star } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, CreditCard, Bell, Brain, LogOut, Flame, MessageSquare, ShieldAlert, Ticket, X, Image as ImageIcon, Star, Activity } from "lucide-react";
 import { useAdminAuthStore } from "@/stores/admin-auth.store";
 import { useEffect } from "react";
 
 const NAV_ITEMS = [
   { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/admin/visitors", icon: Activity, label: "Visitors" },
   { href: "/admin/users", icon: Users, label: "Watumiaji" },
   { href: "/admin/matches", icon: Calendar, label: "Mechi" },
   { href: "/admin/derbies", icon: Flame, label: "Derby Mode" },

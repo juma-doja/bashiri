@@ -33,11 +33,13 @@ from .views import (
     AdminUserDetailView,
     AdminUserListView,
     DashboardStatsView,
+    VisitorAnalyticsView,
 )
 
 urlpatterns = [
     path("login/", AdminLoginView.as_view(), name="admin-login"),
     path("stats/", DashboardStatsView.as_view(), name="admin-stats"),
+    path("visitors/", VisitorAnalyticsView.as_view(), name="admin-visitors"),
 
     path("users/", AdminUserListView.as_view(), name="admin-user-list"),
     path("users/<int:user_id>/", AdminUserDetailView.as_view(), name="admin-user-detail"),
