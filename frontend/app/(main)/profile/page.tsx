@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { Crown, Target, TrendingUp, Zap, Settings, LogOut, Award, Calendar, Camera, Loader2, Edit2, Share2, MapPin, ChevronLeft, X, Flame, Sparkles, Power, Eye, Trash2, Trophy } from "lucide-react";
+import { Crown, Target, TrendingUp, Zap, Settings, LogOut, Award, Calendar, Camera, Loader2, Edit2, Share2, MapPin, ChevronLeft, X, Flame, Sparkles, Power, Eye, Trash2, Trophy, Music2 } from "lucide-react";
 import { useAuthStore } from "@/stores/auth.store";
 import { PremiumButton } from "@/components/ui/Button";
 import { PremiumCard, GlassCard } from "@/components/ui/GlassCard";
@@ -477,7 +477,42 @@ export default function ProfilePage() {
               <span className="text-xs font-bold text-white">Settings</span>
             </button>
           </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.37 }}
+          >
+            <button
+              onClick={() => router.push("/music")}
+              className="w-full rounded-2xl p-4 flex flex-col items-center gap-2 text-center"
+              style={{ background: "#111111" }}
+            >
+              <Music2 size={20} style={{ color: "#22C55E" }} />
+              <span className="text-xs font-bold text-white">Music</span>
+            </button>
+          </motion.div>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.38 }}
+          className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black"
+        >
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-label="Bashiri background video"
+            className="aspect-video w-full object-cover"
+          >
+            <source src="/splash-background.mp4" type="video/mp4" />
+          </video>
+          <div className="pointer-events-none absolute inset-0 bg-black/20" />
+        </motion.div>
 
         {!user.is_subscription_active && (
           <motion.div 
