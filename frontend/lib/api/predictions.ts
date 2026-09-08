@@ -424,97 +424,7 @@ export function getLeagueDetail(leagueCode: string) {
   return apiClient<LeagueDetail>(`/predictions/leagues/${leagueCode}/`, { skipAuth: true });
 }
 
-// AI Pick Feed + Result Recap + Accuracy Tracking API types
-export interface AIPick {
-  pick_id: string;
-  match_id: number;
-  home_team: string;
-  away_team: string;
-  league: string;
-  kickoff_at: string;
-  market: string;
-  market_label: string;
-  selection: string;
-  selection_label: string;
-  probability: number;
-  probability_percent: number;
-  tier: "ELITE" | "STRONG" | "MINIMUM";
-  feed: "STANDARD" | "PREMIUM";
-  status: "PENDING" | "LIVE" | "WON" | "LOST" | "PUSH" | "VOID" | "CANCELLED";
-  created_at: string;
-  published_at: string | null;
-  settled_at: string | null;
-  actual_home_score: number | null;
-  actual_away_score: number | null;
-  result: string | null;
-}
-
-export interface AIPickListResponse {
-  count: number;
-  limit: number;
-  offset: number;
-  results: AIPick[];
-}
-
-export function getAIPicks(params?: {
-  feed?: "STANDARD" | "PREMIUM";
-  tier?: "ELITE" | "STRONG" | "MINIMUM";
-  status?: "PENDING" | "LIVE" | "WON" | "LOST" | "PUSH";
-  date?: string;
-  range?: "today" | "yesterday" | "this_week" | "last_7_days" | "this_month";
-  league?: string;
-  market?: string;
-  limit?: number;
-  offset?: number;
-}) {
-  const query = new URLSearchParams();
-  if (params?.feed) query.append("feed", params.feed);
-  if (params?.tier) query.append("tier", params.tier);
-  if (params?.status) query.append("status", params.status);
-  if (params?.date) query.append("date", params.date);
-  if (params?.range) query.append("range", params.range);
-  if (params?.league) query.append("league", params.league);
-  if (params?.market) query.append("market", params.market);
-  if (params?.limit) query.append("limit", params.limit.toString());
-  if (params?.offset) query.append("offset", params.offset.toString());
-  return apiClient<AIPickListResponse>(`/predictions/ai-picks/${query ? '?' + query : ''}`, { skipAuth: true });
-}
-
-export interface AIResultRecap {
-  range: string;
-  total_picks: number;
-  settled: number;
-  pending: number;
-  live: number;
-  won: number;
-  lost: number;
-  push: number;
-  void: number;
-  hit_rate: number;
-  win_rate: number;
-  settlement_rate: number;
-}
-
-export function getAIResultRecap(params?: {
-  range?: "today" | "yesterday" | "this_week" | "last_7_days" | "this_month" | "custom";
-  start_date?: string;
-  end_date?: string;
-  tier?: "ELITE" | "STRONG" | "MINIMUM";
-  feed?: "STANDARD" | "PREMIUM";
-  league?: string;
-  market?: string;
-}) {
-  const query = new URLSearchParams();
-  if (params?.range) query.append("range", params.range);
-  if (params?.start_date) query.append("start_date", params.start_date);
-  if (params?.end_date) query.append("end_date", params.end_date);
-  if (params?.tier) query.append("tier", params.tier);
-  if (params?.feed) query.append("feed", params.feed);
-  if (params?.league) query.append("league", params.league);
-  if (params?.market) query.append("market", params.market);
-  return apiClient<AIResultRecap>(`/predictions/ai-results/${query ? '?' + query : ''}`, { skipAuth: true });
-}
-
+// Bashiri Pick Analytics types
 export interface AIAnalytics {
   range: string;
   total_picks: number;
@@ -551,4 +461,102 @@ export function getAIAnalytics(params?: {
   if (params?.range) query.append("range", params.range);
   if (params?.breakdown) query.append("breakdown", params.breakdown);
   return apiClient<AIAnalytics>(`/predictions/ai-analytics/${query ? '?' + query : ''}`, { skipAuth: true });
+}
+
+export interface BashiriPickAnalyticsSummary {
+  total_picks: number;
+  settled_picks: number;
+  won: number;
+  lost: number;
+  push: number;
+  accuracy: number;
+  current_streak: number;
+  best_streak: number;
+  date_range: {
+    start: string;
+    end: string;
+  };
+  filters_applied: {
+    league: string | null;
+    range: string;
+    min_confidence: string | null;
+    max_confidence: string | null;
+  };
+}
+
+export interface MarketBreakdown {
+  market: string;
+  total: number;
+  won: number;
+  lost: number;
+  accuracy: number;
+}
+
+export interface LeagueBreakdown {
+  league: string;
+  total: number;
+  won: number;
+  lost: number;
+  accuracy: number;
+}
+
+export interface ConfidenceBreakdown {
+  label: string;
+  total: number;
+  won: number;
+  lost: number;
+  accuracy: number;
+}
+
+export interface DailyTrend {
+  date: string;
+  accuracy: number;
+  total: number;
+  won: number;
+  lost: number;
+}
+
+export interface RecentPick {
+  snapshot_id: number;
+  match_id: number;
+  home_team: string;
+  away_team: string;
+  league: string;
+  market_key: string;
+  market_label: string;
+  option_key: string;
+  option_label: string;
+  confidence: number;
+  status: string;
+  created_at: string;
+  settled_at: string | null;
+  actual_home_score: number | null;
+  actual_away_score: number | null;
+}
+
+export interface BashiriPickAnalytics {
+  summary: BashiriPickAnalyticsSummary;
+  market_breakdown: MarketBreakdown[];
+  league_breakdown: LeagueBreakdown[];
+  confidence_breakdown: ConfidenceBreakdown[];
+  daily_trend: DailyTrend[];
+  recent_picks: RecentPick[];
+}
+
+export function getBashiriPickAnalytics(params?: {
+  league?: string;
+  range?: "last_7_days" | "last_30_days" | "last_90_days" | "custom";
+  start_date?: string;
+  end_date?: string;
+  min_confidence?: number;
+  max_confidence?: number;
+}) {
+  const query = new URLSearchParams();
+  if (params?.league) query.append("league", params.league);
+  if (params?.range) query.append("range", params.range);
+  if (params?.start_date) query.append("start_date", params.start_date);
+  if (params?.end_date) query.append("end_date", params.end_date);
+  if (params?.min_confidence) query.append("min_confidence", params.min_confidence.toString());
+  if (params?.max_confidence) query.append("max_confidence", params.max_confidence.toString());
+  return apiClient<BashiriPickAnalytics>(`/predictions/bashiri-pick-analytics/${query ? '?' + query : ''}`, { skipAuth: true });
 }

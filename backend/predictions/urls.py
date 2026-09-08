@@ -4,9 +4,8 @@ from .views import (
     ActiveDerbyView, AITrackRecordView, AIPerformanceStatsView, BookmakersView, CommandSearchView, FixturesView, LeagueListView,
     LiveMatchesView, MatchAnalysisView, MatchDashboardView, MatchOddsView, MatchOverviewView, OddsListView,
     SavedMatchesListView, SavedMarketsListView, SaveMatchView, SaveMarketView, SearchView, TeamListView, FinishedMatchesView, SyncHistoricalView, GenerateSavedMarketsPDFView,
-    TeamStandingsView, HeadToHeadView, TeamDetailView, LeagueDetailView,
+    TeamStandingsView, HeadToHeadView, TeamDetailView, LeagueDetailView, BashiriPickAnalyticsView,
 )
-from .ai_pick_views import AIPickListView, AIResultRecapView, AIAnalyticsView
 
 urlpatterns = [
     path("fixtures/", FixturesView.as_view(), name="fixtures"),
@@ -35,8 +34,6 @@ urlpatterns = [
     path("sync-historical/", SyncHistoricalView.as_view(), name="sync-historical"),
     path("standings/", TeamStandingsView.as_view(), name="team-standings"),
     path("h2h/", HeadToHeadView.as_view(), name="head-to-head"),
-    # AI Pick Feed + Result Recap + Accuracy Tracking
-    path("ai-picks/", AIPickListView.as_view(), name="ai-picks"),
-    path("ai-results/", AIResultRecapView.as_view(), name="ai-results"),
-    path("ai-analytics/", AIAnalyticsView.as_view(), name="ai-analytics"),
+    # Bashiri Pick Analytics (TopPickCard picks only)
+    path("bashiri-pick-analytics/", BashiriPickAnalyticsView.as_view(), name="bashiri-pick-analytics"),
 ]

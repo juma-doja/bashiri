@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { Crown, Target, TrendingUp, Zap, Settings, LogOut, Award, Calendar, Camera, Loader2, Edit2, Share2, MapPin, ChevronLeft, BarChart3, X, Flame, Sparkles, Power, Eye, Trash2, Trophy } from "lucide-react";
+import { Crown, Target, TrendingUp, Zap, Settings, LogOut, Award, Calendar, Camera, Loader2, Edit2, Share2, MapPin, ChevronLeft, X, Flame, Sparkles, Power, Eye, Trash2, Trophy } from "lucide-react";
 import { useAuthStore } from "@/stores/auth.store";
 import { PremiumButton } from "@/components/ui/Button";
 import { PremiumCard, GlassCard } from "@/components/ui/GlassCard";
@@ -10,13 +10,9 @@ import { useState, useRef, useEffect } from "react";
 import { updateAvatar, completeProfile, deleteAccount } from "@/lib/api/auth";
 import { getUserTips } from "@/lib/api/tips";
 import type { UserTipList } from "@/lib/types/tips";
-import { getAIPerformanceStats, type AIPerformanceStats } from "@/lib/api/predictions";
 import { ShareProfileModal } from "@/components/profile/ShareProfileModal";
 import { QRCodeModal } from "@/components/profile/QRCodeModal";
 import { AlertModal } from "@/components/ui/AlertModal";
-import { useMobileTooltip } from "@/hooks/useMobileTooltip";
-import { AccuracySphere } from "@/components/profile/AccuracySphere";
-import { MarketMasteryHeatmap } from "@/components/profile/MarketMasteryHeatmap";
 
 const PROFILE_PARTICLES = [
   { startX: 8, startY: 18, endX: 74, endY: 64, duration: 12, delay: 0.4, size: 5, alpha: 0.55 },
@@ -38,8 +34,6 @@ export default function ProfilePage() {
   const [editUsername, setEditUsername] = useState("");
   const [editDob, setEditDob] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [aiPerformance, setAiPerformance] = useState<AIPerformanceStats | null>(null);
-  const [loadingAI, setLoadingAI] = useState(true);
   const [userTips, setUserTips] = useState<UserTipList[]>([]);
   const [loadingTips, setLoadingTips] = useState(true);
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -53,28 +47,15 @@ export default function ProfilePage() {
   const [viewAvatarModal, setViewAvatarModal] = useState<{ isOpen: boolean; imageUrl: string }>({ isOpen: false, imageUrl: "" });
   const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
-  const { tooltip, handleChartClick, hideTooltip } = useMobileTooltip();
 
   // Check for reduced motion preference
   const reduceMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   useEffect(() => {
-    fetchAIPerformance();
     if (user?.username) {
       fetchUserTips();
     }
   }, [user?.username]);
-
-  async function fetchAIPerformance() {
-    try {
-      const data = await getAIPerformanceStats();
-      setAiPerformance(data);
-    } catch (error) {
-      console.error("Failed to fetch AI performance:", error);
-    } finally {
-      setLoadingAI(false);
-    }
-  }
 
   async function fetchUserTips() {
     try {
@@ -216,42 +197,6 @@ export default function ProfilePage() {
       setDeleteConfirmModal(false);
     }
   }
-
-  const STATS = loadingAI ? [
-    { label: "Usahihi", value: "Loading...", icon: <Target size={20} />, color: "from-[var(--success)]/20 to-[var(--success)]/10 border-[var(--success)]/30 text-[var(--success)]", subtitle: "" },
-    { label: "Sahihi", value: "Loading...", icon: <TrendingUp size={20} />, color: "from-[var(--brand-primary)]/20 to-[var(--brand-accent)]/10 border-[var(--brand-primary)]/30 text-[var(--brand-primary)]", subtitle: "" },
-    { label: "Jumla", value: "Loading...", icon: <Zap size={20} />, color: "from-blue-500/20 to-blue-600/10 border-blue-500/30 text-blue-400", subtitle: "" },
-    { label: "Streak", value: "Loading...", icon: <Flame size={20} />, color: "from-red-500/20 to-red-600/10 border-red-500/30 text-red-400", subtitle: "" },
-  ] : [
-    { 
-      label: "Usahihi (Wiki)", 
-      value: `${aiPerformance?.weekly?.accuracy_percentage || 0}%`, 
-      icon: <Sparkles size={20} />, 
-      color: "from-[var(--success)]/20 to-[var(--success)]/10 border-[var(--success)]/30 text-[var(--success)]",
-      subtitle: "AI Performance"
-    },
-    { 
-      label: "Sahihi", 
-      value: aiPerformance?.weekly?.correct_predictions || 0, 
-      icon: <TrendingUp size={20} />, 
-      color: "from-[var(--brand-primary)]/20 to-[var(--brand-accent)]/10 border-[var(--brand-primary)]/30 text-[var(--brand-primary)]",
-      subtitle: "Weekly Correct"
-    },
-    { 
-      label: "Jumla", 
-      value: aiPerformance?.weekly?.total_predictions || 0, 
-      icon: <Zap size={20} />, 
-      color: "from-blue-500/20 to-blue-600/10 border-blue-500/30 text-blue-400",
-      subtitle: "Weekly Predictions"
-    },
-    { 
-      label: "Usahihi (Leo)", 
-      value: `${aiPerformance?.daily?.accuracy_percentage || 0}%`, 
-      icon: <Flame size={20} />, 
-      color: "from-red-500/20 to-red-600/10 border-red-500/30 text-red-400",
-      subtitle: "Today's Accuracy"
-    },
-  ];
 
   return (
     <div className="min-h-dvh bg-[#050508] overflow-y-auto no-scrollbar">
@@ -470,227 +415,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="px-5 py-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Sparkles size={18} className="text-[var(--brand-primary)]" />
-            <span className="text-sm font-bold text-white/90">AI Performance Stats</span>
-          </div>
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[var(--brand-primary)]/10 border border-[var(--brand-primary)]/20">
-            <div className="w-1.5 h-1.5 rounded-full bg-[var(--brand-primary)] animate-pulse" />
-            <span className="text-xs font-medium text-[var(--brand-primary)]">Live</span>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          {STATS.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.1 * index, duration: 0.4, ease: "easeOut" }}
-              className={`rounded-2xl p-4 backdrop-blur-sm border cursor-pointer group transition-all duration-300 hover:scale-[1.02] hover:shadow-xl relative overflow-hidden ${stat.color}`}
-              whileTap={{ scale: 0.98 }}
-            >
-              {/* Background gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              
-              {/* Icon with glow */}
-              <div className="relative flex items-center gap-2 mb-3">
-                <div className="relative">
-                  <div className="absolute inset-0 blur-xl opacity-50" style={{ background: stat.color.split(' ')[0] }} />
-                  {stat.icon}
-                </div>
-                <span className="text-xs font-semibold text-white/70">{stat.label}</span>
-              </div>
-              
-              {/* Value with animation */}
-              <motion.p 
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2 + index * 0.1, type: "spring", stiffness: 200 }}
-                className="text-3xl font-black text-white relative z-10"
-              >
-                {stat.value}
-              </motion.p>
-              
-              {/* Subtitle with badge */}
-              {stat.subtitle && (
-                <div className="mt-2 relative z-10">
-                  <span className="text-xs font-medium text-white/50 bg-white/5 px-2 py-0.5 rounded-full border border-white/10">
-                    {stat.subtitle}
-                  </span>
-                </div>
-              )}
-              
-              {/* Shine effect on hover */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-            </motion.div>
-          ))}
-          
-          {/* Streak Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: 0.5, duration: 0.4, ease: "easeOut" }}
-            className="rounded-2xl p-4 backdrop-blur-sm border cursor-pointer group transition-all duration-300 hover:scale-[1.02] hover:shadow-xl relative overflow-hidden from-purple-500/20 to-purple-600/10 border-purple-500/30 text-purple-400"
-            whileTap={{ scale: 0.98 }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative flex items-center gap-2 mb-3">
-              <Flame size={20} />
-              <span className="text-xs font-semibold text-white/70">Best Streak</span>
-            </div>
-            <motion.p 
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.6, type: "spring", stiffness: 200 }}
-              className="text-3xl font-black text-white relative z-10"
-            >
-              {aiPerformance?.weekly?.best_streak || 0}
-            </motion.p>
-            <div className="mt-2 relative z-10">
-              <span className="text-xs font-medium text-white/50 bg-white/5 px-2 py-0.5 rounded-full border border-white/10">
-                Correct in a row
-              </span>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-          </motion.div>
-        </div>
-        
-        {/* Unique Visualizations Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="mt-6 space-y-4"
-        >
-          {/* 3D Accuracy Sphere */}
-          <div className="rounded-2xl p-5 backdrop-blur-sm border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02]">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Sparkles size={18} className="text-[var(--brand-primary)]" />
-                <span className="text-sm font-bold text-white/90">Accuracy Sphere</span>
-              </div>
-              <span className="text-xs text-white/40">3D Visualization</span>
-            </div>
-            <div className="flex justify-center">
-              <AccuracySphere 
-                accuracy={aiPerformance?.weekly?.accuracy_percentage || 0} 
-                size={180}
-              />
-            </div>
-          </div>
-
-          {/* Market Mastery Heatmap */}
-          <div className="rounded-2xl p-5 backdrop-blur-sm border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02]">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <BarChart3 size={18} className="text-[var(--brand-primary)]" />
-                <span className="text-sm font-bold text-white/90">Market Mastery</span>
-              </div>
-              <span className="text-xs text-white/40">Heatmap</span>
-            </div>
-            <MarketMasteryHeatmap
-              data={[
-                { market: '1X2', accuracy: aiPerformance?.weekly?.market_accuracy?.["1x2"] ?? null, predictions: aiPerformance?.weekly?.market_counts?.["1x2"] || 0 },
-                { market: 'BTTS', accuracy: aiPerformance?.weekly?.market_accuracy?.["btts"] ?? null, predictions: aiPerformance?.weekly?.market_counts?.["btts"] || 0 },
-                { market: 'O/U 2.5', accuracy: aiPerformance?.weekly?.market_accuracy?.["over_under"] ?? null, predictions: aiPerformance?.weekly?.market_counts?.["over_under"] || 0 },
-                { market: 'Dbl Chance', accuracy: aiPerformance?.weekly?.market_accuracy?.["double_chance"] ?? null, predictions: aiPerformance?.weekly?.market_counts?.["double_chance"] || 0 },
-                { market: 'O/U 1.5', accuracy: aiPerformance?.weekly?.market_accuracy?.["over_under_15"] ?? null, predictions: aiPerformance?.weekly?.market_counts?.["over_under_15"] || 0 },
-                { market: 'Home Goals', accuracy: aiPerformance?.weekly?.market_accuracy?.["home_goals"] ?? null, predictions: aiPerformance?.weekly?.market_counts?.["home_goals"] || 0 },
-                { market: 'Away Goals', accuracy: aiPerformance?.weekly?.market_accuracy?.["away_goals"] ?? null, predictions: aiPerformance?.weekly?.market_counts?.["away_goals"] || 0 },
-              ]}
-            />
-          </div>
-        </motion.div>
-        
-        {/* Weekly Trend Mini Chart */}
-        {!loadingAI && aiPerformance?.weekly_trend && aiPerformance.weekly_trend.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="mt-4 rounded-2xl p-5 backdrop-blur-sm border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02]"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <BarChart3 size={18} className="text-[var(--brand-primary)]" />
-                <span className="text-sm font-bold text-white/90">Weekly Trend</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[var(--brand-primary)]/10 border border-[var(--brand-primary)]/20">
-                  <div className="w-2 h-2 rounded-full bg-[var(--brand-primary)]" />
-                  <span className="text-xs font-medium text-[var(--brand-primary)]">Accuracy</span>
-                </div>
-              </div>
-            </div>
-            <div
-              className="relative h-32 cursor-pointer chart-glass"
-              onClick={(e) => handleChartClick(e, { accuracy_percentage: aiPerformance.weekly_trend[aiPerformance.weekly_trend.length - 1]?.accuracy_percentage ?? 0 })}
-            >
-              {/* Grid Lines */}
-              <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
-                {[0, 25, 50, 75, 100].map((value) => (
-                  <div key={value} className="flex items-center gap-2">
-                    <span className="text-xs text-white/30 w-8 text-right">{value}%</span>
-                    <div className="flex-1 h-px bg-white/5" />
-                  </div>
-                ))}
-              </div>
-              {/* Bars */}
-              <div className="absolute inset-0 flex items-end gap-2 pt-6 pl-10">
-                {aiPerformance.weekly_trend.map((day: AIPerformanceStats["weekly_trend"][number], index: number) => {
-                  const accuracy = day.accuracy_percentage ?? 0;
-                  const height = day.total_predictions > 0 ? Math.max(8, accuracy) : 8;
-                  const isToday = index === aiPerformance.weekly_trend.length - 1;
-                  return (
-                    <motion.div
-                      key={day.date}
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: `${height}%`, opacity: 1 }}
-                      transition={{ delay: 0.6 + index * 0.1, duration: 0.5, ease: "easeOut" }}
-                      className="flex-1 flex flex-col items-center gap-2 group relative"
-                    >
-                      <div 
-                        className={`w-full rounded-t-lg transition-all duration-300 relative overflow-hidden ${isToday ? 'bg-gradient-to-t from-[var(--brand-primary)] to-[var(--brand-accent)]' : 'bg-gradient-to-t from-white/10 to-white/20'}`}
-                        style={{ height: `${height}%` }}
-                      >
-                        {/* Shine effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                      </div>
-                      {/* Tooltip */}
-                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                        <div className="px-2 py-1 rounded-lg bg-black/80 backdrop-blur-sm border border-white/10">
-                          <span className="text-xs font-bold text-white">{day.total_predictions > 0 ? `${accuracy}%` : "—"}</span>
-                        </div>
-                      </div>
-                      <span className={`text-xs font-medium transition-colors ${isToday ? 'text-[var(--brand-primary)]' : 'text-white/40'}`}>
-                        {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}
-                      </span>
-                    </motion.div>
-                  );
-                })}
-              </div>
-
-              {/* Mobile Tooltip */}
-              {tooltip.visible && (
-                <div
-                  className="fixed bg-black/80 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm z-50 pointer-events-none border border-white/10"
-                  style={{
-                    left: `${tooltip.x}px`,
-                    top: `${tooltip.y - 40}px`,
-                    transform: 'translateX(-50%)',
-                  }}
-                >
-                  {tooltip.content}
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </div>
-
       {/* Quick Actions */}
       <div className="px-5 pb-8">
         <div className="grid grid-cols-2 gap-3">
@@ -715,12 +439,12 @@ export default function ProfilePage() {
             transition={{ delay: 0.32 }}
           >
             <button
-              onClick={() => router.push("/ai-picks")}
+              onClick={() => router.push("/bashiri-pick-analytics")}
               className="w-full rounded-2xl p-4 flex flex-col items-center gap-2 text-center"
               style={{ background: "#111111" }}
             >
               <Sparkles size={20} style={{ color: "var(--brand-accent)" }} />
-              <span className="text-xs font-bold text-white">Bashiri Picks</span>
+              <span className="text-xs font-bold text-white">Analytics</span>
             </button>
           </motion.div>
 

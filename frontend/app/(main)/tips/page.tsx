@@ -76,7 +76,7 @@ export default function TipsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#0f0f0f] to-[#0a0a0a]">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#0f0f0f] to-[#0a0a0a] pb-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -186,8 +186,8 @@ export default function TipsPage() {
             onClick={() => setShowLeaderboard(!showLeaderboard)}
             className="w-full flex items-center justify-between p-3 sm:p-4 rounded-xl transition-all duration-200 hover:scale-[1.01]"
             style={{
-              background: 'linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(207,175,123,0.04) 100%)',
-              border: '1px solid rgba(212,175,55,0.15)'
+              background: 'rgba(255,255,255,0.035)',
+              border: '1px solid rgba(212,175,55,0.22)'
             }}
           >
             <div className="flex items-center gap-2 sm:gap-3">
@@ -203,7 +203,7 @@ export default function TipsPage() {
           </button>
           
           {showLeaderboard && (
-            <div className="mt-4 p-3 sm:p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div className="mt-4 rounded-2xl border border-white/8 bg-black/20 p-3 sm:p-4">
               <TipstersLeaderboard />
             </div>
           )}

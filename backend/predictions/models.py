@@ -428,3 +428,48 @@ class AIPick(models.Model):
     @property
     def is_pending(self):
         return self.status == "PENDING"
+
+
+class BashiriPickSnapshot(models.Model):
+    """
+    Snapshot ya EXACTLY ile pick inayoonekana kwenye TopPickCard (Bashiri Pick).
+    Hii inatumiwa kwa tracking accuracy ya picks zilizochaguliwa kwenye recommendation_engine.
+    """
+    STATUS_CHOICES = [
+        ("PENDING", "Pending"),
+        ("LIVE", "Live"),
+        ("WON", "Won"),
+        ("LOST", "Lost"),
+        ("PUSH", "Push"),
+        ("VOID", "Void"),
+    ]
+
+    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name="bashiri_pick_snapshots")
+    
+    # Snapshot data (immutable - exactly what was shown in TopPickCard)
+    market_key = models.CharField(max_length=50, help_text="Market key from TopPickCard, e.g., 'HOME_GOALS_OVER_0_5'")
+    market_label = models.CharField(max_length=100, help_text="Market label from TopPickCard, e.g., 'Home Over/Under 0.5'")
+    option_key = models.CharField(max_length=50, help_text="Option key from TopPickCard, e.g., 'home_over_0_5'")
+    option_label = models.CharField(max_length=100, help_text="Option label from TopPickCard, e.g., 'Over 0.5'")
+    confidence = models.FloatField(help_text="Confidence percentage from TopPickCard, e.g., 79.4")
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True, help_text="When this snapshot was created")
+    
+    # Result data (nullable until settlement)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="PENDING", db_index=True)
+    actual_home_score = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Final home score")
+    actual_away_score = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Final away score")
+    settled_at = models.DateTimeField(null=True, blank=True, help_text="When match was settled")
+
+    class Meta:
+        db_table = "predictions_bashiripicksnapshot"
+        ordering = ["-created_at"]
+        unique_together = ["match"]  # One snapshot per match
+
+    def __str__(self):
+        return f"Bashiri Pick Snapshot: {self.match} - {self.option_label} ({self.confidence}%)"
+
+    @property
+    def is_settled(self):
+        return self.status in ["WON", "LOST", "PUSH", "VOID"]

@@ -19,7 +19,7 @@ export function ConfidenceLegend() {
         ))}
       </div>
       <p className="text-[10px] mt-3" style={{ color: "rgba(255,255,255,0.3)" }}>
-        Asilimia ya chini haimaanishi "makosa" — inaonyesha tu kiwango cha uhakika wa takwimu.
+        Asilimia ya chini haimaanishi &quot;makosa&quot; — inaonyesha tu kiwango cha uhakika wa takwimu.
       </p>
     </div>
   );

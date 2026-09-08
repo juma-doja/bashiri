@@ -172,7 +172,9 @@ def build_prediction_dashboard(match, viewer_is_subscriber: bool):
             top_pick = {
                 "is_locked": True,
                 "confidence": global_best["confidence"],
+                "market_key": global_best.get("market_key"),
                 "market_label": None,
+                "option_key": global_best.get("option_key"),
                 "option_label": None,
                 "status": global_best.get("status", "STRONG"),
                 "tier": global_best.get("tier"),
@@ -184,7 +186,9 @@ def build_prediction_dashboard(match, viewer_is_subscriber: bool):
             top_pick = {
                 "is_locked": False,
                 "confidence": global_best["confidence"],
+                "market_key": global_best.get("market_key"),
                 "market_label": global_best["market_label"],
+                "option_key": global_best.get("option_key"),
                 "option_label": global_best["option_label"],
                 "status": global_best.get("status", "STRONG"),
                 "tier": global_best.get("tier"),
@@ -200,6 +204,79 @@ def build_prediction_dashboard(match, viewer_is_subscriber: bool):
         "top_pick": top_pick,
         "markets": markets,
     }
+
+
+def create_bashiri_pick_snapshot(match, top_pick_data):
+    """
+    Create or update BashiriPickSnapshot for a match based on TopPickCard data.
+    This captures EXACTLY what was shown in the TopPickCard (Bashiri Pick).
+    """
+    from .models import BashiriPickSnapshot
+    from django.utils import timezone
+    
+    # Only create snapshot if there's a valid pick (not NO_STRONG_PICK)
+    if top_pick_data.get("status") == "NO_STRONG_PICK":
+        return None
+    
+    if not top_pick_data.get("market_label") or not top_pick_data.get("option_label"):
+        return None
+    
+    # Create or update snapshot with the exact data from TopPickCard
+    snapshot, created = BashiriPickSnapshot.objects.update_or_create(
+        match=match,
+        defaults={
+            "market_key": top_pick_data.get("market_key", ""),
+            "market_label": top_pick_data.get("market_label", ""),
+            "option_key": top_pick_data.get("option_key", ""),
+            "option_label": top_pick_data.get("option_label", ""),
+            "confidence": top_pick_data.get("confidence", 0),
+            "status": "PENDING",
+        }
+    )
+    
+    return snapshot
+
+
+def settle_bashiri_pick_snapshots():
+    """
+    Settle BashiriPickSnapshot records for finished matches.
+    This should be called periodically (e.g., every 5-10 minutes).
+    """
+    from .models import BashiriPickSnapshot, Match
+    from django.utils import timezone
+    from .settlement_engine import settle_ai_pick
+    
+    # Get pending snapshots for finished matches
+    pending_snapshots = BashiriPickSnapshot.objects.filter(
+        status="PENDING",
+        match__status="FINISHED"
+    ).select_related("match")
+    
+    settled_count = 0
+    for snapshot in pending_snapshots:
+        match = snapshot.match
+        
+        if match.home_score is None or match.away_score is None:
+            continue
+        
+        # Run settlement engine
+        settlement = settle_ai_pick(
+            snapshot.market_key,
+            snapshot.option_key,
+            match.home_score,
+            match.away_score
+        )
+        
+        # Update snapshot with result
+        snapshot.status = settlement.status
+        snapshot.actual_home_score = match.home_score
+        snapshot.actual_away_score = match.away_score
+        snapshot.settled_at = timezone.now()
+        snapshot.save(update_fields=['status', 'actual_home_score', 'actual_away_score', 'settled_at'])
+        
+        settled_count += 1
+    
+    return {"settled_count": settled_count}
 
 
 def is_prediction_correct(market: str, selection: str, home_score: int, away_score: int) -> bool:
@@ -410,6 +487,12 @@ def build_enhanced_prediction_dashboard(match, viewer_is_subscriber: bool):
         "away_team": away_data,
         "head_to_head": h2h_data,
     }
+    
+    # Create BashiriPickSnapshot for tracking accuracy
+    # This captures EXACTLY what was shown in TopPickCard
+    top_pick = dashboard.get("top_pick")
+    if top_pick:
+        create_bashiri_pick_snapshot(match, top_pick)
     
     return dashboard
 

@@ -131,7 +131,7 @@ export function InstallPromptSheet() {
                         2
                       </div>
                       <p className="text-sm text-white flex items-center gap-2">
-                        Chagua <SquarePlus size={16} style={{ color: "#00FF87" }} /> "Add to Home Screen"
+                        Chagua <SquarePlus size={16} style={{ color: "#00FF87" }} /> &quot;Add to Home Screen&quot;
                       </p>
                     </div>
                   </div>

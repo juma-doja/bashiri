@@ -9,38 +9,107 @@ django.setup()
 from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
 
 
+def make_schedule_unique(schedule_queryset):
+    schedules = list(schedule_queryset.order_by('id'))
+    if not schedules:
+        return None
+
+    primary = schedules[0]
+    if len(schedules) > 1:
+        for duplicate in schedules[1:]:
+            PeriodicTask.objects.filter(crontab=duplicate).update(crontab=primary)
+            duplicate.delete()
+    return primary
+
+
+def ensure_crontab_schedule(cron_kwargs):
+    matches = CrontabSchedule.objects.filter(**cron_kwargs).order_by('id')
+    existing = matches.first()
+    if existing:
+        return make_schedule_unique(matches)
+    return CrontabSchedule.objects.create(**cron_kwargs)
+
+
 def make_task(name, task, cron_kwargs):
-    schedule, created = CrontabSchedule.objects.get_or_create(**cron_kwargs)
+    schedule = ensure_crontab_schedule(cron_kwargs)
     obj, created = PeriodicTask.objects.get_or_create(name=name, defaults={"crontab": schedule, "task": task})
     if not created:
         obj.crontab = schedule
+        obj.task = task
+        obj.interval = None
+        obj.enabled = True
+        obj.save()
+    print(f"{'Imeundwa' if created else 'Imethibitishwa'}: {name}")
+
+
+def ensure_interval_schedule(every, period):
+    matches = IntervalSchedule.objects.filter(every=every, period=period).order_by('id')
+    existing = matches.first()
+    if existing:
+        if matches.count() > 1:
+            for duplicate in matches[1:]:
+                PeriodicTask.objects.filter(interval=duplicate).update(interval=existing)
+                duplicate.delete()
+        return existing
+    return IntervalSchedule.objects.create(every=every, period=period)
+
+
+def make_interval_task(name, task, every_minutes):
+    schedule = ensure_interval_schedule(every_minutes, IntervalSchedule.MINUTES)
+    obj, created = PeriodicTask.objects.get_or_create(name=name, defaults={"interval": schedule, "task": task})
+    if not created:
+        obj.interval = schedule
+        obj.crontab = None
         obj.task = task
         obj.enabled = True
         obj.save()
     print(f"{'Imeundwa' if created else 'Imethibitishwa'}: {name}")
 
 
-def make_interval_task(name, task, every_minutes):
-    schedule, _ = IntervalSchedule.objects.get_or_create(every=every_minutes, period=IntervalSchedule.MINUTES)
-    obj, created = PeriodicTask.objects.get_or_create(name=name, defaults={"interval": schedule, "task": task})
-    if not created:
-        obj.interval = schedule
-        obj.crontab = None
-        obj.enabled = True
-        obj.save()
-    print(f"{'Imeundwa' if created else 'Imethibitishwa'}: {name}")
-
-
 def make_interval_task_seconds(name, task, every_seconds):
-    schedule, _ = IntervalSchedule.objects.get_or_create(every=every_seconds, period=IntervalSchedule.SECONDS)
+    schedule = ensure_interval_schedule(every_seconds, IntervalSchedule.SECONDS)
     obj, created = PeriodicTask.objects.get_or_create(name=name, defaults={"interval": schedule, "task": task})
     if not created:
         obj.interval = schedule
         obj.crontab = None
+        obj.task = task
         obj.enabled = True
         obj.save()
     print(f"{'Imeundwa' if created else 'Imethibitishwa'}: {name}")
 
+
+def remove_legacy_periodic_tasks():
+    legacy_names = [
+        "verify-tips",
+        "lock-tips-at-kickoff",
+        "verify-slips",
+        "update-leaderboard",
+        "clean-old-shares",
+        "sync-live-matches",
+        "sync-finished-matches",
+        "generate-daily-ai-picks",
+        "update-ai-pick-status",
+        "generate-ai-track-record",
+        "fetch-live-odds",
+        "fetch-upcoming-odds",
+        "fetch-team-standings",
+        "create-best-streak-card",
+        "generate-daily-picks",
+        "Generate Daily Picks",
+    ]
+    deleted_count, _ = PeriodicTask.objects.filter(name__in=legacy_names).delete()
+    if deleted_count:
+        print(f"Legacy schedules zimeondolewa: {deleted_count}")
+
+
+remove_legacy_periodic_tasks()
+
+# Tips and slips
+make_interval_task("Verify Tips", "tips.tasks.verify_tips_task", 5)
+make_interval_task_seconds("Lock Tips at Kickoff", "tips.tasks.lock_tips_at_kickoff_task", 60)
+make_interval_task("Verify Slips", "tips.tasks.verify_slips_task", 5)
+make_interval_task("Update Leaderboard", "tips.tasks.update_leaderboard_task", 10)
+make_task("Create Best Streak Card", "tips.tasks.create_best_streak_card_task", {"minute": "0", "hour": "5"})
 
 # Sync KAMILI — mara moja kwa siku (fixtures mpya + backup ya matokeo)
 make_task("Sync Football Data", "predictions.tasks.sync_daily_task", {"minute": "0", "hour": "3"})
@@ -60,6 +129,9 @@ make_task("Generate Daily AI Picks", "predictions.ai_pick_tasks.generate_daily_a
 
 # Update AI Pick Status — kila dakika 10 (NEW AI PICK SYSTEM)
 make_interval_task("Update AI Pick Status", "predictions.ai_pick_tasks.update_pick_status_periodic", 10)
+
+# Settle Bashiri Pick snapshots for finished matches — kila dakika 5
+make_interval_task("Settle Bashiri Pick Snapshots", "predictions.tasks.settle_bashiri_pick_snapshots_task", 5)
 
 # Generate AI Track Record — kila siku saa 12:30
 make_task("Generate AI Track Record", "predictions.tasks.generate_ai_track_record_snapshot", {"minute": "30", "hour": "12"})

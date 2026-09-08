@@ -347,7 +347,7 @@ export function TipForm({ match, onSubmit, isLoading, aiRecommendation, isLocked
           <span>Very Confident</span>
         </div>
         <p className="text-xs text-white/30 mt-2">
-          Note: Your confidence reflects your personal belief, not the AI model's probability
+          Note: Your confidence reflects your personal belief, not the AI model&apos;s probability
         </p>
       </div>
 

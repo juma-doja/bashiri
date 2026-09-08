@@ -38,7 +38,7 @@ export const MarketMasteryHeatmap: React.FC<MarketMasteryHeatmapProps> = ({ data
 
   return (
     <div className="w-full">
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {data.map((item, index) => (
           <motion.div
             key={item.market}
@@ -49,14 +49,14 @@ export const MarketMasteryHeatmap: React.FC<MarketMasteryHeatmapProps> = ({ data
             className="relative group"
           >
             <div
-              className={`rounded-xl p-4 transition-all duration-300 ${item.accuracy === null ? 'bg-white/5' : `bg-gradient-to-br ${getHeatColor(item.accuracy)}`}`}
+              className={`rounded-xl p-3 transition-all duration-300 sm:p-4 ${item.accuracy === null ? 'bg-white/5' : `bg-gradient-to-br ${getHeatColor(item.accuracy)}`}`}
               style={{
                 opacity: item.accuracy === null ? 1 : 0.3 + (getIntensity(item.accuracy) * 0.7),
               }}
             >
               <div className="relative z-10">
-                <p className={`text-xs font-bold mb-1 ${item.accuracy === null ? 'text-white/60' : getTextColor(item.accuracy)}`}>{item.market}</p>
-                <p className={`text-2xl font-black ${item.accuracy === null ? 'text-white/50' : getTextColor(item.accuracy)}`}>{item.accuracy === null ? "—" : `${item.accuracy.toFixed(1)}%`}</p>
+                <p className={`mb-1 break-words text-[11px] font-bold sm:text-xs ${item.accuracy === null ? 'text-white/60' : getTextColor(item.accuracy)}`}>{item.market}</p>
+                <p className={`text-xl font-black sm:text-2xl ${item.accuracy === null ? 'text-white/50' : getTextColor(item.accuracy)}`}>{item.accuracy === null ? "—" : `${item.accuracy.toFixed(1)}%`}</p>
                 <p className="text-[10px] mt-1 text-white/50">{item.predictions} picks</p>
               </div>
               

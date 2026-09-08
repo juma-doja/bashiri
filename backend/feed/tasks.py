@@ -291,14 +291,13 @@ def close_expired_debates():
 def deactivate_finished_live_cards():
     """
     Safety-net: funga LIVE_MATCH cards ZOTE zenye is_active=True ambazo
-    match yake tayari ni FINISHED, bila kujali kama generate_result_recaps
-    imeshaziona leo (mfano mechi iliyomaliza jana lakini kwa sababu fulani
-    haikushughulikiwa). Celery Beat: kila dakika 5.
+    match yake si LIVE tena, bila kujali kama imekuwa FINISHED, CANCELLED,
+    au POSTPONED. Celery Beat: kila dakika 1.
     """
     live_cards = Card.objects.filter(type="LIVE_MATCH", is_active=True).select_related("match")
     deactivated = 0
     for card in live_cards:
-        if card.match_id and card.match.status == "FINISHED":
+        if card.match_id and card.match.status != "LIVE":
             card.is_active = False
             card.save(update_fields=["is_active"])
             deactivated += 1

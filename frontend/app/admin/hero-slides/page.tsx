@@ -99,7 +99,7 @@ export default function AdminHeroSlidesPage() {
       </div>
 
       <p className="text-xs mb-6" style={{ color: "rgba(255,255,255,0.4)" }}>
-        Hizi ni "custom slides" (matangazo) tu — slides za kiotomatiki (Mechi ya Leo, Derby,
+        Hizi ni &quot;custom slides&quot; (matangazo) tu — slides za kiotomatiki (Mechi ya Leo, Derby,
         Track Record, PRO, Fan of Match, Did You Know) hazionekani hapa kwa sababu zinatengenezwa
         moja kwa moja kutoka data iliyopo.
       </p>

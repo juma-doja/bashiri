@@ -1,9 +1,27 @@
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
 
 
+def ensure_crontab_schedule(cron_kwargs):
+    matches = CrontabSchedule.objects.filter(**cron_kwargs).order_by('id')
+    if not matches.exists():
+        return CrontabSchedule.objects.create(**cron_kwargs)
+
+    primary = matches.first()
+    duplicates = list(matches[1:])
+    for duplicate in duplicates:
+        PeriodicTask.objects.filter(crontab=duplicate).update(crontab=primary)
+        duplicate.delete()
+    return primary
+
+
 def make_task(name, task, cron_kwargs):
-    schedule, _ = CrontabSchedule.objects.get_or_create(**cron_kwargs)
-    PeriodicTask.objects.get_or_create(name=name, defaults={"crontab": schedule, "task": task})
+    schedule = ensure_crontab_schedule(cron_kwargs)
+    obj, created = PeriodicTask.objects.get_or_create(name=name, defaults={"crontab": schedule, "task": task})
+    if not created:
+        obj.crontab = schedule
+        obj.task = task
+        obj.enabled = True
+        obj.save()
 
 
 make_task("Daily Sync", "predictions.tasks.sync_daily_task", {"minute": "0", "hour": "3"})

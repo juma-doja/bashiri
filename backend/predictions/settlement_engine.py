@@ -80,7 +80,9 @@ def settle_btts_no(market: str, selection: str, home_score: int, away_score: int
 
 def settle_dc_1x(market: str, selection: str, home_score: int, away_score: int) -> SettlementResult:
     """Settle Double Chance 1X (Home or Draw)."""
-    if selection != "1X":
+    # Normalize selection - accept "1X" or "1x"
+    normalized_selection = selection.lower()
+    if normalized_selection != "1x":
         return SettlementResult("VOID", f"Invalid selection for dc_1x: {selection}")
 
     if home_score >= away_score:
@@ -91,7 +93,9 @@ def settle_dc_1x(market: str, selection: str, home_score: int, away_score: int) 
 
 def settle_dc_x2(market: str, selection: str, home_score: int, away_score: int) -> SettlementResult:
     """Settle Double Chance X2 (Draw or Away)."""
-    if selection != "X2":
+    # Normalize selection - accept "X2" or "x2"
+    normalized_selection = selection.lower()
+    if normalized_selection != "x2":
         return SettlementResult("VOID", f"Invalid selection for dc_x2: {selection}")
 
     if away_score >= home_score:
@@ -102,7 +106,9 @@ def settle_dc_x2(market: str, selection: str, home_score: int, away_score: int) 
 
 def settle_dc_12(market: str, selection: str, home_score: int, away_score: int) -> SettlementResult:
     """Settle Double Chance 12 (Home or Away - no draw)."""
-    if selection != "12":
+    # Normalize selection - accept "12" or "12"
+    normalized_selection = selection.lower()
+    if normalized_selection != "12":
         return SettlementResult("VOID", f"Invalid selection for dc_12: {selection}")
 
     if home_score != away_score:
@@ -187,7 +193,9 @@ def settle_under_2_5(market: str, selection: str, home_score: int, away_score: i
 
 def settle_home_over_0_5(market: str, selection: str, home_score: int, away_score: int) -> SettlementResult:
     """Settle Home Over 0.5 Goals predictions."""
-    if selection != "Over":
+    # Accept both "over" and "home_over_0_5" formats
+    normalized_selection = selection.lower().replace("away_", "").replace("home_", "").replace("_1_5", "").replace("_0_5", "").replace("_2_5", "")
+    if normalized_selection != "over":
         return SettlementResult("VOID", f"Invalid selection for home_over_0_5: {selection}")
 
     if home_score >= 1:
@@ -220,7 +228,44 @@ def settle_home_over_2_5(market: str, selection: str, home_score: int, away_scor
 
 def settle_away_over_0_5(market: str, selection: str, home_score: int, away_score: int) -> SettlementResult:
     """Settle Away Over 0.5 Goals predictions."""
+    # Accept both "over" and "home_over_0_5"/"away_over_0_5" formats
+    normalized_selection = selection.lower().replace("away_", "").replace("home_", "").replace("_1_5", "").replace("_0_5", "").replace("_2_5", "")
+    if normalized_selection != "over":
+        return SettlementResult("VOID", f"Invalid selection for away_over_0_5: {selection}")
+
+    if away_score >= 1:
+        return SettlementResult("WON", f"Away scored {away_score} goals")
+    else:
+        return SettlementResult("LOST", f"Away scored {away_score} goals")
+
+
+def settle_away_over_1_5(market: str, selection: str, home_score: int, away_score: int) -> SettlementResult:
+    """Settle Away Over 1.5 Goals predictions."""
     if selection != "Over":
+        return SettlementResult("VOID", f"Invalid selection for away_over_1_5: {selection}")
+
+    if away_score >= 2:
+        return SettlementResult("WON", f"Away scored {away_score} goals")
+    else:
+        return SettlementResult("LOST", f"Away scored {away_score} goals")
+
+
+def settle_home_over_2_5(market: str, selection: str, home_score: int, away_score: int) -> SettlementResult:
+    """Settle Home Over 2.5 Goals predictions."""
+    if selection != "Over":
+        return SettlementResult("VOID", f"Invalid selection for home_over_2_5: {selection}")
+
+    if home_score >= 3:
+        return SettlementResult("WON", f"Home scored {home_score} goals")
+    else:
+        return SettlementResult("LOST", f"Home scored {home_score} goals")
+
+
+def settle_away_over_0_5(market: str, selection: str, home_score: int, away_score: int) -> SettlementResult:
+    """Settle Away Over 0.5 Goals predictions."""
+    # Accept both "over" and "home_over_0_5"/"away_over_0_5" formats
+    normalized_selection = selection.lower().replace("away_", "").replace("home_", "").replace("_1_5", "").replace("_0_5", "").replace("_2_5", "")
+    if normalized_selection != "over":
         return SettlementResult("VOID", f"Invalid selection for away_over_0_5: {selection}")
 
     if away_score >= 1:
@@ -251,6 +296,58 @@ def settle_away_over_2_5(market: str, selection: str, home_score: int, away_scor
         return SettlementResult("LOST", f"Away scored {away_score} goals")
 
 
+def settle_home_under_0_5(market: str, selection: str, home_score: int, away_score: int) -> SettlementResult:
+    """Settle Home Under 0.5 Goals predictions."""
+    # Accept both "under" and "home_under_0_5"/"away_under_0_5" formats
+    normalized_selection = selection.lower().replace("away_", "").replace("home_", "").replace("_1_5", "").replace("_0_5", "").replace("_2_5", "")
+    if normalized_selection != "under":
+        return SettlementResult("VOID", f"Invalid selection for home_under_0_5: {selection}")
+
+    if home_score == 0:
+        return SettlementResult("WON", f"Home scored {home_score} goals")
+    else:
+        return SettlementResult("LOST", f"Home scored {home_score} goals")
+
+
+def settle_home_under_1_5(market: str, selection: str, home_score: int, away_score: int) -> SettlementResult:
+    """Settle Home Under 1.5 Goals predictions."""
+    # Accept both "under" and "home_under_1_5" formats
+    normalized_selection = selection.lower().replace("away_", "").replace("home_", "").replace("_1_5", "").replace("_0_5", "").replace("_2_5", "")
+    if normalized_selection != "under":
+        return SettlementResult("VOID", f"Invalid selection for home_under_1_5: {selection}")
+
+    if home_score <= 1:
+        return SettlementResult("WON", f"Home scored {home_score} goals")
+    else:
+        return SettlementResult("LOST", f"Home scored {home_score} goals")
+
+
+def settle_away_under_0_5(market: str, selection: str, home_score: int, away_score: int) -> SettlementResult:
+    """Settle Away Under 0.5 Goals predictions."""
+    # Accept both "under" and "home_under_0_5"/"away_under_0_5" formats
+    normalized_selection = selection.lower().replace("away_", "").replace("home_", "").replace("_1_5", "").replace("_0_5", "").replace("_2_5", "")
+    if normalized_selection != "under":
+        return SettlementResult("VOID", f"Invalid selection for away_under_0_5: {selection}")
+
+    if away_score == 0:
+        return SettlementResult("WON", f"Away scored {away_score} goals")
+    else:
+        return SettlementResult("LOST", f"Away scored {away_score} goals")
+
+
+def settle_away_under_1_5(market: str, selection: str, home_score: int, away_score: int) -> SettlementResult:
+    """Settle Away Under 1.5 Goals predictions."""
+    # Accept both "under" and "away_under_1_5"
+    normalized_selection = selection.lower().replace("away_", "").replace("home_", "").replace("_1_5", "").replace("_0_5", "").replace("_2_5", "")
+    if normalized_selection != "under":
+        return SettlementResult("VOID", f"Invalid selection for away_under_1_5: {selection}")
+
+    if away_score <= 1:
+        return SettlementResult("WON", f"Away scored {away_score} goals")
+    else:
+        return SettlementResult("LOST", f"Away scored {away_score} goals")
+
+
 # Settlement function registry
 SETTLEMENT_FUNCTIONS = {
     "1x2_home": settle_1x2_home,
@@ -270,9 +367,25 @@ SETTLEMENT_FUNCTIONS = {
     "home_over_0_5": settle_home_over_0_5,
     "home_over_1_5": settle_home_over_1_5,
     "home_over_2_5": settle_home_over_2_5,
+    "home_under_0_5": settle_home_under_0_5,
+    "home_under_1_5": settle_home_under_1_5,
     "away_over_0_5": settle_away_over_0_5,
     "away_over_1_5": settle_away_over_1_5,
     "away_over_2_5": settle_away_over_2_5,
+    "away_under_0_5": settle_away_under_0_5,
+    "away_under_1_5": settle_away_under_1_5,
+    # Add mappings for variations
+    "HOME_GOALS_OVER_0_5": settle_home_over_0_5,
+    "HOME_GOALS_OVER_1_5": settle_home_over_1_5,
+    "HOME_GOALS_OVER_2_5": settle_home_over_2_5,
+    "HOME_GOALS_UNDER_0_5": settle_home_under_0_5,
+    "HOME_GOALS_UNDER_1_5": settle_home_under_1_5,
+    "AWAY_GOALS_OVER_0_5": settle_away_over_0_5,
+    "AWAY_GOALS_OVER_1_5": settle_away_over_1_5,
+    "AWAY_GOALS_OVER_2_5": settle_away_over_2_5,
+    "AWAY_GOALS_UNDER_0_5": settle_away_under_0_5,
+    "AWAY_GOALS_UNDER_1_5": settle_away_under_1_5,
+    "OVER_UNDER_1_5": settle_over_1_5,  # Will be handled based on selection
 }
 
 
@@ -281,7 +394,7 @@ def settle_ai_pick(market: str, selection: str, home_score: int, away_score: int
     Main settlement function - routes to appropriate market settlement logic.
 
     Args:
-        market: Market key (e.g., "1x2_home", "dc_1x")
+        market: Market key (e.g., "1x2_home", "dc_1x", "HOME_GOALS_OVER_0_5")
         selection: Selection key (e.g., "Home", "1X", "Over")
         home_score: Final home score
         away_score: Final away score
@@ -289,9 +402,55 @@ def settle_ai_pick(market: str, selection: str, home_score: int, away_score: int
     Returns:
         SettlementResult with status and reason
     """
-    settlement_func = SETTLEMENT_FUNCTIONS.get(market)
+    # Normalize market keys to match settlement functions
+    normalized_market = market.lower()
+    normalized_selection = selection.lower()
+    
+    # Handle HOME_GOALS_OVER_X_X markets - if selection is under, use under function
+    if normalized_market.startswith("home_goals_over"):
+        threshold = normalized_market.replace("home_goals_over_", "")
+        if "under" in normalized_selection:
+            normalized_market = f"home_under_{threshold}"
+        else:
+            normalized_market = f"home_over_{threshold}"
+    
+    # Handle HOME_GOALS_UNDER_X_X markets
+    elif normalized_market.startswith("home_goals_under"):
+        threshold = normalized_market.replace("home_goals_under_", "")
+        normalized_market = f"home_under_{threshold}"
+    
+    # Handle AWAY_GOALS_OVER_X_X markets - if selection is under, use under function
+    elif normalized_market.startswith("away_goals_over"):
+        threshold = normalized_market.replace("away_goals_over_", "")
+        if "under" in normalized_selection:
+            normalized_market = f"away_under_{threshold}"
+        else:
+            normalized_market = f"away_over_{threshold}"
+    
+    # Handle AWAY_GOALS_UNDER_X_X markets
+    elif normalized_market.startswith("away_goals_under"):
+        threshold = normalized_market.replace("away_goals_under_", "")
+        normalized_market = f"away_under_{threshold}"
+    
+    # Handle OVER_UNDER_1_5 market
+    elif normalized_market == "over_under_1_5":
+        if "under" in normalized_selection:
+            normalized_market = "under_1_5"
+        else:
+            normalized_market = "over_1_5"
+    
+    # Handle DOUBLE_CHANCE market
+    elif normalized_market == "double_chance":
+        if "1x" in normalized_selection:
+            normalized_market = "dc_1x"
+        elif "x2" in normalized_selection:
+            normalized_market = "dc_x2"
+        elif "12" in normalized_selection:
+            normalized_market = "dc_12"
+    
+    settlement_func = SETTLEMENT_FUNCTIONS.get(normalized_market)
 
     if settlement_func is None:
-        return SettlementResult("VOID", f"Unknown market: {market}")
+        return SettlementResult("VOID", f"Unknown market: {market} (normalized: {normalized_market})")
 
-    return settlement_func(market, selection, home_score, away_score)
+    return settlement_func(normalized_market, selection, home_score, away_score)

@@ -524,10 +524,20 @@ def fetch_team_standings_task():
         
         logger.info(f"Team standings fetch completed: {total_updated} standings updated")
         return f"fetch_team_standings_task: {total_updated} standings updated"
-        
+
     except Exception as e:
         logger.error(f"Error in fetch_team_standings_task: {e}")
         return f"fetch_team_standings_task: failed - {str(e)}"
+
+
+@shared_task
+def settle_bashiri_pick_snapshots_task():
+    """
+    Scheduled task to settle BashiriPickSnapshot records for finished matches.
+    Run this every 5-10 minutes.
+    """
+    from .services import settle_bashiri_pick_snapshots
+    return settle_bashiri_pick_snapshots()
 
 
 @shared_task  

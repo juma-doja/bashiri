@@ -61,17 +61,17 @@ export function TipstersLeaderboard() {
   const getRankBadge = (rank: number) => {
     switch (rank) {
       case 1:
-        return 'bg-gradient-to-r from-yellow-400 to-yellow-600 border-yellow-300 shadow-lg shadow-yellow-500/20'
+        return 'bg-[#15130e] border-[#D4AF37]/35 shadow-lg shadow-[#D4AF37]/10'
       case 2:
-        return 'bg-gradient-to-r from-gray-300 to-gray-400 border-gray-200 shadow-lg shadow-gray-400/20'
+        return 'bg-[#121315] border-white/20 shadow-lg shadow-white/5'
       case 3:
-        return 'bg-gradient-to-r from-amber-600 to-amber-700 border-amber-500 shadow-lg shadow-amber-600/20'
+        return 'bg-[#15120f] border-amber-500/30 shadow-lg shadow-amber-600/10'
       case 4:
-        return 'bg-gradient-to-r from-blue-500 to-blue-600 border-blue-400 shadow-md shadow-blue-500/15'
+        return 'bg-[#10151b] border-blue-400/25 shadow-md shadow-blue-500/10'
       case 5:
-        return 'bg-gradient-to-r from-purple-500 to-purple-600 border-purple-400 shadow-md shadow-purple-500/15'
+        return 'bg-[#14121b] border-purple-400/25 shadow-md shadow-purple-500/10'
       default:
-        return 'bg-gray-900/40 border-gray-700/40 hover:bg-gray-800/50'
+        return 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06]'
     }
   }
 
@@ -119,7 +119,7 @@ export function TipstersLeaderboard() {
         {tipsters.map((tipster) => (
           <div
             key={tipster.user.id}
-            className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-all hover:scale-[1.01] ${getRankBadge(tipster.rank)}`}
+            className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl border transition-all hover:-translate-y-0.5 ${getRankBadge(tipster.rank)}`}
           >
             {/* Header - Rank and User Info */}
             <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -174,7 +174,7 @@ export function TipstersLeaderboard() {
             {/* Stats - Full width on mobile, row on desktop */}
             <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 w-full sm:w-auto">
               <div className="flex-1 sm:flex-none">
-                <p className="text-[11px] sm:text-xs font-semibold text-black">Accuracy</p>
+                <p className="text-[11px] sm:text-xs font-semibold text-[#D4AF37]">Accuracy</p>
                 <p className="text-lg sm:text-xl font-black text-white">{tipster.accuracy_percentage}%</p>
               </div>
               <div className="flex-1 sm:flex-none">

@@ -80,7 +80,7 @@ export default function AdminModerationPage() {
                   @{r.reporter_username} aliripoti {r.content_type} #{r.object_id}
                 </p>
                 <p className="text-xs" style={{ color: "#FF4757" }}>{r.reason}</p>
-                {r.note && <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>"{r.note}"</p>}
+                    {r.note && <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>&quot;{r.note}&quot;</p>}
                 <p className="text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>
                   {new Date(r.created_at).toLocaleString()}
                 </p>
@@ -89,7 +89,7 @@ export default function AdminModerationPage() {
           )}
           <p className="text-xs mt-4" style={{ color: "rgba(255,255,255,0.35)" }}>
             Ikiwa maudhui yameripotiwa mara 3+ na watumiaji tofauti, yanafichwa moja kwa moja
-            na ticket inaundwa kwenye "Support" kwa uamuzi wako wa mwisho.
+            na ticket inaundwa kwenye &quot;Support&quot; kwa uamuzi wako wa mwisho.
           </p>
         </div>
       )}

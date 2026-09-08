@@ -152,11 +152,11 @@ export function PredictionTutorial({ onClose }: PredictionTutorialProps) {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-white/50">
                   <CheckCircle size={14} className="text-green-400" />
-                  <span>Use "Select Markets" kwa uhifadhi wa wingi</span>
+                  <span>Use &quot;Select Markets&quot; kwa uhifadhi wa wingi</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-white/50">
                   <CheckCircle size={14} className="text-green-400" />
-                  <span>Angalia "Saved Markets" kwa markets yako</span>
+                  <span>Angalia &quot;Saved Markets&quot; kwa markets yako</span>
                 </div>
               </motion.div>
 
