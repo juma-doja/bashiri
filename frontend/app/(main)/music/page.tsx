@@ -1,83 +1,25 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  ChevronDown,
   Headphones,
   ListMusic,
   Music2,
   Pause,
   Play,
   Search,
-  SkipBack,
-  SkipForward,
-  Volume2,
-  VolumeX,
 } from "lucide-react";
-
-type Track = {
-  id: string;
-  title: string;
-  artist: string;
-  genre: string;
-  duration: string;
-  src: string;
-  accent: string;
-};
-
-const TRACKS: Track[] = [
-  {
-    id: "matchday-energy",
-    title: "Matchday Energy",
-    artist: "Bashiri Sounds",
-    genre: "Matchday",
-    duration: "03:42",
-    src: "/music/matchday-energy.mp3",
-    accent: "#D4AF37",
-  },
-  {
-    id: "golden-hour",
-    title: "Golden Hour",
-    artist: "Bashiri Sounds",
-    genre: "Chill",
-    duration: "04:08",
-    src: "/music/golden-hour.mp3",
-    accent: "#F59E0B",
-  },
-  {
-    id: "stadium-lights",
-    title: "Stadium Lights",
-    artist: "Bashiri Sounds",
-    genre: "Focus",
-    duration: "02:56",
-    src: "/music/stadium-lights.mp3",
-    accent: "#22C55E",
-  },
-  {
-    id: "last-whistle",
-    title: "Last Whistle",
-    artist: "Bashiri Sounds",
-    genre: "Late Night",
-    duration: "03:31",
-    src: "/music/last-whistle.mp3",
-    accent: "#38BDF8",
-  },
-];
+import { TRACKS, useMusicPlayer } from "@/components/music/MusicPlayerProvider";
 
 const GENRES = ["All tracks", ...Array.from(new Set(TRACKS.map((track) => track.genre)))];
 
 export default function MusicPage() {
   const router = useRouter();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { currentId, isPlaying, selectTrack } = useMusicPlayer();
   const [activeGenre, setActiveGenre] = useState("All tracks");
   const [search, setSearch] = useState("");
-  const [currentId, setCurrentId] = useState(TRACKS[0].id);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(0.8);
   const [showQueue, setShowQueue] = useState(false);
 
   const currentTrack = TRACKS.find((track) => track.id === currentId) ?? TRACKS[0];
@@ -89,48 +31,6 @@ export default function MusicPage() {
       return matchesGenre && matchesSearch;
     });
   }, [activeGenre, search]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.volume = volume;
-  }, [volume]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.load();
-    setProgress(0);
-    setDuration(0);
-    if (isPlaying) audio.play().catch(() => setIsPlaying(false));
-  }, [currentId, isPlaying]);
-
-  const togglePlay = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
-      return;
-    }
-    audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
-  };
-
-  const selectTrack = (track: Track) => {
-    setCurrentId(track.id);
-    setIsPlaying(true);
-  };
-
-  const stepTrack = (direction: 1 | -1) => {
-    const index = TRACKS.findIndex((track) => track.id === currentId);
-    const nextIndex = (index + direction + TRACKS.length) % TRACKS.length;
-    selectTrack(TRACKS[nextIndex]);
-  };
-
-  const formatTime = (seconds: number) => {
-    if (!Number.isFinite(seconds)) return "00:00";
-    return `${Math.floor(seconds / 60).toString().padStart(2, "0")}:${Math.floor(seconds % 60).toString().padStart(2, "0")}`;
-  };
 
   return (
     <main className="min-h-dvh bg-[#090a09] px-4 pb-36 pt-5 text-white sm:px-6 lg:px-10">
@@ -211,18 +111,6 @@ export default function MusicPage() {
         </div>
       </div>
 
-      <div className="fixed bottom-3 left-3 right-3 z-20 mx-auto max-w-4xl rounded-2xl border border-white/10 bg-[#131512]/95 p-3 shadow-2xl backdrop-blur-xl sm:bottom-5 sm:p-4">
-        <audio ref={audioRef} src={currentTrack.src} onTimeUpdate={(event) => setProgress(event.currentTarget.currentTime)} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)} onEnded={() => stepTrack(1)} />
-        <div className="flex items-center gap-3 sm:gap-5">
-          <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl sm:flex" style={{ background: `linear-gradient(135deg, ${currentTrack.accent}, #111)` }}><Music2 size={20} className="text-black/70" /></div>
-          <div className="min-w-0 flex-1"><p className="truncate text-sm font-extrabold">{currentTrack.title}</p><p className="truncate text-xs text-white/40">{currentTrack.artist}</p></div>
-          <button onClick={() => stepTrack(-1)} aria-label="Wimbo uliopita" className="hidden text-white/60 hover:text-white sm:block"><SkipBack size={18} fill="currentColor" /></button>
-          <button onClick={togglePlay} aria-label={isPlaying ? "Pause" : "Play"} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#D4AF37] text-black transition hover:bg-[#e7c452]">{isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" />}</button>
-          <button onClick={() => stepTrack(1)} aria-label="Wimbo unaofuata" className="text-white/60 hover:text-white"><SkipForward size={18} fill="currentColor" /></button>
-          <div className="hidden items-center gap-2 md:flex"><button onClick={() => setVolume(volume ? 0 : 0.8)} aria-label={volume ? "Mute" : "Unmute"} className="text-white/50 hover:text-white">{volume ? <Volume2 size={17} /> : <VolumeX size={17} />}</button><input aria-label="Volume" type="range" min="0" max="1" step="0.05" value={volume} onChange={(event) => setVolume(Number(event.target.value))} className="w-20 accent-[#D4AF37]" /></div>
-        </div>
-        <div className="mt-3 flex items-center gap-2 text-[10px] tabular-nums text-white/35"><span>{formatTime(progress)}</span><input aria-label="Song progress" type="range" min="0" max={duration || 1} step="0.1" value={progress} onChange={(event) => { const next = Number(event.target.value); setProgress(next); if (audioRef.current) audioRef.current.currentTime = next; }} className="h-1 flex-1 accent-[#D4AF37]" /><span>{duration ? formatTime(duration) : currentTrack.duration}</span></div>
-      </div>
     </main>
   );
 }

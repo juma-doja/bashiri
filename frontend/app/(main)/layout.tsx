@@ -11,6 +11,7 @@ import { FloatingReviewButton } from "@/components/review/FloatingReviewButton";
 import { useAuthStore } from "@/stores/auth.store";
 import { getMe } from "@/lib/api/auth";
 import { shouldShowOnboarding } from "@/lib/auth/onboarding";
+import { MusicPlayerProvider } from "@/components/music/MusicPlayerProvider";
 
 function MainLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -63,15 +64,17 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <PWAInstallProvider>
-      <div className={`min-h-dvh bg-background ${shouldHideBottomNav ? 'pb-0' : 'pb-24'}`}>
-        {children}
-        {!shouldHideBottomNav && <BottomNav />}
-        <AuthRequiredSheet />
-        <InstallPromptSheet />
-        <CommandPaletteProvider />
-        <FloatingReviewButton onClick={() => router.push("/review")} />
-        <FloatingWhatsAppButton />
-      </div>
+      <MusicPlayerProvider>
+        <div className={`min-h-dvh bg-background ${shouldHideBottomNav ? 'pb-0' : 'pb-24'}`}>
+          {children}
+          {!shouldHideBottomNav && <BottomNav />}
+          <AuthRequiredSheet />
+          <InstallPromptSheet />
+          <CommandPaletteProvider />
+          <FloatingReviewButton onClick={() => router.push("/review")} />
+          <FloatingWhatsAppButton />
+        </div>
+      </MusicPlayerProvider>
     </PWAInstallProvider>
   );
 }

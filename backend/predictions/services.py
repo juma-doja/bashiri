@@ -22,7 +22,7 @@ class UnknownTeamError(Exception):
 
 def compute_global_top_pick(prediction: dict) -> dict:
     """
-    Inatafuta chaguo LENYE UHAKIKA MKUBWA ZAIDI KATI YA MASOKO YOTE 9
+    Inatafuta chaguo LENYE UHAKIKA MKUBWA ZAIDI KATI YA MASOKO YOTE
     (si 1X2 pekee) — hii ndiyo 'AI Pick ya kweli', tofauti na
     prediction['ai_pick'] (poisson_model.py) ambayo imefungwa 1X2 kwa
     matumizi ya ndani ya model pelee.
@@ -66,7 +66,7 @@ def compute_global_top_pick(prediction: dict) -> dict:
 
 def build_prediction_dashboard(match, viewer_is_subscriber: bool):
     """
-    AI Prediction Dashboard — masoko 9, kila moja likiwa na 'ai_pick'
+    AI Prediction Dashboard — masoko yote, kila moja likiwa na 'ai_pick'
     YAKE MWENYEWE (per-market, si 1X2 pekee tena), PAMOJA na 'top_pick'
     — recommendation MOJA kuu kati ya masoko YOTE 9 (global-best),
     ambayo ikiwa ndani ya soko lililofungwa kwa non-subscriber,
@@ -149,7 +149,7 @@ def build_prediction_dashboard(match, viewer_is_subscriber: bool):
 
     markets.sort(key=lambda m: (m["confidence"] is None, -(m["confidence"] or 0)))
 
-    # === TOP PICK — Recommendation MOJA kuu kati ya masoko YOTE 9 ===
+    # === TOP PICK — Recommendation MOJA kuu kati ya masoko yote ===
     global_best = compute_global_top_pick(prediction)
     
     if global_best is None:

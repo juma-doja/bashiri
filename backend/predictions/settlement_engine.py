@@ -6,6 +6,7 @@ Each market has a specific settlement function that takes final scores
 and returns WON, LOST, PUSH, or VOID.
 """
 
+import re
 from typing import Tuple, Optional
 
 
@@ -402,9 +403,62 @@ def settle_ai_pick(market: str, selection: str, home_score: int, away_score: int
     Returns:
         SettlementResult with status and reason
     """
-    # Normalize market keys to match settlement functions
-    normalized_market = market.lower()
-    normalized_selection = selection.lower()
+    # TopPickCard stores option keys (for example ``over_1_5``), while the
+    # settlement functions consume canonical selections (``Over``). Normalize
+    # both values here so every producer can use the same contract.
+    normalized_market = market.lower().strip()
+    normalized_selection = selection.lower().strip()
+
+    selection_aliases = {
+        "home_win": "Home",
+        "away_win": "Away",
+        "draw": "Draw",
+        "btts_yes": "Yes",
+        "btts_no": "No",
+        "home_dnb": "Home",
+        "away_dnb": "Away",
+        "dc_1x": "1X",
+        "dc_x2": "X2",
+        "dc_12": "12",
+    }
+    canonical_selection = selection_aliases.get(normalized_selection)
+    if canonical_selection is None:
+        if re.fullmatch(r"(?:home|away)?_?(?:over|under)_\d+_\d+", normalized_selection):
+            canonical_selection = "Under" if "under" in normalized_selection else "Over"
+        elif normalized_selection.startswith("over"):
+            canonical_selection = "Over"
+        elif normalized_selection.startswith("under"):
+            canonical_selection = "Under"
+        else:
+            canonical_selection = selection.strip()
+    normalized_selection = canonical_selection.lower()
+
+    market_aliases = {
+        "1x2": {
+            "home_win": "1x2_home",
+            "draw": "1x2_draw",
+            "away_win": "1x2_away",
+        },
+        "btts": {"btts_yes": "btts_yes", "btts_no": "btts_no"},
+        "draw_no_bet": {"home_dnb": "dnb_home", "away_dnb": "dnb_away"},
+        "double_chance": {"1x": "dc_1x", "x2": "dc_x2", "12": "dc_12"},
+    }
+    alias_market = market_aliases.get(normalized_market)
+    if alias_market:
+        normalized_market = alias_market.get(selection.lower().strip(), normalized_market)
+
+    if normalized_market.startswith("over_under_"):
+        threshold = normalized_market.removeprefix("over_under_")
+        normalized_market = f"under_{threshold}" if normalized_selection == "under" else f"over_{threshold}"
+
+    if normalized_market.startswith("1x2_"):
+        normalized_selection = {"1x2_home": "home", "1x2_draw": "draw", "1x2_away": "away"}.get(normalized_market, normalized_selection)
+    elif normalized_market in {"btts_yes", "btts_no"}:
+        normalized_selection = "yes" if normalized_market.endswith("yes") else "no"
+    elif normalized_market in {"dnb_home", "dnb_away"}:
+        normalized_selection = "home" if normalized_market.endswith("home") else "away"
+    elif normalized_market in {"dc_1x", "dc_x2", "dc_12"}:
+        normalized_selection = {"dc_1x": "1x", "dc_x2": "x2", "dc_12": "12"}[normalized_market]
     
     # Handle HOME_GOALS_OVER_X_X markets - if selection is under, use under function
     if normalized_market.startswith("home_goals_over"):
@@ -453,4 +507,4 @@ def settle_ai_pick(market: str, selection: str, home_score: int, away_score: int
     if settlement_func is None:
         return SettlementResult("VOID", f"Unknown market: {market} (normalized: {normalized_market})")
 
-    return settlement_func(normalized_market, selection, home_score, away_score)
+    return settlement_func(normalized_market, canonical_selection, home_score, away_score)

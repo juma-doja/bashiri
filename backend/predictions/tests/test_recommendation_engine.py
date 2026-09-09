@@ -381,6 +381,38 @@ class TestRecommendationGeneration:
         # If recommendation is STRONG, it should be from 1X2
         if recommendation.status == "STRONG":
             assert recommendation.market_key == "1X2"
+
+    def test_full_match_over_2_5_can_be_selected(self):
+        """The new full-match 2.5 line participates in Bashiri Pick ranking."""
+        prediction = {
+            "over_under": {
+                "over_1_5": 55.0,
+                "under_1_5": 45.0,
+                "over_2_5": 82.0,
+                "under_2_5": 18.0,
+            },
+            "match_result": {"home_win": 40.0, "draw": 30.0, "away_win": 30.0},
+            "double_chance": {"1x": 70.0, "x2": 60.0, "12": 70.0},
+            "draw_no_bet": {"home_dnb": 55.0, "away_dnb": 45.0},
+            "btts": {"btts_yes": 55.0, "btts_no": 45.0},
+            "home_goals": {
+                "home_over_0_5": 60.0, "home_under_0_5": 40.0,
+                "home_over_1_5": 45.0, "home_under_1_5": 55.0,
+            },
+            "away_goals": {
+                "away_over_0_5": 60.0, "away_under_0_5": 40.0,
+                "away_over_1_5": 45.0, "away_under_1_5": 55.0,
+            },
+        }
+
+        recommendation = generate_recommendation(
+            prediction,
+            market_filter=["OVER_UNDER_2_5"],
+        )
+
+        assert recommendation.status == "STRONG"
+        assert recommendation.market_key == "OVER_UNDER_2_5"
+        assert recommendation.option_key == "over_2_5"
     
     def test_home_over_0_5_does_not_automatically_win(self):
         """Test that Home Over 0.5 doesn't automatically win due to high probability."""
@@ -524,7 +556,7 @@ class TestMarketDefinitions:
         expected_markets = [
             # Full Match
             "1X2", "DOUBLE_CHANCE", "DRAW_NO_BET", "BTTS",
-            "OVER_UNDER_1_5",
+            "OVER_UNDER_1_5", "OVER_UNDER_2_5",
             # Home Team Goals
             "HOME_GOALS_OVER_0_5", "HOME_GOALS_OVER_1_5",
             # Away Team Goals

@@ -253,7 +253,7 @@ BASHIRI = {
     "FREE_MARKETS": ["1X2", "BTTS"],
     "LOCKED_MARKETS": [
         "DOUBLE_CHANCE", "DRAW_NO_BET",
-        "OVER_UNDER_1_5",
+        "OVER_UNDER_1_5", "OVER_UNDER_2_5",
         "HOME_GOALS_OVER_0_5", "HOME_GOALS_OVER_1_5",
         "AWAY_GOALS_OVER_0_5", "AWAY_GOALS_OVER_1_5",
         "CORRECT_SCORE",

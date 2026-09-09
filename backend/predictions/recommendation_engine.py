@@ -57,9 +57,12 @@ MARKET_DEFINITIONS = {
     "BTTS": {"label": "Timu Zote Kufunga (BTTS)", "source_key": "btts", "options": [
         {"key": "btts_yes", "label": "Ndiyo"}, {"key": "btts_no", "label": "Hapana"},
     ]},
-    # Full Match Over/Under (production contract: 1.5 only)
+    # Full Match Over/Under (both production contract lines)
     "OVER_UNDER_1_5": {"label": "Over/Under 1.5", "source_key": "over_under", "options": [
         {"key": "over_1_5", "label": "Over 1.5"}, {"key": "under_1_5", "label": "Under 1.5"},
+    ]},
+    "OVER_UNDER_2_5": {"label": "Over/Under 2.5", "source_key": "over_under", "options": [
+        {"key": "over_2_5", "label": "Over 2.5"}, {"key": "under_2_5", "label": "Under 2.5"},
     ]},
     # Home Team Goals Over/Under (production contract: 0.5, 1.5)
     "HOME_GOALS_OVER_0_5": {"label": "Home Over/Under 0.5", "source_key": "home_goals", "options": [
@@ -95,9 +98,11 @@ MARKET_EVALUATION_KEY_MAP = {
     # BTTS
     ("BTTS", "btts_yes"): "btts_yes",
     ("BTTS", "btts_no"): "btts_no",
-    # Full Match Over/Under (1.5 only per production contract)
+    # Full Match Over/Under
     ("OVER_UNDER_1_5", "over_1_5"): "over_1_5",
     ("OVER_UNDER_1_5", "under_1_5"): "over_1_5",
+    ("OVER_UNDER_2_5", "over_2_5"): "over_2_5",
+    ("OVER_UNDER_2_5", "under_2_5"): "over_2_5",
     # Home Team Goals Over/Under (0.5, 1.5)
     ("HOME_GOALS_OVER_0_5", "home_over_0_5"): "home_over_0_5",
     ("HOME_GOALS_OVER_0_5", "home_under_0_5"): "home_over_0_5",
