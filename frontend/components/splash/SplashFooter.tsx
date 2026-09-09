@@ -39,21 +39,17 @@ export function SplashFooter() {
       >
         <span className="text-xs">⚽</span>
       </div>
-      <span
-        className="
-          text-xs
-          font-semibold
-          tracking-wider
-          truncate
-          max-w-full
-        "
-        style={{
-          color:
-            SPLASH_CONFIG.textSecondary,
-        }}
-      >
-        {SPLASH_CONFIG.appName}
-      </span>
+      <div className="min-w-0 text-left leading-tight">
+        <span
+          className="block truncate text-xs font-semibold tracking-wider"
+          style={{ color: SPLASH_CONFIG.textSecondary }}
+        >
+          {SPLASH_CONFIG.appName}
+        </span>
+        <span className="mt-1 block text-[10px] font-medium tracking-[0.16em] text-white/45">
+          Created by Lastmateru
+        </span>
+      </div>
     </motion.div>
   );
 }

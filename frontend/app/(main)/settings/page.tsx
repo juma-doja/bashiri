@@ -387,6 +387,10 @@ export default function SettingsPage() {
           Hold the LOGOUT button for 3 seconds to logout
         </motion.p>
       </div>
+
+      <p className="px-3 pb-8 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+        Created by Lastmateru
+      </p>
     </div>
   );
 }
