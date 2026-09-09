@@ -326,6 +326,8 @@ def generate_ai_track_record_snapshot():
         for market_key in market_keys:
             definition = MARKET_DEFINITIONS[market_key]
             source_data = prediction[definition["source_key"]]
+            if not definition["options"]:
+                continue
             best_key = max(definition["options"], key=lambda o: source_data[o["key"]])["key"]
             correct = is_prediction_correct(market_key, best_key, match.home_score, match.away_score)
 
