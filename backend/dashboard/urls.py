@@ -12,6 +12,8 @@ from .views import (
     AdminCustomSlideDetailView,
     AdminCustomSlideListView,
     AdminDeleteDebateView,
+    AdminHeroImageConfigDetailView,
+    AdminHeroImageConfigListView,
     AdminHeroImageUploadSignatureView,
     AdminLeagueListView,
     AdminLoginView,
@@ -83,4 +85,7 @@ urlpatterns = [
     path("hero-slides/", AdminCustomSlideListView.as_view(), name="admin-hero-slide-list"),
     path("hero-slides/<int:slide_id>/", AdminCustomSlideDetailView.as_view(), name="admin-hero-slide-detail"),
     path("hero-slides/upload-signature/", AdminHeroImageUploadSignatureView.as_view(), name="admin-hero-upload-signature"),
+
+    path("hero-images/", AdminHeroImageConfigListView.as_view(), name="admin-hero-image-list"),
+    path("hero-images/<str:slide_type>/", AdminHeroImageConfigDetailView.as_view(), name="admin-hero-image-detail"),
 ]

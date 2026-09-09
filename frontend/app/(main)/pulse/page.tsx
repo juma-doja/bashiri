@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft, Music2, Search } from "lucide-react";
 import { getPulseSummary, PulseSummary } from "@/lib/api/pulse";
 import { getSavedMatches } from "@/lib/api/predictions";
 import { LivePulseBar } from "@/components/pulse/LivePulseBar";
@@ -64,6 +64,29 @@ export default function BashiriPulsePage() {
             {/* HERO SECTION - MIC */}
             <section className="px-4 md:px-6 lg:px-8 pt-6">
               <BentoGrid data={data} mode="hero" />
+            </section>
+
+            {/* MUSIC */}
+            <section className="px-4 md:px-6 lg:px-8 pt-6">
+              <motion.button
+                onClick={() => router.push("/music")}
+                className="group relative min-h-40 w-full overflow-hidden rounded-3xl border border-[#D4AF37]/25 bg-cover bg-center text-left"
+                style={{ backgroundImage: "url('/music/music_backgound.jpg')" }}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,8,7,0.94),rgba(5,8,7,0.58),rgba(5,8,7,0.2))]" />
+                <div className="relative flex min-h-40 items-center justify-between gap-5 p-5 sm:p-7">
+                  <div>
+                    <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-[#22C55E]">Bashiri Audio</p>
+                    <h2 className="text-2xl font-black text-white sm:text-3xl">Soundtrack your matchday.</h2>
+                    <p className="mt-2 max-w-md text-xs leading-5 text-white/60">Sikiliza, discover na hifadhi nyimbo zako kwenye library yako.</p>
+                  </div>
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#D4AF37] text-black shadow-lg shadow-black/30 transition group-hover:scale-105">
+                    <Music2 size={21} />
+                  </span>
+                </div>
+              </motion.button>
             </section>
 
             {/* LIVE INTELLIGENCE - ROOMS */}

@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: "/admin/derbies", icon: Flame, label: "Derby Mode" },
   { href: "/admin/debates", icon: MessageSquare, label: "Debates" },
   { href: "/admin/hero-slides", icon: ImageIcon, label: "Hero Carousel" },
+  { href: "/admin/hero-images", icon: ImageIcon, label: "Hero Images" },
   { href: "/admin/moderation", icon: ShieldAlert, label: "Moderation" },
   { href: "/admin/support", icon: Ticket, label: "Support" },
   { href: "/admin/transactions", icon: CreditCard, label: "Malipo" },

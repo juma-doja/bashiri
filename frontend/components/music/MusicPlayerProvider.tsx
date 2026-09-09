@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ListMusic, Music2, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
+import { useAuthStore } from "@/stores/auth.store";
+import { getMyMusicTracks, MusicTrack } from "@/lib/api/music";
 
 export type Track = {
   id: string;
@@ -11,6 +13,7 @@ export type Track = {
   duration: string;
   src: string;
   accent: string;
+  ownerTrackId?: number;
 };
 
 export const TRACKS: Track[] = [
@@ -32,9 +35,25 @@ type MusicPlayerContextValue = {
   stepTrack: (direction: 1 | -1) => void;
   setProgress: (value: number) => void;
   setVolume: (value: number) => void;
+  tracks: Track[];
+  addUploadedTrack: (track: MusicTrack) => void;
+  removeUploadedTrack: (trackId: number) => void;
 };
 
 const MusicPlayerContext = createContext<MusicPlayerContextValue | null>(null);
+
+function toTrack(track: MusicTrack): Track {
+  return {
+    id: `user-${track.id}`,
+    ownerTrackId: track.id,
+    title: track.title,
+    artist: track.artist || track.owner_name || "Your library",
+    genre: track.genre_label,
+    duration: `${Math.floor(track.duration_seconds / 60).toString().padStart(2, "0")}:${(track.duration_seconds % 60).toString().padStart(2, "0")}`,
+    src: track.audio_url,
+    accent: "#38BDF8",
+  };
+}
 
 export function useMusicPlayer() {
   const context = useContext(MusicPlayerContext);
@@ -57,7 +76,8 @@ function GlobalMiniPlayer() {
       <button
         onClick={() => setIsVisible(true)}
         aria-label="Onyesha music player"
-        className="fixed bottom-20 right-4 z-40 flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#D4AF37]/60 bg-[#111218]/90 text-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.3)] backdrop-blur-xl transition hover:scale-110 hover:bg-[#D4AF37] hover:text-black sm:bottom-5 sm:right-5"
+        className="fixed bottom-20 right-4 z-40 flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#D4AF37]/60 bg-cover bg-center text-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.3)] backdrop-blur-xl transition hover:scale-110 hover:bg-[#D4AF37] hover:text-black sm:bottom-5 sm:right-5"
+        style={{ backgroundImage: "linear-gradient(rgba(10,12,10,0.45),rgba(10,12,10,0.45)), url('/music/music_backgound.jpg')" }}
       >
         <Music2 size={14} className={isPlaying ? "animate-pulse" : ""} />
         {isPlaying && <span className="absolute inset-0 rounded-full border border-[#D4AF37]/60" />}
@@ -66,7 +86,10 @@ function GlobalMiniPlayer() {
   }
 
   return (
-    <div className="fixed bottom-[5.75rem] left-3 right-3 z-40 mx-auto max-w-3xl rounded-2xl border border-white/10 bg-[#131512]/95 p-3 shadow-2xl backdrop-blur-xl sm:bottom-5 sm:left-auto sm:right-5 sm:w-[min(27rem,calc(100vw-2rem))] sm:p-4">
+    <div
+      className="fixed bottom-[5.75rem] left-3 right-3 z-40 mx-auto max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-cover bg-center p-3 shadow-2xl backdrop-blur-xl sm:bottom-5 sm:left-auto sm:right-5 sm:w-[min(27rem,calc(100vw-2rem))] sm:p-4"
+      style={{ backgroundImage: "linear-gradient(rgba(12,15,13,0.9),rgba(12,15,13,0.9)), url('/music/music_backgound.jpg')" }}
+    >
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: `linear-gradient(135deg, ${currentTrack.accent}, #111)` }}>
           <Music2 size={18} className="text-black/70" />
@@ -100,12 +123,25 @@ function GlobalMiniPlayer() {
 
 export function MusicPlayerProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const access = useAuthStore((state) => state.access);
+  const [uploadedTracks, setUploadedTracks] = useState<Track[]>([]);
   const [currentId, setCurrentId] = useState(TRACKS[0].id);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgressState] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.8);
-  const currentTrack = useMemo(() => TRACKS.find((track) => track.id === currentId) ?? TRACKS[0], [currentId]);
+  const tracks = useMemo(() => [...TRACKS, ...uploadedTracks], [uploadedTracks]);
+  const currentTrack = useMemo(() => tracks.find((track) => track.id === currentId) ?? tracks[0], [currentId, tracks]);
+
+  useEffect(() => {
+    if (!access) {
+      setUploadedTracks([]);
+      return;
+    }
+    getMyMusicTracks()
+      .then((items) => setUploadedTracks(items.map(toTrack)))
+      .catch(() => setUploadedTracks([]));
+  }, [access]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -144,8 +180,8 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
   };
 
   const stepTrack = (direction: 1 | -1) => {
-    const index = TRACKS.findIndex((track) => track.id === currentId);
-    selectTrack(TRACKS[(index + direction + TRACKS.length) % TRACKS.length]);
+    const index = tracks.findIndex((track) => track.id === currentId);
+    selectTrack(tracks[(index + direction + tracks.length) % tracks.length]);
   };
 
   const setProgress = (value: number) => {
@@ -153,7 +189,15 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
     if (audioRef.current) audioRef.current.currentTime = value;
   };
 
-  const contextValue = { currentTrack, currentId, isPlaying, progress, duration, volume, selectTrack, togglePlay, stepTrack, setProgress, setVolume };
+  const addUploadedTrack = (track: MusicTrack) => setUploadedTracks((items) => [toTrack(track), ...items]);
+  const removeUploadedTrack = (trackId: number) => {
+    setUploadedTracks((items) => items.filter((track) => track.ownerTrackId !== trackId));
+    if (currentId === `user-${trackId}`) {
+      setCurrentId(TRACKS[0].id);
+      setIsPlaying(false);
+    }
+  };
+  const contextValue = { currentTrack, currentId, isPlaying, progress, duration, volume, selectTrack, togglePlay, stepTrack, setProgress, setVolume, tracks, addUploadedTrack, removeUploadedTrack };
 
   return (
     <MusicPlayerContext.Provider value={contextValue}>

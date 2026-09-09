@@ -325,10 +325,26 @@ def generate_ai_track_record_snapshot():
 
         for market_key in market_keys:
             definition = MARKET_DEFINITIONS[market_key]
-            source_data = prediction[definition["source_key"]]
+            source_data = prediction.get(definition["source_key"], {})
             if not definition["options"]:
                 continue
-            best_key = max(definition["options"], key=lambda o: source_data[o["key"]])["key"]
+            available_options = [
+                option for option in definition["options"]
+                if option["key"] in source_data
+                and source_data[option["key"]] is not None
+            ]
+            if not available_options:
+                logger.warning(
+                    "Skipping %s for match %s: no prediction options in %s",
+                    market_key,
+                    match.id,
+                    definition["source_key"],
+                )
+                continue
+            best_key = max(
+                available_options,
+                key=lambda option: source_data[option["key"]],
+            )["key"]
             correct = is_prediction_correct(market_key, best_key, match.home_score, match.away_score)
 
             overall_stats[market_key]["total"] += 1

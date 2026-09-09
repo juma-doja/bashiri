@@ -6,7 +6,7 @@ from feed.models import Card
 from payments.models import Subscription, Transaction
 from predictions.models import ActiveDerby, League, Match, Team
 from support.models import ContentReport, SupportMessage, SupportTicket
-from herocarousel.models import CustomSlide
+from herocarousel.models import CustomSlide, HeroImageConfig
 
 from .models import AdminActionLog
 
@@ -195,3 +195,15 @@ class AdminCustomSlideSerializer(serializers.ModelSerializer):
             "accent_color", "starts_at", "ends_at", "order", "is_active", "created_at",
         ]
         read_only_fields = ["id", "created_at"]
+
+
+class AdminHeroImageConfigSerializer(serializers.ModelSerializer):
+    slide_type_display = serializers.CharField(source="get_slide_type_display", read_only=True)
+
+    class Meta:
+        model = HeroImageConfig
+        fields = [
+            "id", "slide_type", "slide_type_display", "image_url",
+            "cloudinary_public_id", "updated_at",
+        ]
+        read_only_fields = ["id", "updated_at"]

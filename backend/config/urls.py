@@ -39,4 +39,5 @@ urlpatterns = [
     path("api/pulse/", include("pulse.urls")),
     path("api/reviews/", include("reviews.urls")),
     path("api/tips/", include("tips.urls")),
+    path("api/music/", include("music.urls")),
 ]

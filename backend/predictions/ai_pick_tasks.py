@@ -167,6 +167,11 @@ def generate_ai_picks(feed_type="STANDARD"):
 
             # Find best qualified pick
             for candidate in market_candidates:
+                # Poisson prediction payloads expose percentages (0-100),
+                # while the qualification thresholds use decimals (0-1).
+                if candidate['probability'] > 1:
+                    candidate['probability'] /= 100
+
                 tier = qualify_ai_pick(
                     candidate['market'],
                     candidate['probability'],

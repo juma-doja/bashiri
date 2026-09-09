@@ -96,6 +96,8 @@ def remove_legacy_periodic_tasks():
         "create-best-streak-card",
         "generate-daily-picks",
         "Generate Daily Picks",
+        # Historical imports are one-off operations and must never run from Beat.
+        "Historical Sync 2023-2027",
     ]
     deleted_count, _ = PeriodicTask.objects.filter(name__in=legacy_names).delete()
     if deleted_count:
@@ -114,9 +116,8 @@ make_task("Create Best Streak Card", "tips.tasks.create_best_streak_card_task", 
 # Sync KAMILI — mara moja kwa siku (fixtures mpya + backup ya matokeo)
 make_task("Sync Football Data", "predictions.tasks.sync_daily_task", {"minute": "0", "hour": "3"})
 
-# Historical Sync — mara moja tu kwa import data ya 2023, 2024, 2025, 2026, 2027 (ENABLED for now)
-# DISABLE after completion by commenting out this line
-make_task("Historical Sync 2023-2027", "predictions.tasks.sync_historical_task", {"minute": "40", "hour": "17"})
+# Historical sync is intentionally not registered with Beat. Run it manually
+# when importing a new season, then keep production scheduling incremental.
 
 # Sync NDOGO — mpya, kila sekunde 30 (status/score za mechi za sasa) - production safe
 make_interval_task_seconds("Quick Sync Live Matches", "predictions.tasks.sync_live_and_upcoming_matches", 30)

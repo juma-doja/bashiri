@@ -897,9 +897,54 @@ class AdminCustomSlideListView(APIView):
         serializer = AdminCustomSlideSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         slide = serializer.save()
-
-        _log_action(request.user, "CREATE_HERO_SLIDE", f"CustomSlide #{slide.id}", {"title": slide.title})
+        _log_action(request.user, "CREATE_CUSTOM_SLIDE", f"Created slide: {slide.title}")
         return Response(AdminCustomSlideSerializer(slide).data, status=status.HTTP_201_CREATED)
+
+
+class AdminHeroImageConfigListView(APIView):
+    """GET /api/dashboard/hero-images/ — list all hero image configs"""
+    permission_classes = [IsBashiriAdmin]
+
+    def get(self, request):
+        from herocarousel.models import HeroImageConfig
+        from .serializers import AdminHeroImageConfigSerializer
+
+        configs = HeroImageConfig.objects.all().order_by("slide_type")
+        return Response(AdminHeroImageConfigSerializer(configs, many=True).data)
+
+
+class AdminHeroImageConfigDetailView(APIView):
+    """GET/PUT/PATCH /api/dashboard/hero-images/{slide_type}/"""
+    permission_classes = [IsBashiriAdmin]
+
+    def get(self, request, slide_type):
+        from herocarousel.models import HeroImageConfig
+        from .serializers import AdminHeroImageConfigSerializer
+
+        config = get_object_or_404(HeroImageConfig, slide_type=slide_type)
+        return Response(AdminHeroImageConfigSerializer(config).data)
+
+    def put(self, request, slide_type):
+        from herocarousel.models import HeroImageConfig
+        from .serializers import AdminHeroImageConfigSerializer
+
+        config = get_object_or_404(HeroImageConfig, slide_type=slide_type)
+        serializer = AdminHeroImageConfigSerializer(config, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        _log_action(request.user, "UPDATE_HERO_IMAGE", f"Updated hero image for {slide_type}")
+        return Response(AdminHeroImageConfigSerializer(config).data)
+
+    def patch(self, request, slide_type):
+        from herocarousel.models import HeroImageConfig
+        from .serializers import AdminHeroImageConfigSerializer
+
+        config = get_object_or_404(HeroImageConfig, slide_type=slide_type)
+        serializer = AdminHeroImageConfigSerializer(config, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        _log_action(request.user, "UPDATE_HERO_IMAGE", f"Updated hero image for {slide_type}")
+        return Response(AdminHeroImageConfigSerializer(config).data)
 
 
 class AdminCustomSlideDetailView(APIView):

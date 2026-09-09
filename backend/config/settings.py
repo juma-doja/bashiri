@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "pulse",
     "reviews",
     "tips",
+    "music",
 ]
 
 MIDDLEWARE = [
@@ -311,7 +312,7 @@ BASHIRI = {
 
     "CONTENT_REPORT_AUTO_HIDE_THRESHOLD": 3,
 
-    "HERO_CAROUSEL_MAX_SLIDES": 5,
+    "HERO_CAROUSEL_MAX_SLIDES": 15,
 }
 
 # ============================================================

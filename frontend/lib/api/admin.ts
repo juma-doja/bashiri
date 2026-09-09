@@ -337,3 +337,27 @@ export async function uploadHeroImageToCloudinary(file: File, sig: HeroUploadSig
   const data = await res.json();
   return data.secure_url as string;
 }
+
+export interface AdminHeroImageConfig {
+  id: number;
+  slide_type: string;
+  slide_type_display: string;
+  image_url: string;
+  cloudinary_public_id: string;
+  updated_at: string;
+}
+
+export function getHeroImageConfigs() {
+  return adminFetch<AdminHeroImageConfig[]>("/dashboard/hero-images/");
+}
+
+export function getHeroImageConfig(slide_type: string) {
+  return adminFetch<AdminHeroImageConfig>(`/dashboard/hero-images/${slide_type}/`);
+}
+
+export function updateHeroImageConfig(slide_type: string, payload: Partial<AdminHeroImageConfig>) {
+  return adminFetch<AdminHeroImageConfig>(`/dashboard/hero-images/${slide_type}/`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
