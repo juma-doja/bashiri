@@ -9,7 +9,7 @@ import {
   AdminHeroImageConfig,
 } from "@/lib/api/admin";
 import { BashiriButton } from "@/components/ui/Button";
-import { Upload, ArrowLeft, RefreshCw } from "lucide-react";
+import { Upload, ArrowLeft, RefreshCw, XCircle, AlertCircle } from "lucide-react";
 
 const SLIDE_TYPE_LABELS: Record<string, string> = {
   top_pick: "Top Pick - Mechi ya Leo",
@@ -26,6 +26,7 @@ export default function AdminHeroImagesPage() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUloading] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
+  const [error, setError] = useState<string | null>(null);
   const topPickRef = useRef<HTMLInputElement>(null);
   const derbyRef = useRef<HTMLInputElement>(null);
   const trackRecordRef = useRef<HTMLInputElement>(null);
@@ -63,6 +64,7 @@ export default function AdminHeroImagesPage() {
     if (!file) return;
 
     setUloading((prev) => ({ ...prev, [slideType]: true }));
+    setError(null);
     try {
       const sig = await getHeroImageUploadSignature();
       const url = await uploadHeroImageToCloudinary(file, sig);
@@ -70,9 +72,13 @@ export default function AdminHeroImagesPage() {
       // Update the config with new image URL
       await updateHeroImageConfig(slideType, { image_url: url });
       await load();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Imeshindwa kupakia picha:", error);
-      alert("Imeshindwa kupakia picha. Tafadhali jaribu tena.");
+      if (error.message === "AUTH_REQUIRED") {
+        setError("Session ya admin imeisha. Tafadhali login tena.");
+      } else {
+        setError("Imeshindikana kupakia picha. Tafadhali jaribu tena.");
+      }
     } finally {
       setUloading((prev) => ({ ...prev, [slideType]: false }));
     }
@@ -92,6 +98,31 @@ export default function AdminHeroImagesPage() {
 
   return (
     <div>
+      {/* Error Modal */}
+      {error && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#1a1a1a] border border-red-500/30 rounded-2xl p-6 max-w-md mx-4 shadow-2xl">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                  <XCircle size={24} className="text-red-500" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-white mb-2">Imeshindikana</h3>
+                <p className="text-sm text-white/70 mb-4">{error}</p>
+                <button
+                  onClick={() => setError(null)}
+                  className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm font-bold transition"
+                >
+                  Funga
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <button onClick={() => router.back()} aria-label="Rudi nyuma">

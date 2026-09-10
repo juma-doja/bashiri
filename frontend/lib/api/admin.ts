@@ -59,12 +59,12 @@ async function adminFetch<T = Record<string, unknown>>(
       return adminFetch<T>(endpoint, options, true);
     }
     useAdminAuthStore.getState().logout();
-    throw new Error("Session ya admin imeisha au huna ruhusa.");
+    throw new Error("AUTH_REQUIRED");
   }
 
   if (res.status === 403) {
     useAdminAuthStore.getState().logout();
-    throw new Error("Session ya admin imeisha au huna ruhusa.");
+    throw new Error("AUTH_REQUIRED");
   }
 
   if (!res.ok) {
