@@ -136,51 +136,50 @@ export default function SettingsPage() {
   }, []);
 
   return (
-    <div className="min-h-dvh bg-[#050508] overflow-y-auto no-scrollbar">
-      {/* Header */}
-      <div className="px-5 pt-safe pt-10 pb-4" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 32px)" }}>
-        <div className="flex items-center gap-3 mb-2">
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      <div className="mx-auto max-w-6xl px-4 pb-24 pt-safe pt-10 sm:px-6 lg:px-8" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 32px)" }}>
+        <div className="mb-6 flex items-center gap-3">
           <button onClick={() => router.back()} aria-label="Rudi nyuma">
             <ArrowLeft size={20} style={{ color: "rgba(255,255,255,0.6)" }} />
           </button>
-          <h1 className="text-2xl font-black text-white tracking-tight">
-            Settings
-          </h1>
+          <div>
+            <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
+              Settings
+            </h1>
+            <p className="mt-1 text-sm text-white/50">Personalize your experience</p>
+          </div>
         </div>
-        <p className="text-sm text-white/50 mt-1">Personalize your experience</p>
-      </div>
 
-      <div className="px-3 pb-4">
-        {/* Settings Items - Grid Layout like matches */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-2 gap-3 mb-6"
+          transition={{ delay: 0.05 }}
+          className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
         >
           {SETTINGS_ITEMS.filter(item => !item.adminOnly || user?.is_staff).map((item, index) => (
             <motion.div
               key={item.href}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 + (index * 0.05) }}
+              transition={{ delay: 0.05 + (index * 0.05) }}
+              className="h-full"
             >
-              <GlassCard hover className="p-3">
+              <GlassCard hover className="h-full p-4">
                 <button
                   onClick={() => router.push(item.href)}
                   className="w-full text-left"
                 >
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-lg ${item.adminOnly ? 'bg-gradient-to-br from-[var(--brand-accent)]/10 to-[var(--brand-accent)]/5 border border-[var(--brand-accent)]/30' : 'bg-gradient-to-br from-[#F5A623]/10 to-[#E8892A]/5 border border-[#F5A623]/20'} flex items-center justify-center flex-shrink-0`}>
-                        <item.icon size={17} className={item.adminOnly ? 'text-[var(--brand-accent)]' : 'text-[#F5A623]'} />
+                  <div className="flex h-full flex-col gap-3">
+                    <div className="flex items-start gap-3">
+                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${item.adminOnly ? 'border-[var(--brand-accent)]/30 bg-[var(--brand-accent)]/10' : 'border-[#F5A623]/20 bg-[#F5A623]/10'}`}>
+                        <item.icon size={18} className={item.adminOnly ? 'text-[var(--brand-accent)]' : 'text-[#F5A623]'} />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="text-sm font-semibold text-white block truncate">{item.label}</span>
+                      <div className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-bold text-white">{item.label}</span>
+                        <span className="mt-1 block text-xs text-white/50">{item.description}</span>
                       </div>
-                      <ChevronRight size={15} className="text-white/30 flex-shrink-0" />
+                      <ChevronRight size={16} className="mt-1 shrink-0 text-white/35" />
                     </div>
-                    <span className="text-xs text-white/50 truncate pl-1">{item.description}</span>
                   </div>
                 </button>
               </GlassCard>
@@ -188,49 +187,46 @@ export default function SettingsPage() {
           ))}
         </motion.div>
 
-        {/* Account Section - Compact Glass Card */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.2 }}
           className="mb-6"
         >
-          <GlassCard className="p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-[var(--brand-accent)]/10 border border-[var(--brand-accent)]/30 flex items-center justify-center">
+          <GlassCard className="p-4 sm:p-5">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--brand-accent)]/30 bg-[var(--brand-accent)]/10">
                 <Shield size={16} className="text-[var(--brand-accent)]" />
               </div>
-              <p className="text-xs font-bold text-white">Account Information</p>
+              <p className="text-sm font-bold text-white">Account Information</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div className="p-2 rounded-lg bg-white/5 border border-white/10">
-                <p className="text-xs text-white/50 mb-1 font-semibold">Phone</p>
-                <p className="text-sm font-bold text-white truncate">{user?.phone_number || 'N/A'}</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-white/45">Phone</p>
+                <p className="truncate text-sm font-bold text-white">{user?.phone_number || 'N/A'}</p>
               </div>
 
-              <div className="p-2 rounded-lg bg-white/5 border border-white/10">
-                <p className="text-xs text-white/50 mb-1 font-semibold">Username</p>
-                <p className="text-sm font-bold text-white truncate">@{user?.username || 'User'}</p>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-white/45">Username</p>
+                <p className="truncate text-sm font-bold text-white">@{user?.username || 'User'}</p>
               </div>
 
-              <div className="col-span-2 p-2 rounded-lg bg-green-500/10 border border-green-400/30">
-                <p className="text-xs text-white/50 mb-1 font-semibold">Status</p>
+              <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-3 sm:col-span-2">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-white/45">Status</p>
                 <p className="text-sm font-bold text-green-400">✓ Active</p>
               </div>
             </div>
           </GlassCard>
         </motion.div>
 
-        {/* SOS Logout Button */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.3 }}
           className="flex justify-center"
         >
           <div className="relative">
-            {/* Ripple/Radar Animation */}
             <AnimatePresence>
               {isHolding && (
                 <>
@@ -240,9 +236,9 @@ export default function SettingsPage() {
                       initial={{ scale: 1, opacity: 0.8 }}
                       animate={{ scale: 3, opacity: 0 }}
                       exit={{ scale: 3, opacity: 0 }}
-                      transition={{ 
-                        duration: 1, 
-                        repeat: Infinity, 
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
                         delay: i * 0.3,
                         ease: "easeOut"
                       }}
@@ -254,7 +250,6 @@ export default function SettingsPage() {
               )}
             </AnimatePresence>
 
-            {/* SOS Button */}
             <motion.button
               onMouseDown={handleMouseDown}
               onMouseUp={handleMouseUp}
@@ -264,7 +259,7 @@ export default function SettingsPage() {
               disabled={isExploding}
               whileHover={{ scale: isHolding ? 1 : 1.05 }}
               whileTap={{ scale: isHolding ? 0.95 : 0.95 }}
-              animate={{ 
+              animate={{
                 scale: isExploding ? 0 : 1,
                 opacity: isExploding ? 0 : 1
               }}
@@ -278,8 +273,7 @@ export default function SettingsPage() {
               }}
               className="relative flex flex-col items-center justify-center gap-1 overflow-hidden"
             >
-              {/* Progress Ring */}
-              <svg className="absolute inset-0 w-full h-full -rotate-90" style={{ width: '140px', height: '140px' }}>
+              <svg className="absolute inset-0 h-full w-full -rotate-90" style={{ width: '140px', height: '140px' }}>
                 <circle
                   cx="70"
                   cy="70"
@@ -304,13 +298,12 @@ export default function SettingsPage() {
                 />
               </svg>
 
-              {/* Shield Icon */}
               <motion.div
-                animate={{ 
+                animate={{
                   scale: isHolding ? [1, 1.15, 1] : 1,
                   rotate: isHolding ? [0, -8, 8, 0] : 0
                 }}
-                transition={{ 
+                transition={{
                   duration: isHolding ? 0.4 : 0.3,
                   repeat: isHolding ? Infinity : 0
                 }}
@@ -318,12 +311,10 @@ export default function SettingsPage() {
                 <ShieldAlert size={36} style={{ color: 'white', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
               </motion.div>
 
-              {/* LOGOUT Text */}
               <span className="text-lg font-black tracking-widest" style={{ color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.4)' }}>
                 LOGOUT
               </span>
 
-              {/* Hold Text */}
               <motion.span
                 animate={{ opacity: isHolding ? 0 : 1 }}
                 className="text-[11px] font-semibold"
@@ -333,13 +324,12 @@ export default function SettingsPage() {
               </motion.span>
             </motion.button>
 
-            {/* Explosion Particles */}
             <AnimatePresence>
               {isExploding && particles.map((particle) => (
                 <motion.div
                   key={particle.id}
-                  initial={{ 
-                    x: particle.x, 
+                  initial={{
+                    x: particle.x,
                     y: particle.y,
                     scale: 1,
                     opacity: 1
@@ -351,7 +341,7 @@ export default function SettingsPage() {
                     opacity: 0
                   }}
                   transition={{ duration: 1.5, ease: "easeOut" }}
-                  className="absolute w-3 h-3 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]"
+                  className="absolute h-3 w-3 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]"
                   style={{
                     left: particle.x,
                     top: particle.y,
@@ -360,7 +350,6 @@ export default function SettingsPage() {
               ))}
             </AnimatePresence>
 
-            {/* Screen Flash */}
             <AnimatePresence>
               {isExploding && (
                 <motion.div
@@ -368,7 +357,7 @@ export default function SettingsPage() {
                   animate={{ opacity: 0.2 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
-                  className="fixed inset-0 bg-red-500 pointer-events-none z-50"
+                  className="pointer-events-none fixed inset-0 z-50 bg-red-500"
                 />
               )}
             </AnimatePresence>
@@ -376,7 +365,6 @@ export default function SettingsPage() {
         </motion.div>
       </div>
 
-      {/* Instructions */}
       <div className="px-3 pb-6">
         <motion.p
           initial={{ opacity: 0 }}

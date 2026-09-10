@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { Crown, Target, TrendingUp, Zap, Settings, LogOut, Award, Calendar, Camera, Loader2, Edit2, Share2, MapPin, ChevronLeft, X, Flame, Sparkles, Power, Eye, Trash2, Trophy, Music2 } from "lucide-react";
+import { Crown, Target, TrendingUp, Zap, Settings, LogOut, Award, Calendar, Camera, Loader2, Edit2, Share2, MapPin, ChevronLeft, X, Flame, Sparkles, Power, Eye, Trash2, Trophy, Music2, Gamepad2 } from "lucide-react";
 import { useAuthStore } from "@/stores/auth.store";
 import { PremiumButton } from "@/components/ui/Button";
 import { PremiumCard, GlassCard } from "@/components/ui/GlassCard";
@@ -490,6 +490,21 @@ export default function ProfilePage() {
             >
               <Music2 size={20} style={{ color: "#22C55E" }} />
               <span className="text-xs font-bold text-white">Music</span>
+            </button>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.38 }}
+          >
+            <button
+              onClick={() => router.push("/gamification")}
+              className="w-full rounded-2xl p-4 flex flex-col items-center gap-2 text-center"
+              style={{ background: "#111111" }}
+            >
+              <Gamepad2 size={20} style={{ color: "#A855F7" }} />
+              <span className="text-xs font-bold text-white">Mada</span>
             </button>
           </motion.div>
         </div>

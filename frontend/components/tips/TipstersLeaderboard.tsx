@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Trophy, Medal, Crown, Star, TrendingUp, Flame, Target, Award } from 'lucide-react'
+import { Trophy, Medal, Crown, Star, TrendingUp, Flame, Target, Award, Zap } from 'lucide-react'
 import { getTipLeaderboard } from '@/lib/api/tips'
 
 interface Tipster {
@@ -19,6 +19,10 @@ interface Tipster {
   best_streak: number
   recent_form_correct: number
   recent_form_tips: number
+  level?: number
+  experience_points?: number
+  ai_agreement_score?: number
+  achievement_count?: number
 }
 
 export function TipstersLeaderboard() {
@@ -166,13 +170,19 @@ export function TipstersLeaderboard() {
                         <span className="text-[10px] sm:text-[10px] font-bold text-orange-400">{tipster.current_streak} streak</span>
                       </div>
                     )}
+                    {tipster.level !== undefined && (
+                      <div className="flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 bg-purple-500/20 rounded-full border border-purple-500/30">
+                        <Zap size={6} className="text-purple-400 sm:size-8" />
+                        <span className="text-[10px] sm:text-[10px] font-bold text-purple-400">Lvl {tipster.level}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Stats - Full width on mobile, row on desktop */}
-            <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 w-full sm:w-auto">
+            <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 w-full sm:w-auto">
               <div className="flex-1 sm:flex-none">
                 <p className="text-[11px] sm:text-xs font-semibold text-[#D4AF37]">Accuracy</p>
                 <p className="text-lg sm:text-xl font-black text-white">{tipster.accuracy_percentage}%</p>
@@ -185,6 +195,21 @@ export function TipstersLeaderboard() {
                 <p className="text-[11px] sm:text-xs font-semibold text-white/50">Best Streak</p>
                 <p className="text-lg sm:text-xl font-black text-white">{tipster.best_streak}</p>
               </div>
+              {/* Gamification Stats */}
+              {tipster.level !== undefined && (
+                <>
+                  <div className="flex-1 sm:flex-none hidden sm:block">
+                    <p className="text-[11px] sm:text-xs font-semibold text-purple-400">Level</p>
+                    <p className="text-lg sm:text-xl font-black text-white">{tipster.level}</p>
+                  </div>
+                  {tipster.achievement_count !== undefined && tipster.achievement_count > 0 && (
+                    <div className="flex-1 sm:flex-none hidden sm:block">
+                      <p className="text-[11px] sm:text-xs font-semibold text-yellow-400">Badges</p>
+                      <p className="text-lg sm:text-xl font-black text-white">{tipster.achievement_count}</p>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         ))}

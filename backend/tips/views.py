@@ -163,6 +163,32 @@ class TipListView(APIView):
             # Invalidate leaderboard cache
             TipsCache.invalidate_leaderboard()
             
+            # Gamification: Award XP for creating tip
+            from gamification.models import UserProgress
+            from gamification.services import check_and_award_achievements
+            
+            progress, created = UserProgress.objects.get_or_create(user=request.user)
+            progress.add_xp(10)  # 10 XP per tip created
+            
+            # Update challenge progress for CREATE_5_TIPS challenge
+            from gamification.models import UserChallenge, DailyChallenge
+            from datetime import date
+            today = date.today()
+            create_challenge = DailyChallenge.objects.filter(
+                challenge_type="CREATE_5_TIPS",
+                challenge_date=today,
+                is_active=True
+            ).first()
+            if create_challenge:
+                user_challenge, _ = UserChallenge.objects.get_or_create(
+                    user=request.user,
+                    challenge=create_challenge
+                )
+                user_challenge.update_progress(1)
+            
+            # Check for achievements
+            check_and_award_achievements(request.user)
+            
             return Response(
                 UserTipSerializer(tip, context={'request': request}).data,
                 status=status.HTTP_201_CREATED
@@ -532,6 +558,21 @@ class LeaderboardView(APIView):
             ranked_results = []
             for idx, stats in enumerate(tipster_stats[:limit], 1):
                 user = User.objects.get(id=stats['user_id'])
+                
+                # Add gamification data
+                from gamification.models import UserProgress, UserAchievement
+                try:
+                    progress = UserProgress.objects.get(user_id=user.id)
+                    level = progress.level
+                    xp = progress.experience_points
+                    ai_score = progress.ai_agreement_score
+                except UserProgress.DoesNotExist:
+                    level = 1
+                    xp = 0
+                    ai_score = 0
+                
+                achievement_count = UserAchievement.objects.filter(user_id=user.id).count()
+                
                 ranked_results.append({
                     'rank': idx,
                     'user': {
@@ -546,7 +587,11 @@ class LeaderboardView(APIView):
                     'current_streak': stats['current_streak'],
                     'best_streak': stats['best_streak'],
                     'recent_form_correct': stats['correct_tips'],
-                    'recent_form_tips': stats['total_tips']
+                    'recent_form_tips': stats['total_tips'],
+                    'level': level,
+                    'experience_points': xp,
+                    'ai_agreement_score': ai_score,
+                    'achievement_count': achievement_count
                 })
             
             response_data = {
@@ -607,10 +652,29 @@ class LeaderboardView(APIView):
             context={'request': request}
         )
         
-        # Add rank to each result
+        # Add rank and gamification data to each result
         ranked_results = []
         for idx, tipster in enumerate(serializer.data, 1):
             tipster['rank'] = idx
+            
+            # Add gamification data if available
+            user_id = tipster.get('user', {}).get('id')
+            if user_id:
+                from gamification.models import UserProgress, UserAchievement
+                try:
+                    progress = UserProgress.objects.get(user_id=user_id)
+                    tipster['level'] = progress.level
+                    tipster['experience_points'] = progress.experience_points
+                    tipster['ai_agreement_score'] = progress.ai_agreement_score
+                except UserProgress.DoesNotExist:
+                    tipster['level'] = 1
+                    tipster['experience_points'] = 0
+                    tipster['ai_agreement_score'] = 0
+                
+                # Count achievements
+                achievement_count = UserAchievement.objects.filter(user_id=user_id).count()
+                tipster['achievement_count'] = achievement_count
+            
             ranked_results.append(tipster)
         
         response_data = {
@@ -717,6 +781,34 @@ class TipShareView(APIView):
             user=request.user if request.user.is_authenticated else None,
             shared_to=shared_to
         )
+        
+        # Gamification: Award XP for social sharing (only for authenticated users)
+        if request.user.is_authenticated:
+            from gamification.models import UserProgress, UserChallenge, DailyChallenge
+            from gamification.services import check_and_award_achievements
+            from datetime import date
+            
+            progress, _ = UserProgress.objects.get_or_create(user=request.user)
+            progress.add_xp(5)  # 5 XP for social share
+            progress.social_shares_count += 1
+            progress.save()
+            
+            # Update challenge progress for SOCIAL_SHARE challenge
+            today = date.today()
+            social_challenge = DailyChallenge.objects.filter(
+                challenge_type="SOCIAL_SHARE",
+                challenge_date=today,
+                is_active=True
+            ).first()
+            if social_challenge:
+                user_challenge, _ = UserChallenge.objects.get_or_create(
+                    user=request.user,
+                    challenge=social_challenge
+                )
+                user_challenge.update_progress(1)
+            
+            # Check for achievements
+            check_and_award_achievements(request.user)
         
         return Response({
             'message': 'Share tracked successfully',

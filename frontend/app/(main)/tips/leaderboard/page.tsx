@@ -56,28 +56,31 @@ export default function LeaderboardPage() {
   }
 
   return (
-    <div className="min-h-dvh px-5 pt-safe pb-24">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
+    <div className="min-h-dvh bg-[#0A0A0A] px-4 pb-24 pt-safe text-white sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        {/* Header */}
+        <div className="mb-6 flex items-center justify-between gap-4 pt-4 sm:pt-6">
         <div className="flex items-center gap-4">
           <Link
             href="/tips"
-            className="p-2 hover:bg-white/10 rounded-lg transition"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] transition hover:bg-white/[0.06]"
           >
-            <ArrowLeft size={20} className="text-white" />
+            <ArrowLeft size={20} className="text-white/80" />
           </Link>
-          <div className="flex items-center gap-2">
-            <Trophy size={32} className="text-yellow-400" />
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#D4AF37]/30 bg-[#D4AF37]/10">
+              <Trophy size={24} className="text-[#F5D98B]" />
+            </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">Tipster Rankings</h1>
-              <p className="text-sm text-white/50">Verified analysts ranked by performance</p>
+              <h1 className="text-2xl font-black text-white sm:text-3xl">Tipster Rankings</h1>
+              <p className="text-sm text-white/55">Verified analysts ranked by performance</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="mb-6 space-y-4">
+      <div className="mb-6 space-y-4 rounded-[28px] border border-white/10 bg-[#111218]/80 p-4 shadow-[0_12px_30px_rgba(0,0,0,0.22)] backdrop-blur-xl sm:p-5">
         {/* Period Filter */}
         <div>
           <div className="flex items-center gap-2 mb-2">
@@ -91,12 +94,12 @@ export default function LeaderboardPage() {
               { key: 'month', label: 'This Month' },
             ].map((p) => (
               <button
-                key={p.key}
+                key={`${p.key}-${p.label}`}
                 onClick={() => setPeriod(p.key as any)}
-                className={`px-4 py-2 rounded-lg text-sm font-bold transition ${
+                className={`rounded-xl border px-4 py-2 text-sm font-bold transition ${
                   period === p.key
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
-                    : 'bg-white/5 text-white/70 hover:bg-white/10'
+                    ? 'border-[#D4AF37]/40 bg-[#D4AF37]/15 text-[#F5D98B]'
+                    : 'border-white/10 bg-white/[0.03] text-white/70 hover:border-white/20 hover:bg-white/[0.05]'
                 }`}
               >
                 {p.label}
@@ -121,12 +124,12 @@ export default function LeaderboardPage() {
               { key: 'dnb', label: 'DNB' },
             ].map((m) => (
               <button
-                key={m.key}
+                key={`${m.key}-${m.label}`}
                 onClick={() => setMarket(m.key as any)}
-                className={`px-4 py-2 rounded-lg text-sm font-bold transition ${
+                className={`rounded-xl border px-4 py-2 text-sm font-bold transition ${
                   market === m.key
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
-                    : 'bg-white/5 text-white/70 hover:bg-white/10'
+                    ? 'border-[#D4AF37]/40 bg-[#D4AF37]/15 text-[#F5D98B]'
+                    : 'border-white/10 bg-white/[0.03] text-white/70 hover:border-white/20 hover:bg-white/[0.05]'
                 }`}
               >
                 {m.label}
@@ -151,10 +154,10 @@ export default function LeaderboardPage() {
         <div className="space-y-4">
           {leaderboard.map((tipster, index) => (
             <Link
-              key={tipster.id}
+              key={`${tipster.id ?? 'tipster'}-${tipster.user?.username ?? index}`}
               href={`/profile/${tipster.user.username}`}
             >
-              <div className={`bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl p-6 border border-white/10 hover:border-blue-500/50 transition cursor-pointer relative overflow-hidden hover:shadow-2xl hover:shadow-blue-500/10`}>
+              <div className={`relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(17,18,24,0.96),rgba(9,10,12,0.96))] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.25)] transition hover:border-[#D4AF37]/30 hover:shadow-[0_22px_45px_rgba(0,0,0,0.28)] sm:p-5`}>
                 {/* Top 3 accent lines */}
                 {index < 3 && (
                   <div className={`absolute top-0 left-0 right-0 h-1.5 ${
@@ -165,7 +168,7 @@ export default function LeaderboardPage() {
                 )}
 
                 {/* Rank & User Info */}
-                <div className="flex items-center justify-between mb-5">
+                <div className="mb-5 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
                     {/* Rank Badge */}
                     <div className={`flex items-center justify-center w-14 h-14 rounded-full font-bold text-black ${getRankBadge(index)} ring-4 ring-white/10`}>
@@ -242,7 +245,7 @@ export default function LeaderboardPage() {
                 </div>
 
                 {/* Performance Stats */}
-                <div className="grid grid-cols-4 gap-3 mb-5">
+                <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
                   <div className="bg-white/5 rounded-xl p-4 text-center border border-white/10">
                     <p className="text-xs text-white/50 mb-2 flex items-center justify-center gap-1">
                       <Flame size={12} /> Streak
@@ -277,7 +280,7 @@ export default function LeaderboardPage() {
                 </div>
 
                 {/* Specializations */}
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   {/* Market Specialization */}
                   {tipster.market_specialization && (
                     <div className="flex items-center justify-between bg-white/5 rounded-lg p-3">
@@ -350,6 +353,7 @@ export default function LeaderboardPage() {
           </button>
         </div>
       )}
+      </div>
     </div>
   )
 }

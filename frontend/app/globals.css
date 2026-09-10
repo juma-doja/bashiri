@@ -129,6 +129,20 @@ html, body {
   font-family: "Manrope", "Segoe UI", sans-serif;
 }
 
+/* Font hierarchy for Bashiri */
+h1, h2, h3, h4, h5, h6,
+.font-heading,
+.font-display,
+.percentage,
+.stat-value,
+.prediction-value,
+.odds-value,
+.xg-value,
+.rank-number,
+.badge-number {
+  font-family: "Space Grotesk", "Manrope", sans-serif;
+}
+
 body {
   background-clip: padding-box;
   line-height: 1.5;

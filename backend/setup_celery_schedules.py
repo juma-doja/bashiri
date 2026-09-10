@@ -147,6 +147,9 @@ make_interval_task("Fetch Upcoming Odds", "predictions.tasks.fetch_upcoming_odds
 make_interval_task("Generate Result Recaps", "feed.tasks.generate_result_recaps", 15)
 make_task("Clean old shares", "tips.tasks.clean_old_shares_task", {"minute": "0", "hour": "3"})
 make_task("Deactivate old tips", "tips.tasks.deactivate_old_tips_task", {"minute": "0", "hour": "3"})
+
+# Gamification
+make_task("Create Daily Challenges", "tips.tasks.create_daily_challenges_task", {"minute": "0", "hour": "0"})
 make_task("Generate Poll Cards", "feed.tasks.generate_poll_cards", {"minute": "0", "hour": "5"})
 make_interval_task_seconds("Update Live Match Cards", "feed.tasks.update_live_match_cards", 30)
 make_task("Generate Weekly Report", "feed.tasks.generate_weekly_report", {"minute": "0", "hour": "20", "day_of_week": "0"})

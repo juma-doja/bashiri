@@ -60,69 +60,67 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="min-h-dvh px-5 pt-safe pt-10 pb-24" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 32px)" }}>
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <button onClick={() => router.back()} aria-label="Rudi nyuma">
-            <ArrowLeft size={20} style={{ color: "rgba(255,255,255,0.6)" }} />
-          </button>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-accent)] flex items-center justify-center">
-            <Film size={20} className="text-black" />
+    <div className="min-h-screen bg-[#0a0a0a] px-4 pb-24 pt-safe text-white sm:px-6 lg:px-8" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 32px)" }}>
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-6">
+          <div className="mb-2 flex items-center gap-3">
+            <button onClick={() => router.back()} aria-label="Rudi nyuma" className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] transition hover:bg-white/[0.06]">
+              <ArrowLeft size={20} className="text-white/70" />
+            </button>
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-accent)]">
+              <Film size={20} className="text-black" />
+            </div>
+            <h1 className="text-2xl font-black text-white">Video Zangu</h1>
           </div>
-          <h1 className="text-2xl font-black text-white">Video Zangu</h1>
-        </div>
-        <p className="text-sm text-white/50">
-          Simamia na interact na video zote ulizopost kwenye Mic
-        </p>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
-        <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-4 border border-white/10">
-          <p className="text-3xl font-black text-white mb-1">{reactions.length}</p>
-          <p className="text-xs text-white/50">Video Zilizopost</p>
-        </div>
-        <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-4 border border-white/10">
-          <p className="text-3xl font-black text-white mb-1">
-            {reactions.reduce((sum, r) => sum + r.vote_count, 0)}
+          <p className="text-sm text-white/50">
+            Simamia na interact na video zote ulizopost kwenye Mic
           </p>
-          <p className="text-xs text-white/50">Jumla ya Votes</p>
         </div>
-      </div>
 
-      {/* Empty State */}
-      {reactions.length === 0 && (
-        <div className="bg-gradient-to-br from-gray-900 to-black rounded-3xl p-8 border border-white/10 text-center">
-          <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
-            <Film size={40} className="text-white/30" />
+        <div className="mb-6 grid grid-cols-2 gap-3">
+          <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(135deg,rgba(17,18,24,0.96),rgba(9,10,12,0.96))] p-4 shadow-[0_12px_30px_rgba(0,0,0,0.22)]">
+            <p className="mb-1 text-3xl font-black text-white">{reactions.length}</p>
+            <p className="text-xs uppercase tracking-[0.14em] text-white/50">Video Zilizopost</p>
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">Hakuna Video Bado</h3>
-          <p className="text-sm text-white/50 mb-6">
-            Bado hujapost video yoyote kwenye Mic. Anza sasa!
-          </p>
-          <button
-            onClick={() => router.push("/matches")}
-            className="px-6 py-3 rounded-xl font-bold bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-accent)] text-black hover:opacity-90 transition-opacity flex items-center gap-2 mx-auto"
-          >
-            <Plus size={20} />
-            <span>Pata Video Mpya</span>
-          </button>
+          <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(135deg,rgba(17,18,24,0.96),rgba(9,10,12,0.96))] p-4 shadow-[0_12px_30px_rgba(0,0,0,0.22)]">
+            <p className="mb-1 text-3xl font-black text-white">
+              {reactions.reduce((sum, r) => sum + r.vote_count, 0)}
+            </p>
+            <p className="text-xs uppercase tracking-[0.14em] text-white/50">Jumla ya Votes</p>
+          </div>
         </div>
-      )}
 
-      {/* Video Grid */}
-      <AnimatePresence>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {reactions.map((reaction) => (
-            <MicVideoCard
-              key={reaction.id}
-              reaction={reaction}
-              onDelete={handleDelete}
-            />
-          ))}
-        </div>
-      </AnimatePresence>
+        {reactions.length === 0 && (
+          <div className="rounded-[30px] border border-white/10 bg-[#111218]/80 p-8 text-center shadow-[0_12px_30px_rgba(0,0,0,0.22)]">
+            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white/5">
+              <Film size={40} className="text-white/30" />
+            </div>
+            <h3 className="mb-2 text-xl font-bold text-white">Hakuna Video Bado</h3>
+            <p className="mb-6 text-sm text-white/50">
+              Bado hujapost video yoyote kwenye Mic. Anza sasa!
+            </p>
+            <button
+              onClick={() => router.push("/matches")}
+              className="mx-auto flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-accent)] px-6 py-3 font-bold text-black transition-opacity hover:opacity-90"
+            >
+              <Plus size={20} />
+              <span>Pata Video Mpya</span>
+            </button>
+          </div>
+        )}
+
+        <AnimatePresence>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {reactions.map((reaction) => (
+              <MicVideoCard
+                key={reaction.id}
+                reaction={reaction}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

@@ -67,6 +67,53 @@ def verify_tips_task(self):
                     else:
                         perf.incorrect_tips += 1
                         perf.current_streak = 0
+                    
+                    # Gamification: Award XP for correct tips
+                    if is_correct:
+                        from gamification.models import UserProgress, UserChallenge, DailyChallenge
+                        from gamification.services import check_and_award_achievements
+                        from datetime import date
+                        
+                        progress, _ = UserProgress.objects.get_or_create(user=tip.user)
+                        progress.add_xp(20)  # 20 XP for correct tip
+                        
+                        # Update challenge progress for WIN_3_TIPS and STREAK_3
+                        today = date.today()
+                        win_challenge = DailyChallenge.objects.filter(
+                            challenge_type="WIN_3_TIPS",
+                            challenge_date=today,
+                            is_active=True
+                        ).first()
+                        if win_challenge:
+                            user_challenge, _ = UserChallenge.objects.get_or_create(
+                                user=tip.user,
+                                challenge=win_challenge
+                            )
+                            user_challenge.update_progress(1)
+                        
+                        streak_challenge = DailyChallenge.objects.filter(
+                            challenge_type="STREAK_3",
+                            challenge_date=today,
+                            is_active=True
+                        ).first()
+                        if streak_challenge and perf.current_streak >= 3:
+                            user_challenge, _ = UserChallenge.objects.get_or_create(
+                                user=tip.user,
+                                challenge=streak_challenge
+                            )
+                            # Set current_value to actual streak
+                            user_challenge.current_value = perf.current_streak
+                            if user_challenge.current_value >= user_challenge.challenge.target_value:
+                                user_challenge.completed = True
+                                user_challenge.completed_at = timezone.now()
+                                progress.add_xp(streak_challenge.reward_xp)
+                            user_challenge.save()
+                        
+                        # Check for achievements
+                        check_and_award_achievements(tip.user)
+                        
+                        # Save progress
+                        progress.save()
                 
                 # Update market-specific stats
                 if tip.market_key == "1X2":
@@ -428,6 +475,31 @@ def deactivate_old_tips_task():
     
     except Exception as e:
         logger.error(f"deactivate_old_tips_task failed: {str(e)}")
+        return {
+            'status': 'error',
+            'error': str(e)
+        }
+
+
+@shared_task
+def create_daily_challenges_task():
+    """
+    Create daily gamification challenges for the day.
+    Runs daily at midnight via Celery Beat.
+    """
+    try:
+        from gamification.services import create_daily_challenges
+        
+        count = create_daily_challenges()
+        
+        logger.info(f"create_daily_challenges_task: created {count} daily challenges")
+        return {
+            'status': 'success',
+            'created_count': count
+        }
+    
+    except Exception as e:
+        logger.error(f"create_daily_challenges_task failed: {str(e)}")
         return {
             'status': 'error',
             'error': str(e)

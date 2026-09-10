@@ -84,8 +84,35 @@ class FeedbackView(APIView):
         try:
             user = request.user if request.user.is_authenticated else None
             message = ChatMessage.objects.get(id=message_id, user=user, session_key=session_key)
+            
+            # Don't allow duplicate feedback
+            if message.feedback:
+                return Response({"detail": "Feedback tayari imeshawekwa."}, status=status.HTTP_400_BAD_REQUEST)
+            
             message.feedback = feedback
             message.save(update_fields=["feedback"])
-            return Response({"success": True})
+            
+            # Gamification: Update AI agreement score and give XP
+            if user and user.is_authenticated:
+                from gamification.models import UserProgress
+                from gamification.services import award_achievement
+                
+                progress, created = UserProgress.objects.get_or_create(user=user)
+                
+                # Update AI agreement score
+                if feedback == "positive":
+                    progress.ai_agreement_score = min(100, progress.ai_agreement_score + 5)
+                else:
+                    progress.ai_agreement_score = max(0, progress.ai_agreement_score - 2)
+                progress.save()
+                
+                # Give small XP for providing feedback
+                progress.add_xp(5)
+                
+                # Check for AI_MASTER achievement
+                if progress.ai_agreement_score >= 80:
+                    award_achievement(user, "AI_MASTER")
+            
+            return Response({"success": True, "ai_agreement_score": user.progress.ai_agreement_score if user and hasattr(user, 'progress') else None})
         except ChatMessage.DoesNotExist:
             return Response({"detail": "Ujumbe haujapatikana."}, status=status.HTTP_404_NOT_FOUND)

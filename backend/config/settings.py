@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "reviews",
     "tips",
     "music",
+    "gamification",
 ]
 
 MIDDLEWARE = [
@@ -153,6 +154,7 @@ CACHES = {
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
@@ -164,15 +166,15 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "100/hour",
-        "user": "1000/hour",
+        "anon": "500/hour",
+        "user": "5000/hour",
         "otp": "5/minute",  # imehifadhiwa — haitumiki kwa sasa (OTP flow imesimamishwa)
         "content_report": "10/hour",
         "auth_login": "10/minute",
         "auth_register": "5/minute",
         "password_reset": "5/hour",
         "feed": "10000/hour",  # Feed endpoint needs high rate limit for smooth scrolling
-        "tips": "200/hour",  # Tips API rate limit to prevent external app scraping
+        "tips": "1000/hour",  # Tips API rate limit increased for better UX
     },
 }
 

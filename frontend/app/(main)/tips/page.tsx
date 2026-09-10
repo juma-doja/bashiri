@@ -76,10 +76,10 @@ export default function TipsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#0f0f0f] to-[#0a0a0a] pb-32">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div className="min-h-screen bg-[#0a0a0a] pb-32 text-white">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         {/* Header */}
-        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
             <button
               onClick={() => router.back()}
@@ -137,8 +137,8 @@ export default function TipsPage() {
         </div>
 
         {/* Discovery Tabs */}
-        <div className="mb-6 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-          <div className="flex gap-2 sm:gap-3 min-w-max">
+        <div className="mb-6 overflow-x-auto pb-2">
+          <div className="flex min-w-max gap-2 sm:gap-3">
             {[
               { key: 'all', label: 'All Tips', icon: null },
               { key: 'following', label: 'Following', icon: Users },
@@ -175,35 +175,48 @@ export default function TipsPage() {
 
         {/* Filters Panel */}
         {showFilters && (
-          <div className="mb-6 p-4 rounded-xl" style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.2)' }}>
+          <div className="mb-6 rounded-[24px] border border-[#D4AF37]/20 bg-[#111218]/85 p-4 shadow-[0_12px_30px_rgba(0,0,0,0.22)] sm:p-5">
             <TipFilter />
           </div>
         )}
 
         {/* Tipsters Leaderboard - Collapsible */}
         <div className="mb-6">
-          <button
-            onClick={() => setShowLeaderboard(!showLeaderboard)}
-            className="w-full flex items-center justify-between p-3 sm:p-4 rounded-xl transition-all duration-200 hover:scale-[1.01]"
-            style={{
-              background: 'rgba(255,255,255,0.035)',
-              border: '1px solid rgba(212,175,55,0.22)'
-            }}
-          >
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-1.5 sm:p-2 rounded-lg" style={{ background: 'rgba(212,175,55,0.15)' }}>
-                <Trophy size={16} className="text-[#D4AF37] sm:size-20" />
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <button
+              onClick={() => setShowLeaderboard(!showLeaderboard)}
+              className="flex w-full items-center justify-between rounded-[22px] border border-[#D4AF37]/20 bg-[#111218]/80 p-3 transition-all duration-200 hover:scale-[1.01] sm:p-4"
+              style={{
+                background: 'rgba(255,255,255,0.035)',
+                border: '1px solid rgba(212,175,55,0.22)'
+              }}
+            >
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 rounded-lg" style={{ background: 'rgba(212,175,55,0.15)' }}>
+                  <Trophy size={16} className="text-[#D4AF37] sm:size-20" />
+                </div>
+                <div className="text-left">
+                  <span className="text-sm sm:text-base font-bold text-white block">Top 50 Tipsters</span>
+                  <span className="text-[10px] sm:text-xs text-white/50 block">Professional ranking based on accuracy, tips count & streak</span>
+                </div>
               </div>
-              <div className="text-left">
-                <span className="text-sm sm:text-base font-bold text-white block">Top 50 Tipsters</span>
-                <span className="text-[10px] sm:text-xs text-white/50 block">Professional ranking based on accuracy, tips count & streak</span>
-              </div>
-            </div>
-            {showLeaderboard ? <ChevronUp size={20} className="text-[#D4AF37] sm:size-24" /> : <ChevronDown size={20} className="text-white/50 sm:size-24" />}
-          </button>
+              {showLeaderboard ? <ChevronUp size={20} className="text-[#D4AF37] sm:size-24" /> : <ChevronDown size={20} className="text-white/50 sm:size-24" />}
+            </button>
+            <button
+              onClick={() => router.push('/tips/leaderboard')}
+              className="rounded-xl border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-3 py-2 text-xs font-semibold text-[#F5D98B] transition-all duration-200 hover:bg-[#D4AF37]/15 sm:text-sm"
+              style={{
+                background: 'rgba(212,175,55,0.1)',
+                border: '1px solid rgba(212,175,55,0.3)',
+                color: '#D4AF37'
+              }}
+            >
+              View Full
+            </button>
+          </div>
           
           {showLeaderboard && (
-            <div className="mt-4 rounded-2xl border border-white/8 bg-black/20 p-3 sm:p-4">
+            <div className="mt-4 rounded-[24px] border border-white/10 bg-[#0D0F13]/80 p-3 shadow-[0_12px_30px_rgba(0,0,0,0.22)] sm:p-4">
               <TipstersLeaderboard />
             </div>
           )}
@@ -246,7 +259,7 @@ export default function TipsPage() {
                 </button>
               )}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
               {tips.map((tip) => (
                 <TipCard
                   key={tip.id}

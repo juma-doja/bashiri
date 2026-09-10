@@ -2,9 +2,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Film, Target, TrendingUp, Award, Loader2, User, Calendar, Heart, Eye, ArrowLeft, Flame, Medal, Brain, CheckCircle, XCircle, Clock, Shield, Crown, Users, Zap, Star, UserPlus, UserMinus } from "lucide-react";
+import { Film, Target, TrendingUp, Award, Loader2, User, Calendar, Heart, Eye, ArrowLeft, Flame, Medal, Brain, CheckCircle, XCircle, Clock, Shield, Crown, Users, Zap, Star, UserPlus, UserMinus, Trophy } from "lucide-react";
 import { getPublicProfile, followUser, unfollowUser, checkFollowStatus, getFollowing } from "@/lib/api/auth";
 import { getUserTips, getTipLeaderboard } from "@/lib/api/tips";
+import { getUserProgress } from "@/lib/api/gamification";
 import { MicVideoCard } from "@/components/mic/MicVideoCard";
 import { MicReaction } from "@/lib/api/mic";
 import { TipPerformance, UserTipList } from "@/lib/types/tips";
@@ -28,6 +29,7 @@ export default function PublicProfilePage() {
   const [followLoading, setFollowLoading] = useState(false);
   const [serverFollowStatus, setServerFollowStatus] = useState<boolean | null>(null);
   const [followersCount, setFollowersCount] = useState<number | null>(null);
+  const [userProgress, setUserProgress] = useState<any>(null);
 
   useEffect(() => {
     loadProfile();
@@ -75,6 +77,14 @@ export default function PublicProfilePage() {
       // Set followers count from server response
       if (profile.user && profile.user.followers_count !== undefined) {
         setFollowersCount(profile.user.followers_count);
+      }
+
+      // Load gamification progress
+      try {
+        const progressData = await getUserProgress();
+        setUserProgress(progressData);
+      } catch (err) {
+        console.error('Failed to load gamification progress:', err);
       }
 
       // Use follow status from backend response
@@ -218,9 +228,10 @@ export default function PublicProfilePage() {
   const userTipsList = userTips || [];
 
   return (
-    <div className="min-h-dvh px-5 pt-safe pt-10 pb-24">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+    <div className="min-h-dvh bg-[#0A0A0A] px-4 pb-24 pt-safe pt-10 text-white sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        {/* Header */}
+        <div className="mb-6 flex items-center gap-3">
         <button onClick={() => router.back()} aria-label="Rudi nyuma">
           <ArrowLeft size={20} style={{ color: "rgba(255,255,255,0.6)" }} />
         </button>
@@ -237,12 +248,12 @@ export default function PublicProfilePage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-3xl p-6 border border-white/10 mb-6 relative overflow-hidden"
+        className="relative mb-6 overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(135deg,rgba(17,18,24,0.96),rgba(9,10,12,0.96))] p-5 shadow-[0_18px_40px_rgba(0,0,0,0.25)] sm:p-6"
       >
         {/* Top accent line */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-600" />
 
-        <div className="flex items-center gap-4 mb-6">
+        <div className="mb-6 flex items-center gap-4">
           <div className="relative">
             {user.avatar_url ? (
               <img
@@ -321,7 +332,7 @@ export default function PublicProfilePage() {
 
         {/* Enhanced Stats */}
         {tipPerformance ? (
-          <div className="grid grid-cols-4 gap-3 mb-6">
+          <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl p-4 text-center border border-blue-500/30">
               <p className="text-2xl font-black text-white mb-1">{tipPerformance.total_tips}</p>
               <p className="text-xs text-white/50">Verified Tips</p>
@@ -343,21 +354,67 @@ export default function PublicProfilePage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            <div className="bg-white/5 rounded-2xl p-4 text-center border border-white/10">
-              <p className="text-2xl font-black text-white mb-1">{userTips.length}</p>
-              <p className="text-xs text-white/50">Predictions</p>
+          <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl p-4 text-center border border-blue-500/30">
+              <p className="text-2xl font-black text-white mb-1">-</p>
+              <p className="text-xs text-white/50">Verified Tips</p>
             </div>
-            <div className="bg-white/5 rounded-2xl p-4 text-center border border-white/10">
-              <p className="text-2xl font-black text-white mb-1">{calculateUserAccuracy(userTips)}%</p>
+            <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl p-4 text-center border border-green-500/30">
+              <p className="text-2xl font-black text-white mb-1">-</p>
               <p className="text-xs text-white/50">Accuracy</p>
             </div>
-            <div className="bg-white/5 rounded-2xl p-4 text-center border border-white/10">
-              <p className="text-2xl font-black text-white mb-1">{calculateUserStreak(userTips)}</p>
+            <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-2xl p-4 text-center border border-orange-500/30">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Flame size={16} className="text-white/50" />
+                <p className="text-2xl font-black text-white">-</p>
+              </div>
+              <p className="text-xs text-white/50">Current Streak</p>
+            </div>
+            <div className="bg-gradient-to-br from-yellow-500/10 to-amber-500/10 rounded-2xl p-4 text-center border border-yellow-500/30">
+              <p className="text-2xl font-black text-white mb-1">-</p>
               <p className="text-xs text-white/50">Best Streak</p>
             </div>
           </div>
         )}
+
+        {/* Gamification Stats */}
+        {userProgress && (
+          <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-2xl p-4 text-center border border-purple-500/30">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Zap size={16} className="text-purple-400" />
+                <p className="text-2xl font-black text-white">{userProgress.progress.level}</p>
+              </div>
+              <p className="text-xs text-white/50">Level</p>
+            </div>
+            <div className="bg-gradient-to-br from-indigo-500/10 to-blue-500/10 rounded-2xl p-4 text-center border border-indigo-500/30">
+              <p className="text-2xl font-black text-white mb-1">{userProgress.progress.experience_points}</p>
+              <p className="text-xs text-white/50">XP</p>
+            </div>
+            <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-2xl p-4 text-center border border-yellow-500/30">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Trophy size={16} className="text-yellow-400" />
+                <p className="text-2xl font-black text-white">{userProgress.achievements.length}</p>
+              </div>
+              <p className="text-xs text-white/50">Badges</p>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="bg-white/5 rounded-2xl p-4 text-center border border-white/10">
+            <p className="text-2xl font-black text-white mb-1">{userTips.length}</p>
+            <p className="text-xs text-white/50">Predictions</p>
+          </div>
+          <div className="bg-white/5 rounded-2xl p-4 text-center border border-white/10">
+            <p className="text-2xl font-black text-white mb-1">{calculateUserAccuracy(userTips)}%</p>
+            <p className="text-xs text-white/50">Accuracy</p>
+          </div>
+          <div className="bg-white/5 rounded-2xl p-4 text-center border border-white/10">
+            <p className="text-2xl font-black text-white mb-1">{calculateUserStreak(userTips)}</p>
+            <p className="text-xs text-white/50">Best Streak</p>
+          </div>
+        </div>
 
         {/* Recent Form */}
         {tipPerformance && tipPerformance.recent_form_tips > 0 && (
@@ -390,7 +447,7 @@ export default function PublicProfilePage() {
       </motion.div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+      <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
         {[
           { key: "overview", label: "Overview" },
           { key: "tips", label: "Tips" },
@@ -399,10 +456,10 @@ export default function PublicProfilePage() {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key as any)}
-            className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition ${
+            className={`whitespace-nowrap rounded-xl border px-4 py-2 text-sm font-bold transition ${
               activeTab === tab.key
-                ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white"
-                : "bg-white/5 text-white/70 hover:bg-white/10"
+                ? "border-[#D4AF37]/40 bg-[#D4AF37]/15 text-[#F5D98B]"
+                : "border-white/10 bg-white/[0.03] text-white/70 hover:border-white/20 hover:bg-white/[0.05]"
             }`}
           >
             {tab.label}
@@ -418,7 +475,7 @@ export default function PublicProfilePage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-gradient-to-br from-gray-900 to-black rounded-3xl p-6 border border-white/10 mb-6"
+              className="mb-6 rounded-[28px] border border-white/10 bg-[#111218]/80 p-5 shadow-[0_12px_30px_rgba(0,0,0,0.22)] sm:p-6"
             >
               <div className="flex items-center gap-2 mb-4">
                 <Medal size={20} className="text-[var(--brand-accent)]" />
@@ -446,7 +503,7 @@ export default function PublicProfilePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-gradient-to-br from-gray-900 to-black rounded-3xl p-6 border border-white/10 mb-6"
+              className="mb-6 rounded-[28px] border border-white/10 bg-[#111218]/80 p-5 shadow-[0_12px_30px_rgba(0,0,0,0.22)] sm:p-6"
             >
               <div className="flex items-center gap-2 mb-4">
                 <Crown size={20} className="text-[var(--brand-accent)]" />
@@ -474,7 +531,7 @@ export default function PublicProfilePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
-              className="bg-gradient-to-br from-gray-900 to-black rounded-3xl p-6 border border-white/10 mb-6"
+              className="mb-6 rounded-[28px] border border-white/10 bg-[#111218]/80 p-5 shadow-[0_12px_30px_rgba(0,0,0,0.22)] sm:p-6"
             >
               <div className="flex items-center gap-2 mb-4">
                 <Award size={20} className="text-[var(--brand-accent)]" />
@@ -489,7 +546,7 @@ export default function PublicProfilePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gradient-to-br from-gray-900 to-black rounded-3xl p-5 sm:p-6 border border-white/10 mb-6"
+            className="mb-6 rounded-[28px] border border-white/10 bg-[#111218]/80 p-5 shadow-[0_12px_30px_rgba(0,0,0,0.22)] sm:p-6"
           >
             <div className="flex items-center gap-2 mb-5">
               <Award size={20} className="text-[var(--brand-accent)]" />
@@ -497,7 +554,7 @@ export default function PublicProfilePage() {
             </div>
 
             {/* Responsive Stats Grid */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 xl:max-w-[1200px] xl:mx-auto">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:max-w-[1200px] xl:mx-auto">
               {/* Total Tips */}
               <div className="bg-white/5 border border-white/10 rounded-xl p-4 sm:p-5 flex flex-col items-center justify-center text-center hover:bg-white/8 transition-all">
                 <div className="text-[13px] sm:text-[14px] font-medium text-white/60 mb-2 sm:mb-3">Total Tips</div>
@@ -543,13 +600,13 @@ export default function PublicProfilePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="flex items-center gap-2 mb-4">
+          <div className="mb-4 flex items-center gap-2">
             <Target size={20} className="text-[var(--brand-accent)]" />
             <h3 className="text-lg font-bold text-white">Tips ({userTipsList.length})</h3>
           </div>
 
           {userTipsList.length === 0 ? (
-            <div className="bg-gradient-to-br from-gray-900 to-black rounded-3xl p-8 border border-white/10 text-center">
+            <div className="rounded-[28px] border border-white/10 bg-[#111218]/80 p-8 text-center shadow-[0_12px_30px_rgba(0,0,0,0.22)]">
               <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
                 <Target size={40} className="text-white/30" />
               </div>
@@ -574,14 +631,14 @@ export default function PublicProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <div className="flex items-center gap-2 mb-4">
+          <div className="mb-4 flex items-center gap-2">
             <Film size={20} className="text-[var(--brand-accent)]" />
             <h3 className="text-lg font-bold text-white">Video za Mic</h3>
             <span className="text-sm text-white/50">({micCount})</span>
           </div>
 
           {micReactions.length === 0 ? (
-            <div className="bg-gradient-to-br from-gray-900 to-black rounded-3xl p-8 border border-white/10 text-center">
+            <div className="rounded-[28px] border border-white/10 bg-[#111218]/80 p-8 text-center shadow-[0_12px_30px_rgba(0,0,0,0.22)]">
               <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
                 <Film size={40} className="text-white/30" />
               </div>
@@ -591,7 +648,7 @@ export default function PublicProfilePage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {micReactions.map((reaction: MicReaction) => (
                 <div key={reaction.id} className="bg-gradient-to-br from-gray-900 to-black rounded-3xl overflow-hidden border border-white/10">
                   <div className="relative aspect-video bg-black">
@@ -630,6 +687,7 @@ export default function PublicProfilePage() {
           )}
         </motion.div>
       )}
+      </div>
     </div>
   );
 }
