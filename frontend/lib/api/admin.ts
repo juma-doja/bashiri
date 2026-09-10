@@ -333,8 +333,10 @@ export async function uploadHeroImageToCloudinary(file: File, sig: HeroUploadSig
     method: "POST",
     body: formData,
   });
-  if (!res.ok) throw new Error("Imeshindwa kupakia picha.");
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error?.message || data?.detail || `Imeshindwa kupakia picha (${res.status}).`);
+  }
   return data.secure_url as string;
 }
 
