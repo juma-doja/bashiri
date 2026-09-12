@@ -166,7 +166,7 @@ function HeroSection() {
 
       {/* Overlay */}
       <div
-        className="absolute inset-0 z-0 bg-[#05070B]/10"
+        className="absolute inset-0 z-0 bg-[#05070B]/30"
         aria-hidden="true"
       />
 
