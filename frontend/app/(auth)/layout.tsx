@@ -13,19 +13,24 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div
       className="min-h-dvh flex flex-col justify-center relative overflow-hidden"
       style={{
-        backgroundColor: "#0A0A0A",
+        backgroundColor: "#0A1628",
         backgroundImage: `url(/bashiri_new.png)`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
     >
+      {/* Dark overlay for readability */}
+      <div
+        className="absolute inset-0 z-0 bg-[#05070B]/40"
+        aria-hidden="true"
+      />
       {/* Floating Home Button */}
       <motion.button
         onClick={() => router.push("/")}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         aria-label="Go to Home"
-        className="fixed top-6 left-6 z-50 w-12 h-12 rounded-full flex items-center justify-center outline-none focus:ring-2 focus:ring-white/50"
+        className="fixed top-6 left-6 z-[60] w-12 h-12 rounded-full flex items-center justify-center outline-none focus:ring-2 focus:ring-white/50"
         style={{
           background: "rgba(255, 255, 255, 0.08)",
           backdropFilter: "blur(20px)",
@@ -62,7 +67,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* Old background code - commented out
         backgroundImage: `url(/login_background.png)`,
       */}
-      <div className="px-5 pb-safe pb-8 max-w-md mx-auto w-full">
+      <div className="relative z-10 px-5 pb-safe pb-8 max-w-md mx-auto w-full">
         <div className="text-center mb-8">
           <motion.div
             className="relative inline-block mb-4"

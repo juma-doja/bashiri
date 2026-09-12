@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { BashiriButton } from "@/components/ui/Button";
 import { BashiriInput } from "@/components/ui/Input";
@@ -16,11 +16,13 @@ type Tab = "login" | "register";
 
 const isPhoneValid = (value: string) => /^\+255\d{9}$/.test(value);
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const setSession = useAuthStore((s) => s.setSession);
 
-  const [tab, setTab] = useState<Tab>("login");
+  const initialTab = searchParams.get("tab") === "register" ? "register" : "login";
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [registerStep, setRegisterStep] = useState(1);
   const [phone, setPhone] = useState("+255");
   const [password, setPassword] = useState("");
@@ -250,6 +252,14 @@ export default function LoginPage() {
         </div>
       )}
     </motion.div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center text-white/70">Loading...</div>}>
+      <LoginPageContent />
+    </Suspense>
   );
 }
 
