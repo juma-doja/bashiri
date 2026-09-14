@@ -42,7 +42,7 @@ def notify_daily_picks():
         send_push_to_user(
             user, "AI Picks za Leo Ziko Tayari! 🔥",
             f"Angalia predictions {today_picks.count()} za AI kwa mechi za leo.",
-            click_action="/home",
+            click_action="/ai-picks",
         )
         count += 1
     return f"Notifications zilizotumwa: {count}"
@@ -73,16 +73,31 @@ def notify_favorite_team_matches():
             if pref and not pref.favorite_team_alerts_enabled:
                 continue
 
+            # Get actual match time in Swahili
+            match_hour = match.kickoff_at.hour
+            if match_hour == 0:
+                time_str = "Saa 12 usiku"
+            elif match_hour < 12:
+                time_str = f"Saa {match_hour} asubuhi"
+            elif match_hour == 12:
+                time_str = "Saa 12 mchana"
+            elif match_hour < 16:
+                time_str = f"Saa {match_hour - 12} mchana"
+            elif match_hour < 19:
+                time_str = f"Saa {match_hour - 12} alasiri"
+            else:
+                time_str = f"Saa {match_hour - 12} jioni"
+
             Notification.objects.create(
                 user=user, type="FAVORITE_TEAM_MATCH",
-                title="Mechi ya Timu Yako Inaanza Saa 3! ⚽",
+                title=f"Mechi ya Timu Yako Inaanza {time_str}! ⚽",
                 body=f"{match.home_team.name} vs {match.away_team.name}",
                 data={"match_id": match.id},
             )
             send_push_to_user(
-                user, "Mechi ya Timu Yako Inaanza Saa 3! ⚽",
+                user, f"Mechi ya Timu Yako Inaanza {time_str}! ⚽",
                 f"{match.home_team.name} vs {match.away_team.name}",
-                click_action=f"/create/{match.id}/overview",
+                click_action=f"/match/{match.id}/overview",
             )
             count += 1
     return f"Notifications za favorite team: {count}"
@@ -119,7 +134,7 @@ def notify_high_confidence_picks():
             send_push_to_user(
                 user, "AI Ina Uhakika Mkubwa! 🎯",
                 f"Confidence {card.data['ai_pick']['confidence']}% kwa mechi ya leo.",
-                click_action="/home",
+                click_action="/high-confidence",
             )
             count += 1
     return f"High-confidence notifications: {count}"
@@ -148,6 +163,11 @@ def notify_morning_picks():
             title="Today's 5 Best Picks ☀️",
             body=f"Angalia predictions 5 bora za AI kwa mechi za leo.",
             data={"card_ids": [c.id for c in today_picks]},
+        )
+        send_push_to_user(
+            user, "Today's 5 Best Picks ☀️",
+            f"Angalia predictions 5 bora za AI kwa mechi za leo.",
+            click_action="/ai-picks",
         )
         count += 1
     return f"Morning picks notifications: {count}"
@@ -197,6 +217,11 @@ def notify_live_match_alerts():
                 body=f"{match.home_team.name} vs {match.away_team.name} - Tazama live!",
                 data={"match_id": match.id},
             )
+            send_push_to_user(
+                user, f"Mechi Inaendelea! ⚽",
+                f"{match.home_team.name} vs {match.away_team.name} - Tazama live!",
+                click_action=f"/match/{match.id}/overview",
+            )
             count += 1
     
     return f"Live match alerts: {count}"
@@ -239,6 +264,11 @@ def notify_evening_recap():
                 "total": total,
                 "correct": correct,
             },
+        )
+        send_push_to_user(
+            user, f"Leo AI ilikuwa na accuracy {accuracy}% 📊",
+            f"Total predictions: {total}, Sahihi: {correct}",
+            click_action="/evening-recap",
         )
         count += 1
     return f"Evening recap notifications: {count}"
@@ -292,6 +322,11 @@ def notify_weekly_summary():
                 "correct": correct,
                 "is_top_10": is_top_10,
             },
+        )
+        send_push_to_user(
+            user, "Wiki hii ulikuwa top 10%! 🏆" if is_top_10 else "Weekly Summary 📈",
+            f"Accuracy: {accuracy}% ({correct}/{total}) - Endelea kufanya vizuri!",
+            click_action="/weekly-summary",
         )
         count += 1
     return f"Weekly summary notifications: {count}"

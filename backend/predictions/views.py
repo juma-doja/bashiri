@@ -466,6 +466,149 @@ class GenerateSavedMarketsPDFView(APIView):
 
     def post(self, request):
         from .pdf_service import generate_saved_markets_pdf
+
+        tab_name = request.data.get("tab_name", "All Markets")
+
+        queryset = SavedMarket.objects.filter(user=request.user).select_related(
+            "match", "match__league", "match__home_team", "match__away_team"
+        )
+
+        if tab_name == "over_under":
+            queryset = queryset.filter(market_key__contains='OVER_UNDER')
+        elif tab_name == "match_result":
+            queryset = queryset.filter(market_key__in=['1X2', 'DOUBLE_CHANCE', 'DRAW_NO_BET'])
+        elif tab_name == "btts":
+            queryset = queryset.filter(market_key='BTTS')
+
+        saved = queryset.order_by("-created_at")
+        data = SavedMarketSerializer(saved, many=True).data
+
+        from .services import get_ai_recommended_option
+
+        for item in data:
+            try:
+                match = Match.objects.get(id=item['match']['id'])
+                ai_option = get_ai_recommended_option(match, item['market_key'])
+                if ai_option:
+                    from .ml.poisson_model import predict_fixture
+                    prediction = predict_fixture(match.league.poisson_key, match.home_team.name, match.away_team.name)
+
+                    from .services import MARKET_DEFINITIONS
+                    market_def = MARKET_DEFINITIONS.get(item['market_key'], {})
+                    source_data = prediction.get(market_def.get('source_key', ''), {})
+
+                    if item['market_key'] == 'CORRECT_SCORE':
+                        option_label = ai_option
+                        predictions = source_data.get('predictions', [])
+                        pred_data = next((p for p in predictions if p['score'] == ai_option), None)
+                        confidence = round(pred_data['probability_percent'], 1) if pred_data else None
+                    else:
+                        option_def = next((opt for opt in market_def.get('options', []) if opt['key'] == ai_option), None)
+                        option_label = option_def['label'] if option_def else ai_option
+
+                        raw_value = source_data.get(ai_option, 0) if source_data else 0
+                        if raw_value > 1:
+                            confidence = round(raw_value, 1)
+                        else:
+                            confidence = round(raw_value * 100, 1)
+
+                    if confidence is not None and (confidence < 0 or confidence > 100):
+                        confidence = None
+
+                    item['ai_pick'] = option_label
+                    item['ai_confidence'] = confidence
+            except Exception:
+                item['ai_pick'] = None
+                item['ai_confidence'] = None
+
+        pdf_buffer = generate_saved_markets_pdf(data, tab_name)
+
+        response = HttpResponse(pdf_buffer.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = (
+            f'attachment; filename="bashiri_saved_markets_{tab_name.lower().replace(" ", "_")}.pdf"'
+        )
+        return response
+
+
+class PublicSavedMarketsListView(APIView):
+    """GET /api/predictions/public-saved-markets/ — Get public saved markets from other users"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        limit = int(request.query_params.get("limit", 20))
+        offset = int(request.query_params.get("offset", 0))
+        
+        # Get public saved markets from other users (excluding current user)
+        queryset = SavedMarket.objects.filter(
+            is_public=True
+        ).exclude(
+            user=request.user
+        ).select_related(
+            "match", "match__league", "match__home_team", "match__away_team", "user"
+        ).order_by("-created_at")
+        
+        public_markets = queryset[offset:offset + limit]
+        data = SavedMarketSerializer(public_markets, many=True).data
+        
+        # Add AI pick data for each saved market
+        from .services import get_ai_recommended_option
+        
+        for item in data:
+            try:
+                match = Match.objects.get(id=item['match']['id'])
+                ai_option = get_ai_recommended_option(match, item['market_key'])
+                if ai_option:
+                    # Get the prediction to get confidence
+                    from .ml.poisson_model import predict_fixture
+                    prediction = predict_fixture(match.league.poisson_key, match.home_team.name, match.away_team.name)
+                    
+                    # Get market definition
+                    from .services import MARKET_DEFINITIONS
+                    market_def = MARKET_DEFINITIONS.get(item['market_key'], {})
+                    source_data = prediction.get(market_def.get('source_key', ''), {})
+                    
+                    # Special handling for CORRECT_SCORE
+                    if item['market_key'] == 'CORRECT_SCORE':
+                        option_label = ai_option
+                        predictions = source_data.get('predictions', [])
+                        pred_data = next((p for p in predictions if p['score'] == ai_option), None)
+                        confidence = round(pred_data['probability_percent'], 1) if pred_data else None
+                    else:
+                        option_def = next((opt for opt in market_def.get('options', []) if opt['key'] == ai_option), None)
+                        option_label = option_def['label'] if option_def else ai_option
+                        raw_value = source_data.get(ai_option, 0) if source_data else 0
+                        if raw_value > 1:
+                            confidence = round(raw_value, 1)
+                        else:
+                            confidence = round(raw_value * 100, 1)
+                    
+                    if confidence is not None and (confidence < 0 or confidence > 100):
+                        confidence = None
+                    
+                    item['ai_pick'] = option_label
+                    item['ai_confidence'] = confidence
+            except Exception:
+                item['ai_pick'] = None
+                item['ai_confidence'] = None
+        
+        return Response(data)
+
+
+class ToggleSavedMarketPublicView(APIView):
+    """PATCH /api/predictions/saved-markets/{id}/toggle-public/ — Toggle is_public status"""
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, id):
+        try:
+            saved_market = SavedMarket.objects.get(id=id, user=request.user)
+            saved_market.is_public = not saved_market.is_public
+            saved_market.save()
+            return Response(SavedMarketSerializer(saved_market).data)
+        except SavedMarket.DoesNotExist:
+            return Response(
+                {"detail": "Saved market not found or doesn't belong to you"},
+                status=status.HTTP_404_NOT_FOUND
+            )
         
         tab_name = request.data.get("tab_name", "All Markets")
         

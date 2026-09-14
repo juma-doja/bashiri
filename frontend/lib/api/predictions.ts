@@ -151,6 +151,9 @@ export interface SavedMarket {
   created_at: string;
   ai_pick?: string;
   ai_confidence?: number;
+  is_public?: boolean;
+  user?: number;
+  username?: string;
 }
 
 export function getSavedMarkets(matchId?: number) {
@@ -163,6 +166,14 @@ export function generateSavedMarketsPDF(tabName: string) {
     body: JSON.stringify({ tab_name: tabName }),
     responseType: 'blob'
   });
+}
+
+export function getPublicSavedMarkets() {
+  return apiClient<SavedMarket[]>("/predictions/public-saved-markets/");
+}
+
+export function toggleSavedMarketPublic(id: number) {
+  return apiClient<SavedMarket>(`/predictions/saved-markets/${id}/toggle-public/`, { method: "PATCH" });
 }
 
 export interface MarketOptionAnalysis {

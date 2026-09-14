@@ -1,9 +1,9 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSavedMarkets, generateSavedMarketsPDF, unsaveMarket } from "@/lib/api/predictions";
+import { getSavedMarkets, generateSavedMarketsPDF, unsaveMarket, toggleSavedMarketPublic } from "@/lib/api/predictions";
 import { Spinner } from "@/components/ui/Spinner";
-import { Bookmark, Download, CheckCircle, Trash2, Share2, Copy, MessageCircle, Send, ArrowLeft } from "lucide-react";
+import { Bookmark, Download, CheckCircle, Trash2, Share2, Copy, MessageCircle, Send, ArrowLeft, Globe, Eye, EyeOff } from "lucide-react";
 import { AlertModal } from "@/components/ui/AlertModal";
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -20,6 +20,7 @@ interface SavedMarket {
   created_at: string;
   ai_pick?: string;
   ai_confidence?: number;
+  is_public?: boolean;
 }
 
 export default function SavedMarketsPage() {
@@ -306,6 +307,30 @@ export default function SavedMarketsPage() {
     }
   }
 
+  async function handleTogglePublic(marketId: number) {
+    try {
+      const updatedMarket = await toggleSavedMarketPublic(marketId);
+      setSavedMarkets(prev => prev.map(m => m.id === marketId ? { ...m, is_public: updatedMarket.is_public } : m));
+      
+      setAlertModal({
+        isOpen: true,
+        title: updatedMarket.is_public ? "Imekuwa Public!" : "Imekuwa Private!",
+        message: updatedMarket.is_public 
+          ? "Saved market sasa inaweza kuonekana na watumiaji wengine." 
+          : "Saved market sasa ni private na haionekani na wengine.",
+        variant: "success"
+      });
+    } catch (error) {
+      console.error("Failed to toggle public status:", error);
+      setAlertModal({
+        isOpen: true,
+        title: "Imeshindwa",
+        message: "Failed to change public status. Please try again.",
+        variant: "error"
+      });
+    }
+  }
+
   // Group markets by type based on actual market keys from backend
   const marketGroups = {
     all: savedMarkets,
@@ -457,6 +482,14 @@ export default function SavedMarketsPage() {
                 <Share2 size={14} />
                 Share
               </button>
+              <button
+                onClick={() => router.push('/public-saved-markets')}
+                className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold transition-all hover:bg-white/10"
+                style={{ background: "rgba(0, 200, 120, 0.15)", color: "#00C878", border: "1px solid rgba(0, 200, 120, 0.3)" }}
+              >
+                <Globe size={14} />
+                Public
+              </button>
             </>
           )}
         </div>
@@ -531,20 +564,36 @@ export default function SavedMarketsPage() {
                         )}
                       </div>
                       {!isSelectMode && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(market.id, market.match.id, market.market_key);
-                          }}
-                          disabled={deletingId === market.id}
-                          className="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:bg-red-500/20 disabled:opacity-50"
-                        >
-                          {deletingId === market.id ? (
-                            <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                          ) : (
-                            <Trash2 size={16} style={{ color: "rgba(255,255,255,0.4)" }} />
-                          )}
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTogglePublic(market.id);
+                            }}
+                            className="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:bg-white/10"
+                            title={market.is_public ? "Make Private" : "Make Public"}
+                          >
+                            {market.is_public ? (
+                              <EyeOff size={16} style={{ color: "#D4AF37" }} />
+                            ) : (
+                              <Globe size={16} style={{ color: "rgba(255,255,255,0.4)" }} />
+                            )}
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(market.id, market.match.id, market.market_key);
+                            }}
+                            disabled={deletingId === market.id}
+                            className="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:bg-red-500/20 disabled:opacity-50"
+                          >
+                            {deletingId === market.id ? (
+                              <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                            ) : (
+                              <Trash2 size={16} style={{ color: "rgba(255,255,255,0.4)" }} />
+                            )}
+                          </button>
+                        </div>
                       )}
                     </div>
                   ))}

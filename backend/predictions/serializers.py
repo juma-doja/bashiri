@@ -45,11 +45,13 @@ class SavedMatchSerializer(serializers.ModelSerializer):
 class SavedMarketSerializer(serializers.ModelSerializer):
     match = MatchListSerializer(read_only=True)
     match_id = serializers.PrimaryKeyRelatedField(queryset=Match.objects.all(), source="match", write_only=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    username = serializers.CharField(source="user.username", read_only=True)
 
     class Meta:
         model = SavedMarket
-        fields = ["id", "match", "match_id", "market_key", "created_at"]
-        read_only_fields = ["id", "created_at"]
+        fields = ["id", "match", "match_id", "market_key", "is_public", "created_at", "user", "username"]
+        read_only_fields = ["id", "created_at", "user", "username"]
 
 
 class ActiveDerbySerializer(serializers.ModelSerializer):

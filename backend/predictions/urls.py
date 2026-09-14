@@ -4,6 +4,7 @@ from .views import (
     ActiveDerbyView, AITrackRecordView, AIPerformanceStatsView, BookmakersView, CommandSearchView, FixturesView, LeagueListView,
     LiveMatchesView, MatchAnalysisView, MatchDashboardView, MatchOddsView, MatchOverviewView, OddsListView,
     SavedMatchesListView, SavedMarketsListView, SaveMatchView, SaveMarketView, SearchView, TeamListView, FinishedMatchesView, SyncHistoricalView, GenerateSavedMarketsPDFView,
+    PublicSavedMarketsListView, ToggleSavedMarketPublicView,
     TeamStandingsView, HeadToHeadView, TeamDetailView, LeagueDetailView, BashiriPickAnalyticsView,
 )
 
@@ -30,6 +31,8 @@ urlpatterns = [
     path("save-market/", SaveMarketView.as_view(), name="save-market"),
     path("saved-markets/", SavedMarketsListView.as_view(), name="saved-markets"),
     path("saved-markets/pdf/", GenerateSavedMarketsPDFView.as_view(), name="generate-saved-markets-pdf"),
+    path("public-saved-markets/", PublicSavedMarketsListView.as_view(), name="public-saved-markets"),
+    path("saved-markets/<int:id>/toggle-public/", ToggleSavedMarketPublicView.as_view(), name="toggle-saved-market-public"),
     path("finished/", FinishedMatchesView.as_view(), name="finished-matches"),
     path("sync-historical/", SyncHistoricalView.as_view(), name="sync-historical"),
     path("standings/", TeamStandingsView.as_view(), name="team-standings"),

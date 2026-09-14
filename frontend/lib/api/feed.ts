@@ -20,3 +20,7 @@ export function getDebates(status?: "open" | "closed") {
   const q = status ? `?status=${status}` : "";
   return apiClient<Card[]>(`/feed/debates/${q}`, { skipAuth: true });
 }
+
+export function getCards() {
+  return apiClient<Card[]>("/feed/cards/");
+}

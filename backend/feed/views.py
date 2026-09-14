@@ -117,3 +117,15 @@ class DebateListView(APIView):
             qs = qs.filter(data__is_closed=True)
 
         return Response(CardSerializer(qs[:100], many=True).data)
+
+
+class CardsListView(APIView):
+    """GET /api/feed/cards/ — get all cards for AI picks page."""
+    permission_classes = [AllowAny]
+    throttle_classes = [NoThrottle]
+
+    def get(self, request):
+        qs = Card.objects.filter(is_active=True).select_related(
+            "match", "match__home_team", "match__away_team", "match__league"
+        ).order_by("-created_at")
+        return Response(CardSerializer(qs[:50], many=True).data)

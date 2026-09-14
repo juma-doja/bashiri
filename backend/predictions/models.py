@@ -120,6 +120,7 @@ class SavedMarket(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_markets")
     match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name="saved_markets")
     market_key = models.CharField(max_length=50, help_text="Market key, e.g., '1x2', 'btts'")
+    is_public = models.BooleanField(default=False, help_text="If true, other users can see this saved market")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
