@@ -128,14 +128,14 @@ function LoginPageContent() {
         <button
           onClick={() => { setTab("login"); setError(""); }}
           className="flex-1 py-2.5 rounded-xl text-sm font-bold"
-          style={{ background: tab === "login" ? "var(--color-gold)" : "rgba(255,255,255,0.06)", color: tab === "login" ? "#000" : "rgba(255,255,255,0.5)" }}
+          style={{ background: tab === "login" ? "#38BDF8" : "rgba(255,255,255,0.06)", color: tab === "login" ? "#06131a" : "rgba(255,255,255,0.5)" }}
         >
           Ingia
         </button>
         <button
           onClick={() => { setTab("register"); setError(""); setRegisterStep(1); }}
           className="flex-1 py-2.5 rounded-xl text-sm font-bold"
-          style={{ background: tab === "register" ? "var(--color-gold)" : "rgba(255,255,255,0.06)", color: tab === "register" ? "#000" : "rgba(255,255,255,0.5)" }}
+          style={{ background: tab === "register" ? "#38BDF8" : "rgba(255,255,255,0.06)", color: tab === "register" ? "#06131a" : "rgba(255,255,255,0.5)" }}
         >
           Jisajili
         </button>
@@ -173,25 +173,25 @@ function LoginPageContent() {
           {/* Progress Indicator */}
           <div className="flex items-center justify-center gap-3 mb-6">
             <div className="flex items-center gap-2">
-              <div 
+              <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
-                style={{ 
-                  background: registerStep >= 1 ? "var(--color-gold)" : "rgba(255,255,255,0.1)",
-                  color: registerStep >= 1 ? "#000" : "rgba(255,255,255,0.5)"
+                style={{
+                  background: registerStep >= 1 ? "#38BDF8" : "rgba(255,255,255,0.1)",
+                  color: registerStep >= 1 ? "#06131a" : "rgba(255,255,255,0.5)"
                 }}
               >
                 1
               </div>
-              <div 
+              <div
                 className="w-12 h-1 rounded-full transition-all"
-                style={{ background: registerStep >= 2 ? "var(--color-gold)" : "rgba(255,255,255,0.1)" }}
+                style={{ background: registerStep >= 2 ? "#38BDF8" : "rgba(255,255,255,0.1)" }}
               />
             </div>
-            <div 
+            <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
-              style={{ 
-                background: registerStep >= 2 ? "var(--color-gold)" : "rgba(255,255,255,0.1)",
-                color: registerStep >= 2 ? "#000" : "rgba(255,255,255,0.5)"
+              style={{
+                background: registerStep >= 2 ? "#38BDF8" : "rgba(255,255,255,0.1)",
+                color: registerStep >= 2 ? "#06131a" : "rgba(255,255,255,0.5)"
               }}
             >
               2

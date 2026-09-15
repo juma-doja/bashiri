@@ -44,7 +44,7 @@ export default function AdminNotificationsPage() {
                 key={s.v}
                 onClick={() => setSegment(s.v)}
                 className="px-3 py-1.5 rounded-full text-xs font-bold"
-                style={{ background: segment === s.v ? "#00FF87" : "rgba(255,255,255,0.06)", color: segment === s.v ? "#000" : "rgba(255,255,255,0.5)" }}
+                style={{ background: segment === s.v ? "#38BDF8" : "rgba(255,255,255,0.06)", color: segment === s.v ? "#06131a" : "rgba(255,255,255,0.5)" }}
               >
                 {s.l}
               </button>

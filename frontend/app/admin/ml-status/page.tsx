@@ -24,7 +24,7 @@ export default function AdminMLStatusPage() {
       </div>
 
       {!status.loaded ? (
-        <p style={{ color: "#FF4757" }}>Model haijapakiwa — hakikisha bashiri_prediction_models.json ipo.</p>
+        <p style={{ color: "#38BDF8" }}>Model haijapakiwa — hakikisha bashiri_prediction_models.json ipo.</p>
       ) : (
         <>
           <p className="text-sm mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>

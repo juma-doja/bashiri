@@ -40,7 +40,7 @@ export default function AdminMatchesPage() {
             key={s}
             onClick={() => setStatusFilter(s)}
             className="px-3 py-1.5 rounded-full text-xs font-bold"
-            style={{ background: statusFilter === s ? "var(--success)" : "rgba(255,255,255,0.06)", color: statusFilter === s ? "#000" : "rgba(255,255,255,0.5)" }}
+            style={{ background: statusFilter === s ? "#38BDF8" : "rgba(255,255,255,0.06)", color: statusFilter === s ? "#06131a" : "rgba(255,255,255,0.5)" }}
           >
             {s || "Zote"}
           </button>
@@ -50,7 +50,7 @@ export default function AdminMatchesPage() {
         <button
           onClick={() => setLeagueFilter("")}
           className="px-3 py-1.5 rounded-full text-xs font-bold"
-          style={{ background: leagueFilter === "" ? "var(--success)" : "rgba(255,255,255,0.06)", color: leagueFilter === "" ? "#000" : "rgba(255,255,255,0.5)" }}
+          style={{ background: leagueFilter === "" ? "#38BDF8" : "rgba(255,255,255,0.06)", color: leagueFilter === "" ? "#06131a" : "rgba(255,255,255,0.5)" }}
         >
           Ligi Zote
         </button>
@@ -59,7 +59,7 @@ export default function AdminMatchesPage() {
             key={league}
             onClick={() => setLeagueFilter(league)}
             className="px-3 py-1.5 rounded-full text-xs font-bold"
-            style={{ background: leagueFilter === league ? "var(--success)" : "rgba(255,255,255,0.06)", color: leagueFilter === league ? "#000" : "rgba(255,255,255,0.5)" }}
+            style={{ background: leagueFilter === league ? "#38BDF8" : "rgba(255,255,255,0.06)", color: leagueFilter === league ? "#06131a" : "rgba(255,255,255,0.5)" }}
           >
             {league}
           </button>

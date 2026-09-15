@@ -6,7 +6,7 @@ import { ArrowLeft, Send } from "lucide-react";
 
 const STATUSES = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"];
 const STATUS_COLORS: Record<string, string> = {
-  OPEN: "var(--warning)", IN_PROGRESS: "var(--info)", RESOLVED: "var(--success)", CLOSED: "rgba(255,255,255,0.4)",
+  OPEN: "var(--warning)", IN_PROGRESS: "#38BDF8", RESOLVED: "var(--success)", CLOSED: "rgba(255,255,255,0.4)",
 };
 
 export default function AdminSupportTicketPage() {

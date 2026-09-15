@@ -171,8 +171,8 @@ export default function SettingsPage() {
                 >
                   <div className="flex h-full flex-col gap-3">
                     <div className="flex items-start gap-3">
-                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${item.adminOnly ? 'border-[var(--brand-accent)]/30 bg-[var(--brand-accent)]/10' : 'border-[#F5A623]/20 bg-[#F5A623]/10'}`}>
-                        <item.icon size={18} className={item.adminOnly ? 'text-[var(--brand-accent)]' : 'text-[#F5A623]'} />
+                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${item.adminOnly ? 'border-[#38BDF8]/30 bg-[#38BDF8]/10' : 'border-[#F5A623]/20 bg-[#F5A623]/10'}`}>
+                        <item.icon size={18} className={item.adminOnly ? 'text-[#38BDF8]' : 'text-[#F5A623]'} />
                       </div>
                       <div className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-bold text-white">{item.label}</span>

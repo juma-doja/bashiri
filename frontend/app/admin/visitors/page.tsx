@@ -24,7 +24,7 @@ export default function AdminVisitorsPage() {
   if (!data) return <p className="text-white/50">Inapakia visitor analytics...</p>;
 
   const cards = [
-    { label: "Wageni leo", value: data.today.guests, icon: Globe2, color: "#58A6FF" },
+    { label: "Wageni leo", value: data.today.guests, icon: Globe2, color: "#38BDF8" },
     { label: "Users leo", value: data.today.registered, icon: UserRound, color: "#00FF87" },
     { label: "Wageni mwezi huu", value: data.month.guests, icon: CalendarDays, color: "#F5C542" },
     { label: "Users mwezi huu", value: data.month.registered, icon: Activity, color: "#FF715B" },
@@ -62,7 +62,7 @@ export default function AdminVisitorsPage() {
             const guestHeight = (day.guests / maxValue) * 100;
             return (
               <div key={day.date} className="flex-1 h-full flex items-end gap-px" title={`${day.date}: ${day.guests} guests, ${day.registered} users`}>
-                <div className="flex-1 rounded-t bg-[#58A6FF]" style={{ height: `${Math.max(guestHeight, day.guests ? 3 : 0)}%` }} />
+                <div className="flex-1 rounded-t bg-[#38BDF8]" style={{ height: `${Math.max(guestHeight, day.guests ? 3 : 0)}%` }} />
                 <div className="flex-1 rounded-t bg-[#00FF87]" style={{ height: `${Math.max(registeredHeight, day.registered ? 3 : 0)}%` }} />
               </div>
             );
@@ -77,7 +77,7 @@ export default function AdminVisitorsPage() {
           {data.recent.slice(0, 25).map((visit) => (
             <div key={visit.id} className="flex items-center justify-between gap-3 px-5 py-3 text-sm">
               <div className="min-w-0"><p className="truncate text-white">{visit.user || "Guest visitor"}</p><p className="truncate text-xs text-white/40">{visit.path}</p></div>
-              <div className="shrink-0 text-right"><p className={visit.visitor_type === "guest" ? "text-[#58A6FF]" : "text-[#00FF87]"}>{visit.visitor_type === "guest" ? "Guest" : "Account"}</p><p className="text-[10px] text-white/35">{new Date(visit.visited_at).toLocaleString()}</p></div>
+              <div className="shrink-0 text-right"><p className={visit.visitor_type === "guest" ? "text-[#38BDF8]" : "text-[#00FF87]"}>{visit.visitor_type === "guest" ? "Guest" : "Account"}</p><p className="text-[10px] text-white/35">{new Date(visit.visited_at).toLocaleString()}</p></div>
             </div>
           ))}
           {!data.recent.length && <p className="p-5 text-sm text-white/45">Bado hakuna visits zilizorekodiwa.</p>}

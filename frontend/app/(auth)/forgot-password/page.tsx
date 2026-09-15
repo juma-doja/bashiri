@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
     >
       {submitted ? (
         <div className="text-center py-4">
-          <CheckCircle2 size={40} className="mx-auto mb-4" style={{ color: "#00FF87" }} />
+          <CheckCircle2 size={40} className="mx-auto mb-4" style={{ color: "#38BDF8" }} />
           <h1 className="text-lg font-black text-white mb-2">Ombi Limepokewa</h1>
           <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.5)" }}>
             Timu yetu itawasiliana nawe kupitia namba yako ya simu ndani ya muda mfupi

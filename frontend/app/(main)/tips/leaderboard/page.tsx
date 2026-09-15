@@ -206,7 +206,7 @@ export default function LeaderboardPage() {
                     
                     {/* User Info */}
                     <div>
-                      <p className="text-xl font-bold text-white flex items-center gap-2">
+                      <div className="text-xl font-bold text-white flex items-center gap-2">
                         @{tipster.user.username}
                         {tipster.tipster_score > 0 && (
                           <div className="flex items-center gap-1 px-2 py-0.5 bg-yellow-500/20 rounded-full border border-yellow-500/30">
@@ -214,7 +214,7 @@ export default function LeaderboardPage() {
                             <span className="text-xs font-bold text-yellow-400">{tipster.tipster_score}</span>
                           </div>
                         )}
-                      </p>
+                      </div>
                       <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                         {tipster.user.verified_tipster && (
                           <span className="text-xs text-blue-400 flex items-center gap-1 font-medium">

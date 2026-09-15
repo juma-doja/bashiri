@@ -162,12 +162,12 @@ def sync_live_and_upcoming_matches():
 
     for match in candidates:
         url = f"{base_url}/matches/{match.external_id}"
-        resp = requests.get(url, headers=headers, timeout=20)
+        resp = requests.get(url, headers=headers, timeout=60)
 
         if resp.status_code == 429:
             logger.warning("Rate limited kwenye quick sync, tunasubiri sekunde 60...")
             time.sleep(60)
-            resp = requests.get(url, headers=headers, timeout=20)
+            resp = requests.get(url, headers=headers, timeout=60)
 
         if resp.status_code != 200:
             logger.warning(f"Quick sync: error {resp.status_code} kwa match #{match.id}")
@@ -241,12 +241,12 @@ def sync_recently_finished_matches():
 
     for match in candidates:
         url = f"{base_url}/matches/{match.external_id}"
-        resp = requests.get(url, headers=headers, timeout=20)
+        resp = requests.get(url, headers=headers, timeout=60)
 
         if resp.status_code == 429:
             logger.warning("Rate limited kwenye finished matches sync, tunasubiri sekunde 60...")
             time.sleep(60)
-            resp = requests.get(url, headers=headers, timeout=20)
+            resp = requests.get(url, headers=headers, timeout=60)
 
         if resp.status_code != 200:
             logger.warning(f"Finished sync: error {resp.status_code} kwa match #{match.id}")
@@ -497,7 +497,7 @@ def fetch_team_standings_task():
             try:
                 # Get standings from Football Data Org
                 url = f"https://api.football-data.org/v4/competitions/{league.code}/standings"
-                response = requests.get(url, headers=headers, timeout=15)
+                response = requests.get(url, headers=headers, timeout=60)
                 
                 if response.status_code == 200:
                     data = response.json()
@@ -581,7 +581,7 @@ def fetch_head_to_head_task():
             try:
                 url = f"https://api.football-data.org/v4/competitions/{league.code}/matches"
                 params = {"dateFrom": date_from, "dateTo": date_to, "status": "FINISHED"}
-                response = requests.get(url, headers=headers, params=params, timeout=15)
+                response = requests.get(url, headers=headers, params=params, timeout=60)
                 
                 if response.status_code == 200:
                     matches = response.json().get("matches", [])

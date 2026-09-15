@@ -57,7 +57,7 @@ export default function AdminUsersPage() {
               </div>
               <div className="flex-1">
                 <p className="text-white font-bold">@{u.username || "—"}</p>
-                <span className="text-xs" style={{ color: u.is_active ? "var(--success)" : "var(--danger)" }}>{u.is_active ? "Active" : "Banned"}</span>
+                <span className="text-xs" style={{ color: u.is_active ? "#38BDF8" : "var(--danger)" }}>{u.is_active ? "Active" : "Banned"}</span>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs">

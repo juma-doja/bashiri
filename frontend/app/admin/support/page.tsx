@@ -5,7 +5,7 @@ import { getAdminTickets } from "@/lib/api/admin";
 import { ArrowLeft } from "lucide-react";
 
 const STATUS_COLORS: Record<string, string> = {
-  OPEN: "#FFD600", IN_PROGRESS: "#3B82F6", RESOLVED: "#00FF87", CLOSED: "rgba(255,255,255,0.4)",
+  OPEN: "#FFD600", IN_PROGRESS: "#38BDF8", RESOLVED: "#00FF87", CLOSED: "rgba(255,255,255,0.4)",
 };
 
 export default function AdminSupportPage() {

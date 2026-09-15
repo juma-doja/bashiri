@@ -160,7 +160,7 @@ export default function AdminHeroSlidesPage() {
             <div className="flex-1 p-4">
               <div className="flex items-center justify-between mb-1">
                 <p className="text-sm font-bold text-white">{slide.title}</p>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: slide.is_active ? "rgba(0,255,135,0.15)" : "rgba(255,71,87,0.15)", color: slide.is_active ? "#00FF87" : "#FF4757" }}>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: slide.is_active ? "rgba(56,189,248,0.15)" : "rgba(255,71,87,0.15)", color: slide.is_active ? "#38BDF8" : "#FF4757" }}>
                   {slide.is_active ? "Active" : "Inactive"}
                 </span>
               </div>

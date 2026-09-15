@@ -191,7 +191,7 @@ export default function AdminDerbiesPage() {
                 <button
                   onClick={() => toggleActive(d.id, d.is_active)}
                   className="px-2 py-1 rounded-full text-[10px] font-bold"
-                  style={{ background: d.is_active ? "rgba(0,255,135,0.15)" : "rgba(255,71,87,0.15)", color: d.is_active ? "#00FF87" : "#FF4757" }}
+                  style={{ background: d.is_active ? "rgba(56,189,248,0.15)" : "rgba(255,71,87,0.15)", color: d.is_active ? "#38BDF8" : "#FF4757" }}
                 >
                   {d.is_active ? "Active" : "Inactive"}
                 </button>

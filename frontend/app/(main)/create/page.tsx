@@ -178,9 +178,9 @@ export default function CreatePredictionStep1() {
                 aria-pressed={activeFilter === filter.id}
                 className="px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-all snap-start shrink-0"
                 style={{
-                  background: activeFilter === filter.id ? "rgba(212, 175, 55, 0.2)" : "rgba(255,255,255,0.05)",
-                  color: activeFilter === filter.id ? "#D4AF37" : "rgba(255,255,255,0.6)",
-                  border: activeFilter === filter.id ? "1px solid #D4AF37" : "1px solid rgba(255,255,255,0.1)",
+                  background: activeFilter === filter.id ? "rgba(56, 189, 248, 0.2)" : "rgba(255,255,255,0.05)",
+                  color: activeFilter === filter.id ? "#38BDF8" : "rgba(255,255,255,0.6)",
+                  border: activeFilter === filter.id ? "1px solid #38BDF8" : "1px solid rgba(255,255,255,0.1)",
                   minWidth: 'fit-content'
                 }}
               >
@@ -211,7 +211,7 @@ export default function CreatePredictionStep1() {
               type="button"
               onClick={() => setRetryKey((value) => value + 1)}
               className="mt-4 rounded-xl px-4 py-2 text-sm font-bold text-black"
-              style={{ background: "#D4AF37" }}
+              style={{ background: "#38BDF8" }}
             >
               Jaribu tena
             </button>

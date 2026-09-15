@@ -84,7 +84,7 @@ def fetch_live_odds_for_match(match_id: int) -> Optional[Dict]:
         }
         
         headers = get_odds_api_headers()
-        response = requests.get(url, params=params, headers=headers, timeout=10)
+        response = requests.get(url, params=params, headers=headers, timeout=60)
         response.raise_for_status()
         
         data = response.json()
@@ -132,7 +132,7 @@ def fetch_upcoming_odds_for_league(league_code: str, days_ahead: int = 7) -> Lis
         }
         
         headers = get_odds_api_headers()
-        response = requests.get(url, params=params, headers=headers, timeout=15)
+        response = requests.get(url, params=params, headers=headers, timeout=60)
         response.raise_for_status()
         
         return response.json()

@@ -371,9 +371,9 @@ export default function MatchesPage() {
             aria-pressed={useDateInSearch}
             aria-label="Tumia tarehe kwenye utafutaji"
             className="shrink-0 px-2 sm:px-4 py-2 rounded-full text-xs font-bold transition-colors whitespace-nowrap"
-            style={{ 
-              background: useDateInSearch ? "var(--brand-accent)" : "rgba(255,255,255,0.06)", 
-              color: useDateInSearch ? "#000" : "rgba(255,255,255,0.5)" 
+            style={{
+              background: useDateInSearch ? "#38BDF8" : "rgba(255,255,255,0.06)",
+              color: useDateInSearch ? "#06131a" : "rgba(255,255,255,0.5)"
             }}
           >
             {useDateInSearch ? "Date: ON" : "Date: OFF"}
@@ -599,8 +599,8 @@ export default function MatchesPage() {
               aria-selected={tab === t}
               className="px-4 py-3 rounded-full text-sm font-bold sm:flex-none sm:w-28"
               style={{
-                background: tab === t ? "var(--brand-accent)" : "rgba(255,255,255,0.06)",
-                color: tab === t ? "#000" : "rgba(255,255,255,0.5)",
+                background: tab === t ? "#38BDF8" : "rgba(255,255,255,0.06)",
+                color: tab === t ? "#06131a" : "rgba(255,255,255,0.5)",
               }}
             >
               {t === "fixtures" ? "Fixtures" : t === "live" ? "Live" : "Finished"}
@@ -620,7 +620,7 @@ export default function MatchesPage() {
                 type="button"
                 onClick={handleRefresh}
                 className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-black"
-                style={{ background: "var(--brand-accent)" }}
+                style={{ background: "#38BDF8" }}
               >
                 <RefreshCw size={16} /> Jaribu tena
               </button>
@@ -729,7 +729,7 @@ export default function MatchesPage() {
                     <div className="flex flex-wrap items-center gap-2 text-xs mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>
                       {m.matchday && <span className="bg-white/5 rounded-full px-2 py-1">Matchday {m.matchday}</span>}
                       {m.status === "LIVE" && (
-                        <span className="bg-green-500/20 text-green-400 rounded-full px-2 py-1 font-bold">LIVE</span>
+                        <span className="bg-[#38BDF8]/20 text-[#38BDF8] rounded-full px-2 py-1 font-bold">LIVE</span>
                       )}
                     </div>
 

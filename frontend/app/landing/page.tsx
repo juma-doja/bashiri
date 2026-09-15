@@ -303,7 +303,7 @@ function FloatingMetric({
     <div
       className={`absolute flex items-center gap-3 rounded-2xl border border-white/10 bg-[#0C111B]/80 px-4 py-3 shadow-2xl backdrop-blur-xl ${className}`}
     >
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#2563EB]/10 text-[#60A5FA]">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#38BDF8]/10 text-[#67ceff]">
         {icon}
       </div>
       <div className="min-w-0">
@@ -339,7 +339,7 @@ function IntelligenceTrack() {
   });
 
   const wordData = [
-    { label: "Tabiri za AI", icon: <Brain />, className: "text-[#60A5FA]", iconClass: "bg-[#2563EB] text-white" },
+    { label: "Tabiri za AI", icon: <Brain />, className: "text-[#38BDF8]", iconClass: "bg-[#38BDF8] text-[#06131a]" },
     { label: "Soko la Vidokezo", icon: <Users />, className: "text-[#86EFAC]", iconClass: "bg-[#22C55E] text-[#052E16]" },
     { label: "Bashiri Mic", icon: <Play />, className: "text-[#F3D56A]", iconClass: "bg-[#D4A72C] text-[#17120A]" },
     { label: "Pulse na Ishara za Moja kwa Moja", icon: <TrendingUp />, className: "text-[#C4B5FD]", iconClass: "bg-[#7C3AED] text-white" },
@@ -700,7 +700,7 @@ function AnalysisDeck() {
   const activeStep = ANALYSIS_STEPS[active];
 
   const accentStyles = {
-    blue: "from-[#2563EB]/25 via-[#2563EB]/10 to-transparent",
+    blue: "from-[#38BDF8]/25 via-[#38BDF8]/10 to-transparent",
     green: "from-[#22C55E]/25 via-[#22C55E]/10 to-transparent",
     gold: "from-[#D4A72C]/25 via-[#D4A72C]/10 to-transparent",
     purple: "from-[#7C3AED]/25 via-[#7C3AED]/10 to-transparent",

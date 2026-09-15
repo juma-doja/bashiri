@@ -349,7 +349,7 @@ export default function ProfilePage() {
               </div>
               
               {/* Online Status Indicator */}
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-accent)] flex items-center justify-center shadow-lg shadow-[var(--brand-primary)]/30 border-2 border-[#050508]">
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-br from-[#38BDF8] to-[#67ceff] flex items-center justify-center shadow-lg shadow-[#38BDF8]/30 border-2 border-[#050508]">
                 <div className="w-3 h-3 rounded-full bg-white animate-pulse" />
               </div>
               
@@ -359,7 +359,7 @@ export default function ProfilePage() {
                 disabled={uploading}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className="absolute -bottom-2 -right-2 w-12 h-12 rounded-full bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-accent)] flex items-center justify-center shadow-xl shadow-[var(--brand-primary)]/40 hover:shadow-[var(--brand-primary)]/60 transition-all disabled:opacity-50 disabled:hover:scale-100 z-20 border-2 border-[#050508]"
+                className="absolute -bottom-2 -right-2 w-12 h-12 rounded-full bg-gradient-to-br from-[#38BDF8] to-[#67ceff] flex items-center justify-center shadow-xl shadow-[#38BDF8]/40 hover:shadow-[#38BDF8]/60 transition-all disabled:opacity-50 disabled:hover:scale-100 z-20 border-2 border-[#050508]"
                 title="Badilisha picha ya profaili"
               >
                 {uploading ? (

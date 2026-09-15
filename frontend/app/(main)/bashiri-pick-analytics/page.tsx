@@ -299,10 +299,10 @@ export default function BashiriPickAnalyticsPage() {
                       borderRadius: "12px",
                     }}
                     labelStyle={{ color: "white" }}
-                    itemStyle={{ color: "#D4AF37" }}
+                    itemStyle={{ color: "#38BDF8" }}
                     formatter={(value) => [`${Number(value ?? 0)}%`, "Accuracy"]}
                   />
-                  <Line type="monotone" dataKey="accuracy" stroke="#D4AF37" strokeWidth={3} dot={{ fill: "#D4AF37", r: 3 }} />
+                  <Line type="monotone" dataKey="accuracy" stroke="#38BDF8" strokeWidth={3} dot={{ fill: "#38BDF8", r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>

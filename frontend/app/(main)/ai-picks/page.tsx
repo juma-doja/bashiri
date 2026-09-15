@@ -87,8 +87,8 @@ export default function AIPicksPage() {
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1">
-                <Target size={16} style={{ color: "var(--brand-accent)" }} />
-                <span className="text-2xl font-bold" style={{ color: "var(--brand-accent)" }}>
+                <Target size={16} style={{ color: "#38BDF8" }} />
+                <span className="text-2xl font-bold" style={{ color: "#38BDF8" }}>
                   {Math.round(cards.reduce((acc: number, c: any) => acc + (c.data?.ai_pick?.confidence || 0), 0) / (cards.length || 1))}%
                 </span>
               </div>

@@ -102,7 +102,7 @@ export default function AdminUserDetailPage() {
           <div><p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Accuracy</p><p className="text-lg font-black" style={{ color: "var(--success)" }}>{user.accuracy_percentage}%</p></div>
           <div><p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Streak</p><p className="text-lg font-black text-white">{user.current_streak}🔥</p></div>
           <div><p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Jumla</p><p className="text-lg font-black text-white">{user.total_predictions}</p></div>
-          <div><p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>PRO</p><p className="text-lg font-black" style={{ color: user.is_subscription_active ? "var(--success)" : "var(--danger)" }}>{user.is_subscription_active ? "Ndiyo" : "Hapana"}</p></div>
+          <div><p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>PRO</p><p className="text-lg font-black" style={{ color: user.is_subscription_active ? "#38BDF8" : "var(--danger)" }}>{user.is_subscription_active ? "Ndiyo" : "Hapana"}</p></div>
         </div>
 
         <div className="flex gap-3 flex-wrap">

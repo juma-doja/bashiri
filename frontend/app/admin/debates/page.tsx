@@ -119,7 +119,7 @@ export default function AdminDebatesPage() {
               <p className="text-sm font-bold text-white">{d.data.question}</p>
               <div className="flex items-center gap-2">
                 {d.data.is_closed ? (
-                  <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: "rgba(0,255,135,0.1)", color: "#00FF87" }}>
+                  <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: "rgba(56,189,248,0.1)", color: "#38BDF8" }}>
                     Resolved: {d.data.result}
                   </span>
                 ) : (

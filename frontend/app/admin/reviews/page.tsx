@@ -107,8 +107,8 @@ export default function AdminReviewsPage() {
           <h1 className="text-2xl font-black text-white">Reviews za Watumiaji</h1>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: "rgba(212, 175, 55, 0.2)" }}>
-            <span className="text-sm font-bold" style={{ color: "#D4AF37" }}>{reviews.length}</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: "rgba(56, 189, 248, 0.2)" }}>
+            <span className="text-sm font-bold" style={{ color: "#38BDF8" }}>{reviews.length}</span>
             <span className="text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>Reviews</span>
           </div>
         </div>
@@ -120,9 +120,9 @@ export default function AdminReviewsPage() {
           onClick={() => setSelectionMode(!selectionMode)}
           className="text-sm font-bold px-3 py-1.5 rounded-lg transition-all"
           style={{
-            background: selectionMode ? "rgba(212, 175, 55, 0.2)" : "rgba(255,255,255,0.05)",
-            color: selectionMode ? "#D4AF37" : "rgba(255,255,255,0.6)",
-            border: selectionMode ? "1px solid #D4AF37" : "1px solid rgba(255,255,255,0.1)"
+            background: selectionMode ? "rgba(56, 189, 248, 0.2)" : "rgba(255,255,255,0.05)",
+            color: selectionMode ? "#38BDF8" : "rgba(255,255,255,0.6)",
+            border: selectionMode ? "1px solid #38BDF8" : "1px solid rgba(255,255,255,0.1)"
           }}
         >
           {selectionMode ? "Cancel Selection" : "Select Reviews"}

@@ -211,9 +211,9 @@ export default function NotificationsPage() {
       >
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Bell size={20} style={{ color: 'var(--brand-primary)' }} />
+            <Bell size={20} style={{ color: '#38BDF8' }} />
             {unread > 0 && (
-              <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: 'var(--danger)', color: 'white' }}>
+              <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: '#38BDF8', color: '#06131a' }}>
                 {unread > 9 ? '9+' : unread}
               </div>
             )}
@@ -261,7 +261,7 @@ export default function NotificationsPage() {
                 onClick={() => setFilterType(null)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-colors ${
                   filterType === null
-                    ? 'bg-[var(--brand-primary)] text-black'
+                    ? 'bg-[#38BDF8] text-[#06131a]'
                     : 'bg-[#1A1A24] text-white/70 hover:bg-white/5'
                 }`}
               >
@@ -273,7 +273,7 @@ export default function NotificationsPage() {
                   onClick={() => setFilterType(type)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-colors ${
                     filterType === type
-                      ? 'bg-[var(--brand-primary)] text-black'
+                      ? 'bg-[#38BDF8] text-[#06131a]'
                       : 'bg-[#1A1A24] text-white/70 hover:bg-white/5'
                   }`}
                 >

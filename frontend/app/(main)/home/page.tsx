@@ -142,7 +142,7 @@ export default function HomePage() {
                 onClick={() => router.push("/ai")}
                 className="relative w-8 h-8 rounded-lg bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors flex-shrink-0"
               >
-                <Brain size={18} style={{ color: "var(--brand-accent)" }} />
+                <Brain size={18} style={{ color: "#38BDF8" }} />
               </button>
               <h1 
                 className="flex-1 text-center" 
@@ -240,9 +240,9 @@ export default function HomePage() {
                     onClick={() => router.push("/live-odds")}
                     className="px-6 py-3 rounded-xl font-bold text-sm transition-all"
                     style={{
-                      background: "linear-gradient(135deg, #D4AF37 0%, #F5D77A 100%)",
-                      color: "#0A0A0A",
-                      boxShadow: "0 10px 30px rgba(212,175,55,0.3)"
+                      background: "linear-gradient(135deg, #38BDF8 0%, #67ceff 100%)",
+                      color: "#06131a",
+                      boxShadow: "0 10px 30px rgba(56,189,248,0.3)"
                     }}
                   >
                     View All Odds
@@ -251,7 +251,7 @@ export default function HomePage() {
                 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
-                    <div className="text-2xl font-bold" style={{ color: "#00C878" }}>LIVE</div>
+                    <div className="text-2xl font-bold" style={{ color: "#38BDF8" }}>LIVE</div>
                     <div className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.5)" }}>
                       Live Matches
                     </div>
@@ -263,7 +263,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div className="text-center p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
-                    <div className="text-2xl font-bold" style={{ color: "#D4AF37" }}>%</div>
+                    <div className="text-2xl font-bold" style={{ color: "#38BDF8" }}>%</div>
                     <div className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.5)" }}>
                       Market Coverage
                     </div>
@@ -327,9 +327,9 @@ export default function HomePage() {
                     }}
                     className="w-full py-3 rounded-xl font-bold text-sm transition-all"
                     style={{
-                      background: "linear-gradient(135deg, #D4AF37 0%, #F5D77A 100%)",
-                      color: "#0A0A0A",
-                      boxShadow: "0 10px 30px rgba(212,175,55,0.3)"
+                      background: "linear-gradient(135deg, #38BDF8 0%, #67ceff 100%)",
+                      color: "#06131a",
+                      boxShadow: "0 10px 30px rgba(56,189,248,0.3)"
                     }}
                   >
                     Endelea

@@ -15,13 +15,13 @@ export default function AdminDashboardPage() {
   if (!stats) return <p style={{ color: "rgba(255,255,255,0.5)" }}>Inapakia...</p>;
 
   const CARDS = [
-    { label: "Watumiaji Wote", value: stats.total_users, icon: Users, color: "var(--success)", link: "/admin/users" },
+    { label: "Watumiaji Wote", value: stats.total_users, icon: Users, color: "#38BDF8", link: "/admin/users" },
     { label: "Subscribers Active", value: stats.total_subscribers, icon: TrendingUp, color: "var(--warning)", link: "/admin/users" },
     { label: "Mapato Mwezi Huu", value: `TZS ${stats.revenue_this_month_tzs.toLocaleString()}`, icon: DollarSign, color: "var(--success)", link: "/admin/transactions" },
     { label: "Mapato Yote", value: `TZS ${stats.revenue_all_time_tzs.toLocaleString()}`, icon: DollarSign, color: "var(--info)", link: "/admin/transactions" },
-    { label: "AI Accuracy", value: `${stats.ai_prediction_accuracy}%`, icon: TrendingUp, color: "var(--brand-accent)", link: "/admin/ml-status" },
+    { label: "AI Accuracy", value: `${stats.ai_prediction_accuracy}%`, icon: TrendingUp, color: "#38BDF8", link: "/admin/ml-status" },
     { label: "Mechi Leo", value: stats.matches_today, icon: Calendar, color: "var(--warning)", link: "/admin/matches" },
-    { label: "Live Sasa", value: stats.live_matches_now, icon: Radio, color: "var(--danger)", link: "/admin/matches" },
+    { label: "Live Sasa", value: stats.live_matches_now, icon: Radio, color: "#38BDF8", link: "/admin/matches" },
     { label: "Malipo Yanayosubiri", value: stats.pending_transactions, icon: Clock, color: "var(--warning)", link: "/admin/transactions" },
     { label: "Reviews", value: "Manage", icon: Star, color: "#D4AF37", link: "/admin/reviews" },
   ];

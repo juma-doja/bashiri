@@ -152,7 +152,7 @@ def fetch_matches_from_api(
     params = {"dateFrom": date_from, "dateTo": date_to}
     
     try:
-        resp = requests.get(url, headers=headers, params=params, timeout=15)
+        resp = requests.get(url, headers=headers, params=params, timeout=60)
     except requests.RequestException as e:
         raise FootballDataSyncError(f"Network error fetching {league_code}: {e}")
     
@@ -167,7 +167,7 @@ def fetch_matches_from_api(
             f"waiting {wait_time}s..."
         )
         time.sleep(wait_time)
-        resp = requests.get(url, headers=headers, params=params, timeout=15)
+        resp = requests.get(url, headers=headers, params=params, timeout=60)
         
         if resp.status_code == 429 and retry_count == max_retries:
             raise RateLimitError(

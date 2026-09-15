@@ -41,7 +41,7 @@ export default function AdminModerationPage() {
             key={t}
             onClick={() => setTab(t)}
             className="px-3 py-1.5 rounded-full text-xs font-bold"
-            style={{ background: tab === t ? "#00FF87" : "rgba(255,255,255,0.06)", color: tab === t ? "#000" : "rgba(255,255,255,0.5)" }}
+            style={{ background: tab === t ? "#38BDF8" : "rgba(255,255,255,0.06)", color: tab === t ? "#06131a" : "rgba(255,255,255,0.5)" }}
           >
             {t === "mic" ? "Bashiri Mic Videos" : "Content Reports"}
           </button>

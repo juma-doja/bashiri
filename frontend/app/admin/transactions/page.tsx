@@ -5,7 +5,7 @@ import { getTransactions } from "@/lib/api/admin";
 import { ArrowLeft } from "lucide-react";
 
 const STATUS_COLORS: Record<string, string> = {
-  SUCCESS: "#00FF87", PENDING: "#FFD600", FAILED: "#FF4757", CANCELLED: "#FF4757",
+  SUCCESS: "#00FF87", PENDING: "#38BDF8", FAILED: "#FF4757", CANCELLED: "#FF4757",
 };
 
 export default function AdminTransactionsPage() {

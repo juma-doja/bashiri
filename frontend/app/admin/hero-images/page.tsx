@@ -169,8 +169,8 @@ export default function AdminHeroImagesPage() {
                 <div
                   className="absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-full"
                   style={{
-                    background: hasConfig ? "rgba(0,255,135,0.15)" : "rgba(255,71,87,0.15)",
-                    color: hasConfig ? "#00FF87" : "#FF4757",
+                    background: hasConfig ? "rgba(56,189,248,0.15)" : "rgba(255,71,87,0.15)",
+                    color: hasConfig ? "#38BDF8" : "#FF4757",
                   }}
                 >
                   {hasConfig ? "Custom" : "Fallback"}
