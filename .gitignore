@@ -61,3 +61,7 @@ Thumbs.db
 # Misc
 *.bak
 *.backup
+
+# Mobile app
+bashiri_mobile/
+flutter/

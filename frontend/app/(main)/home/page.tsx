@@ -241,24 +241,68 @@ export default function HomePage() {
                 </div>
                 
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
+                  <motion.div
+                    animate={{
+                      boxShadow: [
+                        "0 0 0 0 rgba(56, 189, 248, 0)",
+                        "0 0 0 10px rgba(56, 189, 248, 0)",
+                        "0 0 0 0 rgba(56, 189, 248, 0)"
+                      ]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="text-center p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+                  >
                     <div className="text-2xl font-bold" style={{ color: "#38BDF8" }}>LIVE</div>
                     <div className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.5)" }}>
                       Live Matches
                     </div>
-                  </div>
-                  <div className="text-center p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
+                  </motion.div>
+                  <motion.div
+                    animate={{
+                      boxShadow: [
+                        "0 0 0 0 rgba(212, 175, 55, 0)",
+                        "0 0 0 10px rgba(212, 175, 55, 0)",
+                        "0 0 0 0 rgba(212, 175, 55, 0)"
+                      ]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: 0.5
+                    }}
+                    className="text-center p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+                  >
                     <div className="text-2xl font-bold" style={{ color: "#D4AF37" }}>$</div>
                     <div className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.5)" }}>
                       Best Odds
                     </div>
-                  </div>
-                  <div className="text-center p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
+                  </motion.div>
+                  <motion.div
+                    animate={{
+                      boxShadow: [
+                        "0 0 0 0 rgba(56, 189, 248, 0)",
+                        "0 0 0 10px rgba(56, 189, 248, 0)",
+                        "0 0 0 0 rgba(56, 189, 248, 0)"
+                      ]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: 1
+                    }}
+                    className="text-center p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+                  >
                     <div className="text-2xl font-bold" style={{ color: "#38BDF8" }}>%</div>
                     <div className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.5)" }}>
                       Market Coverage
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               </GlassCard>
             </motion.div>

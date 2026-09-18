@@ -2,7 +2,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getFixtures, getLeagues, Match, League } from "@/lib/api/predictions";
-import { CardSkeleton } from "@/components/ui/Skeleton";
+import { getHeroSlides, HeroSlide } from "@/lib/api/hero-carousel";
+import { CardSkeleton, GoalPostLoader } from "@/components/ui/Skeleton";
 import { BookButton } from "@/components/ui/BookButton";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Calendar, ChevronDown, ArrowLeft, ChevronDown as LoadMoreIcon, Target, TrendingUp, Flame } from "lucide-react";
@@ -17,6 +18,7 @@ export default function CreatePredictionStep1() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
+  const [heroSlide, setHeroSlide] = useState<HeroSlide | null>(null);
   const [activeFilter, setActiveFilter] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('create_active_filter');
@@ -68,6 +70,14 @@ export default function CreatePredictionStep1() {
     getLeagues().then(setLeagues);
     // Load matches
     const loadTimeout = window.setTimeout(() => { void loadMatches(activeFilter, 0); }, 0);
+    // Load hero slide for static image
+    getHeroSlides().then((data) => {
+      if (data.slides && data.slides.length > 0) {
+        setHeroSlide(data.slides[0]);
+      }
+    }).catch(() => {
+      // Fallback if hero slides fail to load
+    });
     return () => window.clearTimeout(loadTimeout);
   }, [activeFilter, loadMatches, retryKey]);
 
@@ -113,6 +123,29 @@ export default function CreatePredictionStep1() {
         </div>
         <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>Anza prediction yako ya AI</p>
       </div>
+
+      {/* Static Hero Image */}
+      {heroSlide && (
+        <motion.div
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
+          className="mb-6 rounded-2xl overflow-hidden"
+          style={{
+            height: "200px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 1px var(--border)"
+          }}
+        >
+          <div
+            className="w-full h-full"
+            style={{
+              backgroundImage: `linear-gradient(180deg, rgba(9,9,11,0.1) 0%, rgba(9,9,11,0.3) 60%, rgba(9,9,11,0.7) 100%), url(${heroSlide.image_url})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center"
+            }}
+          />
+        </motion.div>
+      )}
 
       {/* Date Filter Tabs */}
       <div className="px-5 pb-4">
@@ -203,7 +236,9 @@ export default function CreatePredictionStep1() {
 
       <div className="px-4 md:px-6 lg:px-8 space-y-5">
         {loading ? (
-          [1, 2].map((i) => <CardSkeleton key={i} />)
+          <div className="flex flex-col items-center justify-center py-16">
+            <GoalPostLoader />
+          </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center min-h-[18rem] text-center pt-10">
             <p className="text-sm font-semibold text-red-300">{error}</p>

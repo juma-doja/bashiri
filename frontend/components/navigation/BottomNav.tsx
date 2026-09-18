@@ -94,13 +94,13 @@ export function BottomNav() {
         className="flex-1 flex flex-col items-center justify-center transition-all duration-200"
       >
         <div
-          className="inline-flex flex-col items-center gap-1.5 px-3 py-2 rounded-lg transition-all duration-200"
+          className="inline-flex flex-col items-center gap-1 px-2 py-1.5 rounded-lg transition-all duration-200"
           style={{
             background: isActive ? "rgba(212,175,55,0.15)" : "transparent",
           }}
         >
           <Icon
-            size={20}
+            size={16}
             strokeWidth={2}
             className="transition-all duration-200"
             style={{
@@ -109,7 +109,7 @@ export function BottomNav() {
             }}
           />
           <span
-            className="text-[10px] font-medium tracking-wide transition-all duration-200"
+            className="text-[8px] font-medium tracking-wide transition-all duration-200"
             style={{
               color: isActive ? "var(--brand-primary)" : "rgba(255,255,255,0.9)",
             }}

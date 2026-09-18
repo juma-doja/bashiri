@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useTipsStore } from '@/stores/tips.store'
 import { useFetchTips } from '@/hooks/useTips'
 import { TipCard } from '@/components/tips/TipCard'
+import { TrophyLoader } from '@/components/ui/Skeleton'
 import { TipFilter } from '@/components/tips/TipFilter'
 import { TipstersLeaderboard } from '@/components/tips/TipstersLeaderboard'
 import { useRouter } from 'next/navigation'
@@ -16,6 +17,7 @@ export default function TipsPage() {
   const { fetchTips } = useFetchTips(filters)
   const { user } = useAuthStore()
   const [activeTab, setActiveTab] = useState<'all' | 'following' | 'trending' | 'ai_aligned' | 'hot_form' | 'pending'>('all')
+  const [showMoreTabs, setShowMoreTabs] = useState(false)
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
 
@@ -137,15 +139,13 @@ export default function TipsPage() {
         </div>
 
         {/* Discovery Tabs */}
-        <div className="mb-6 overflow-x-auto pb-2">
-          <div className="flex min-w-max gap-2 sm:gap-3">
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
+            {/* Primary Tabs */}
             {[
               { key: 'all', label: 'All Tips', icon: null },
               { key: 'following', label: 'Following', icon: Users },
               { key: 'trending', label: 'Trending', icon: TrendingUp },
-              { key: 'ai_aligned', label: 'AI Aligned', icon: Brain },
-              { key: 'hot_form', label: 'Hot Form', icon: Flame },
-              { key: 'pending', label: 'Pending', icon: Clock },
             ].map((tab) => {
               const TabIcon = getTabIcon(tab.key)
               return (
@@ -158,8 +158,8 @@ export default function TipsPage() {
                       : 'hover:scale-105'
                   }`}
                   style={{
-                    background: activeTab === tab.key 
-                      ? 'linear-gradient(135deg, #D4AF37 0%, #CFAF7B 100%)' 
+                    background: activeTab === tab.key
+                      ? 'linear-gradient(135deg, #D4AF37 0%, #CFAF7B 100%)'
                       : 'rgba(255,255,255,0.05)',
                     color: activeTab === tab.key ? '#0a0a0a' : 'rgba(255,255,255,0.7)',
                     border: activeTab === tab.key ? '1px solid #D4AF37' : '1px solid rgba(255,255,255,0.1)'
@@ -170,6 +170,56 @@ export default function TipsPage() {
                 </button>
               )
             })}
+
+            {/* More Tabs Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowMoreTabs(!showMoreTabs)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold whitespace-nowrap transition-all duration-200 ${
+                  showMoreTabs ? 'shadow-lg' : 'hover:scale-105'
+                }`}
+                style={{
+                  background: showMoreTabs
+                    ? 'linear-gradient(135deg, #D4AF37 0%, #CFAF7B 100%)'
+                    : 'rgba(255,255,255,0.05)',
+                  color: showMoreTabs ? '#0a0a0a' : 'rgba(255,255,255,0.7)',
+                  border: showMoreTabs ? '1px solid #D4AF37' : '1px solid rgba(255,255,255,0.1)'
+                }}
+              >
+                <Filter size={16} />
+                More
+                <ChevronDown size={16} style={{ transform: showMoreTabs ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+              </button>
+
+              {showMoreTabs && (
+                <div className="absolute top-full left-0 mt-2 w-48 rounded-xl z-10" style={{ background: '#111111', border: '1px solid rgba(212,175,55,0.3)' }}>
+                  {[
+                    { key: 'ai_aligned', label: 'AI Aligned', icon: Brain },
+                    { key: 'hot_form', label: 'Hot Form', icon: Flame },
+                    { key: 'pending', label: 'Pending', icon: Clock },
+                  ].map((tab) => {
+                    const TabIcon = getTabIcon(tab.key)
+                    return (
+                      <button
+                        key={tab.key}
+                        onClick={() => {
+                          handleTabChange(tab.key as any)
+                          setShowMoreTabs(false)
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all hover:scale-[1.02]"
+                        style={{
+                          background: activeTab === tab.key ? 'rgba(212,175,55,0.15)' : 'transparent',
+                          color: activeTab === tab.key ? '#D4AF37' : 'rgba(255,255,255,0.7)'
+                        }}
+                      >
+                        {TabIcon && <TabIcon size={16} />}
+                        <span className="text-sm font-semibold">{tab.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -232,13 +282,7 @@ export default function TipsPage() {
         {/* Loading State */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-16 sm:py-20">
-            <div className="relative mb-4">
-              <Loader size={48} className="text-[#D4AF37] animate-spin" />
-              <Sparkles size={24} className="text-[#CFAF7B] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-            </div>
-            <p className="text-white/50 text-sm sm:text-base" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-              Loading tips...
-            </p>
+            <TrophyLoader />
           </div>
         )}
 

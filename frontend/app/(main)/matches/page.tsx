@@ -3,8 +3,8 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getFixtures, getLiveMatches, getFinishedMatches, searchMatches, Match, getLeagues, League } from "@/lib/api/predictions";
 import { commandSearch, CommandSearchResults } from "@/lib/api/command-search";
-import { Search, ChevronDown, ArrowLeft, ChevronDown as LoadMoreIcon, X, Target, Calendar, Flame, Plus, RefreshCw } from "lucide-react";
-import { CardSkeleton } from "@/components/ui/Skeleton";
+import { Search, ChevronDown, ArrowLeft, ChevronDown as LoadMoreIcon, X, Target, Calendar, Flame, Plus, RefreshCw, Clock } from "lucide-react";
+import { CardSkeleton, BallBounceLoader } from "@/components/ui/Skeleton";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { BookButton } from "@/components/ui/BookButton";
 import { DatePicker } from "@/components/ui/DatePicker";
@@ -54,6 +54,7 @@ export default function MatchesPage() {
   const [searchResults, setSearchResults] = useState<CommandSearchResults | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const refreshInFlightRef = useRef(false);
@@ -76,6 +77,15 @@ export default function MatchesPage() {
 
       const savedLeague = localStorage.getItem('matches_league');
       if (savedLeague) setSelectedLeague(savedLeague);
+
+      const savedRecentSearches = localStorage.getItem('matches_recent_searches');
+      if (savedRecentSearches) {
+        try {
+          setRecentSearches(JSON.parse(savedRecentSearches));
+        } catch (e) {
+          console.error('Failed to parse recent searches', e);
+        }
+      }
     }, 0);
 
     return () => window.clearTimeout(hydrationTimeout);
@@ -103,6 +113,12 @@ export default function MatchesPage() {
   // Handle search result clicks
   const handleSearchResultClick = (type: 'match' | 'team' | 'league', id: number, code?: string) => {
     setIsSearchFocused(false);
+    // Save to recent searches
+    if (query.trim().length >= 2) {
+      const updatedRecentSearches = [query.trim(), ...recentSearches.filter(s => s !== query.trim())].slice(0, 5);
+      setRecentSearches(updatedRecentSearches);
+      localStorage.setItem('matches_recent_searches', JSON.stringify(updatedRecentSearches));
+    }
     if (type === 'match') {
       router.push(`/create/${id}/overview`);
     } else if (type === 'team') {
@@ -364,24 +380,11 @@ export default function MatchesPage() {
               <X size={16} style={{ color: "rgba(255,255,255,0.4)" }} />
             </button>
           )}
-          {/* Date filter toggle for search */}
-          <button
-            type="button"
-            onClick={() => updateUseDateInSearch(!useDateInSearch)}
-            aria-pressed={useDateInSearch}
-            aria-label="Tumia tarehe kwenye utafutaji"
-            className="shrink-0 px-2 sm:px-4 py-2 rounded-full text-xs font-bold transition-colors whitespace-nowrap"
-            style={{
-              background: useDateInSearch ? "#38BDF8" : "rgba(255,255,255,0.06)",
-              color: useDateInSearch ? "#06131a" : "rgba(255,255,255,0.5)"
-            }}
-          >
-            {useDateInSearch ? "Date: ON" : "Date: OFF"}
-          </button>
+
 
           {/* Intelligent Search Results Dropdown */}
           <AnimatePresence>
-            {isSearchFocused && query.length >= 2 && (
+            {isSearchFocused && (
               <motion.div
                 className="absolute top-full left-0 right-0 mt-2 rounded-2xl z-50 max-h-80 overflow-y-auto"
                 style={{ background: "#111111", border: "2px solid rgba(212,175,55,0.3)" }}
@@ -389,137 +392,176 @@ export default function MatchesPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                {searchLoading && (
-                  <p className="text-xs text-center py-4" style={{ color: "rgba(255,255,255,0.4)" }}>Inatafuta...</p>
+                {/* Recent Searches */}
+                {query.length < 2 && recentSearches.length > 0 && (
+                  <div className="px-2 py-2">
+                    <div className="flex items-center justify-between px-2 mb-2">
+                      <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>
+                        Recent Searches
+                      </p>
+                      <button
+                        onClick={() => {
+                          setRecentSearches([]);
+                          localStorage.removeItem('matches_recent_searches');
+                        }}
+                        className="text-[10px] font-semibold text-[#D4AF37] hover:text-[#CFAF7B]"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                    {recentSearches.map((search) => (
+                      <button
+                        key={search}
+                        onClick={() => {
+                          updateQuery(search);
+                          setIsSearchFocused(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all hover:scale-[1.02] text-left"
+                        style={{ background: "rgba(212,175,55,0.05)", border: "1px solid rgba(212,175,55,0.1)" }}
+                      >
+                        <Clock size={14} style={{ color: "rgba(255,255,255,0.4)" }} />
+                        <span className="text-sm" style={{ color: "var(--text-primary)" }}>{search}</span>
+                      </button>
+                    ))}
+                  </div>
                 )}
 
-                {!searchLoading && searchResults && (
+                {/* Search Results */}
+                {query.length >= 2 && (
                   <>
-                    {searchResults.teams.length > 0 && (
-                      <div className="px-2 py-2">
-                        <p className="text-[10px] font-bold uppercase tracking-widest px-2 mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>Timu</p>
-                        {searchResults.teams.map((t) => (
-                          <button
-                            key={t.id}
-                            onClick={() => handleSearchResultClick('team', t.id)}
-                            className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:scale-[1.02] text-left"
-                            style={{ background: "rgba(212,175,55,0.05)", border: "1px solid rgba(212,175,55,0.1)" }}
-                          >
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ background: "rgba(212,175,55,0.15)" }}>
-                              {t.crest_url ? (
-                                <Image
-                                  src={t.crest_url} 
-                                  alt={t.name}
-                                  width={40}
-                                  height={40}
-                                  className="w-full h-full object-contain p-1"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = 'none';
-                                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                                  }}
-                                />
-                              ) : null}
-                              <Target size={16} style={{ color: "#D4AF37" }} className={t.crest_url ? 'hidden' : ''} />
-                            </div>
-                            <div>
-                              <div className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>{t.name}</div>
-                              <div className="text-xs" style={{ color: "var(--text-secondary)" }}>{t.league?.name || ''}</div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
+                    {searchLoading && (
+                      <p className="text-xs text-center py-4" style={{ color: "rgba(255,255,255,0.4)" }}>Inatafuta...</p>
                     )}
 
-                    {searchResults.leagues.length > 0 && (
-                      <div className="px-2 py-2 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                        <p className="text-[10px] font-bold uppercase tracking-widest px-2 mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>Ligi</p>
-                        {searchResults.leagues.map((l) => (
-                          <button
-                            key={l.id}
-                            onClick={() => handleSearchResultClick('league', l.id, l.code)}
-                            className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:scale-[1.02] text-left"
-                            style={{ background: "rgba(212,175,55,0.05)", border: "1px solid rgba(212,175,55,0.1)" }}
-                          >
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ background: "rgba(212,175,55,0.15)" }}>
-                              {l.logo_url ? (
-                                <Image
-                                  src={l.logo_url} 
-                                  alt={l.name}
-                                  width={40}
-                                  height={40}
-                                  className="w-full h-full object-contain p-1"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = 'none';
-                                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                                  }}
-                                />
-                              ) : null}
-                              <Target size={16} style={{ color: "#D4AF37" }} className={l.logo_url ? 'hidden' : ''} />
-                            </div>
-                            <div>
-                              <div className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>{l.name}</div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                    {!searchLoading && searchResults && (
+                      <>
+                        {searchResults.teams.length > 0 && (
+                          <div className="px-2 py-2">
+                            <p className="text-[10px] font-bold uppercase tracking-widest px-2 mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>Timu</p>
+                            {searchResults.teams.map((t) => (
+                              <button
+                                key={t.id}
+                                onClick={() => handleSearchResultClick('team', t.id)}
+                                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:scale-[1.02] text-left"
+                                style={{ background: "rgba(212,175,55,0.05)", border: "1px solid rgba(212,175,55,0.1)" }}
+                              >
+                                <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ background: "rgba(212,175,55,0.15)" }}>
+                                  {t.crest_url ? (
+                                    <Image
+                                      src={t.crest_url} 
+                                      alt={t.name}
+                                      width={40}
+                                      height={40}
+                                      className="w-full h-full object-contain p-1"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                      }}
+                                    />
+                                  ) : null}
+                                  <Target size={16} style={{ color: "#D4AF37" }} className={t.crest_url ? 'hidden' : ''} />
+                                </div>
+                                <div>
+                                  <div className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>{t.name}</div>
+                                  <div className="text-xs" style={{ color: "var(--text-secondary)" }}>{t.league?.name || ''}</div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
 
-                    {searchResults.matches.length > 0 && (
-                      <div className="px-2 py-2 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                        <p className="text-[10px] font-bold uppercase tracking-widest px-2 mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>Mechi</p>
-                        {searchResults.matches.map((m) => (
-                          <button
-                            key={m.id}
-                            onClick={() => handleSearchResultClick('match', m.id)}
-                            className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:scale-[1.02] text-left"
-                            style={{ background: "rgba(212,175,55,0.05)", border: "1px solid rgba(212,175,55,0.1)" }}
-                          >
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ background: "rgba(212,175,55,0.15)" }}>
-                                {m.home_team.crest_url ? (
-                                  <Image
-                                    src={m.home_team.crest_url} 
-                                    alt={m.home_team.name}
-                                    width={32}
-                                    height={32}
-                                    className="w-full h-full object-contain p-1"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                                    }}
-                                  />
-                                ) : null}
-                                <Target size={12} style={{ color: "#D4AF37" }} className={m.home_team.crest_url ? 'hidden' : ''} />
-                              </div>
-                              <span className="text-xs" style={{ color: "var(--text-secondary)" }}>vs</span>
-                              <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ background: "rgba(212,175,55,0.15)" }}>
-                                {m.away_team.crest_url ? (
-                                  <Image
-                                    src={m.away_team.crest_url} 
-                                    alt={m.away_team.name}
-                                    width={32}
-                                    height={32}
-                                    className="w-full h-full object-contain p-1"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                                    }}
-                                  />
-                                ) : null}
-                                <Target size={12} style={{ color: "#D4AF37" }} className={m.away_team.crest_url ? 'hidden' : ''} />
-                              </div>
-                            </div>
-                            <div className="flex-1">
-                              <div className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>{m.home_team.name} vs {m.away_team.name}</div>
-                              <div className="text-xs" style={{ color: "var(--text-secondary)" }}>{m.league.name}</div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                        {searchResults.leagues.length > 0 && (
+                          <div className="px-2 py-2 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                            <p className="text-[10px] font-bold uppercase tracking-widest px-2 mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>Ligi</p>
+                            {searchResults.leagues.map((l) => (
+                              <button
+                                key={l.id}
+                                onClick={() => handleSearchResultClick('league', l.id, l.code)}
+                                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:scale-[1.02] text-left"
+                                style={{ background: "rgba(212,175,55,0.05)", border: "1px solid rgba(212,175,55,0.1)" }}
+                              >
+                                <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden" style={{ background: "rgba(212,175,55,0.15)" }}>
+                                  {l.logo_url ? (
+                                    <Image
+                                      src={l.logo_url} 
+                                      alt={l.name}
+                                      width={40}
+                                      height={40}
+                                      className="w-full h-full object-contain p-1"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                      }}
+                                    />
+                                  ) : null}
+                                  <Target size={16} style={{ color: "#D4AF37" }} className={l.logo_url ? 'hidden' : ''} />
+                                </div>
+                                <div>
+                                  <div className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>{l.name}</div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
 
-                    {!searchLoading && searchResults.matches.length === 0 && searchResults.teams.length === 0 && searchResults.leagues.length === 0 && (
-                      <p className="text-xs text-center py-4" style={{ color: "rgba(255,255,255,0.4)" }}>Hakuna matokeo.</p>
+                        {searchResults.matches.length > 0 && (
+                          <div className="px-2 py-2 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                            <p className="text-[10px] font-bold uppercase tracking-widest px-2 mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>Mechi</p>
+                            {searchResults.matches.map((m) => (
+                              <button
+                                key={m.id}
+                                onClick={() => handleSearchResultClick('match', m.id)}
+                                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:scale-[1.02] text-left"
+                                style={{ background: "rgba(212,175,55,0.05)", border: "1px solid rgba(212,175,55,0.1)" }}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ background: "rgba(212,175,55,0.15)" }}>
+                                    {m.home_team.crest_url ? (
+                                      <Image
+                                        src={m.home_team.crest_url} 
+                                        alt={m.home_team.name}
+                                        width={32}
+                                        height={32}
+                                        className="w-full h-full object-contain p-1"
+                                        onError={(e) => {
+                                          e.currentTarget.style.display = 'none';
+                                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                        }}
+                                      />
+                                    ) : null}
+                                    <Target size={12} style={{ color: "#D4AF37" }} className={m.home_team.crest_url ? 'hidden' : ''} />
+                                  </div>
+                                  <span className="text-xs" style={{ color: "var(--text-secondary)" }}>vs</span>
+                                  <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{ background: "rgba(212,175,55,0.15)" }}>
+                                    {m.away_team.crest_url ? (
+                                      <Image
+                                        src={m.away_team.crest_url} 
+                                        alt={m.away_team.name}
+                                        width={32}
+                                        height={32}
+                                        className="w-full h-full object-contain p-1"
+                                        onError={(e) => {
+                                          e.currentTarget.style.display = 'none';
+                                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                        }}
+                                      />
+                                    ) : null}
+                                    <Target size={12} style={{ color: "#D4AF37" }} className={m.away_team.crest_url ? 'hidden' : ''} />
+                                  </div>
+                                </div>
+                                <div className="flex-1">
+                                  <div className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>{m.home_team.name} vs {m.away_team.name}</div>
+                                  <div className="text-xs" style={{ color: "var(--text-secondary)" }}>{m.league.name}</div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        {!searchLoading && searchResults.matches.length === 0 && searchResults.teams.length === 0 && searchResults.leagues.length === 0 && (
+                          <p className="text-xs text-center py-4" style={{ color: "rgba(255,255,255,0.4)" }}>Hakuna matokeo.</p>
+                        )}
+                      </>
                     )}
                   </>
                 )}
@@ -612,7 +654,9 @@ export default function MatchesPage() {
       <div className="px-4 sm:px-5 pb-6 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {loading ? (
-            [1, 2, 3].map((i) => <CardSkeleton key={i} />)
+            <div className="col-span-full flex flex-col items-center justify-center py-16">
+              <BallBounceLoader />
+            </div>
           ) : error ? (
             <div className="col-span-full flex flex-col items-center gap-3 py-12 text-center">
               <p className="text-sm font-semibold text-red-300">{error}</p>

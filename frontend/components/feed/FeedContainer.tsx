@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { getFeed, Card } from "@/lib/api/feed";
-import { CardSkeleton } from "@/components/ui/Skeleton";
+import { CardSkeleton, FootballFieldLoader } from "@/components/ui/Skeleton";
 import { BookButton } from "@/components/ui/BookButton";
 import { PredictionTutorial } from "@/components/predictions/PredictionTutorial";
 import { AIPickCard } from "./cards/AIPickCard";
@@ -176,8 +176,8 @@ export function FeedContainer({ externalRefreshKey }: { externalRefreshKey?: num
             📚 Jifunze kuhusu market predictions
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
+        <div className="flex flex-col items-center justify-center py-16">
+          <FootballFieldLoader />
         </div>
       </div>
     );
