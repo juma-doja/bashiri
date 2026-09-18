@@ -75,7 +75,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <motion.img
               src="/bashiri-mark-gold.svg"
               alt="Bashiri"
-              className="w-28 h-28 object-contain"
+              className="w-28 h-28 object-contain rounded-full"
               animate={{
                 boxShadow: [
                   '0 0 20px rgba(59,130,246,0.5)',
