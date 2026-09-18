@@ -148,7 +148,7 @@ export default function HomePage() {
                 <img 
                   src="/bashiri-logo-horizontal.svg" 
                   alt="Bashiri Elite" 
-                  className="h-8 w-auto object-contain"
+                  className="h-10 w-auto object-contain"
                   style={{ filter: "drop-shadow(0 0 30px rgba(212, 175, 55, 0.4))" }}
                 />
               </div>
