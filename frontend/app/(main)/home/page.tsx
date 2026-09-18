@@ -144,23 +144,14 @@ export default function HomePage() {
               >
                 <Brain size={18} style={{ color: "#38BDF8" }} />
               </button>
-              <h1 
-                className="flex-1 text-center" 
-                style={{ 
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: "1.5rem",
-                  fontWeight: "800",
-                  color: "var(--brand-primary)",
-                  letterSpacing: "0.08em",
-                  textShadow: "0 0 30px rgba(212, 175, 55, 0.4), 0 0 60px rgba(212, 175, 55, 0.2)",
-                  background: "linear-gradient(135deg, #D4AF37 0%, #F5D77A 50%, #D4AF37 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text"
-                }}
-              >
-                BASHIRI
-              </h1>
+              <div className="flex-1 flex justify-center">
+                <img 
+                  src="/bashiri-logo-horizontal.svg" 
+                  alt="Bashiri Elite" 
+                  className="h-8 w-auto object-contain"
+                  style={{ filter: "drop-shadow(0 0 30px rgba(212, 175, 55, 0.4))" }}
+                />
+              </div>
               <button
                 type="button"
                 aria-label="Go to Pulse"

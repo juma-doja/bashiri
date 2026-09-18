@@ -1598,7 +1598,7 @@ export default function LandingPage() {
         <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <img
-              src="/icon.png"
+              src="/bashiri-mark-gold.svg"
               alt="Bashiri"
               className="h-9 w-9 object-contain sm:h-10 sm:w-10"
             />

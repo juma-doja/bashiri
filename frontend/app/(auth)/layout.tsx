@@ -73,9 +73,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             className="relative inline-block mb-4"
           >
             <motion.img
-              src="/icon.png"
+              src="/bashiri-mark-gold.svg"
               alt="Bashiri"
-              className="w-28 h-28 object-contain rounded-full"
+              className="w-28 h-28 object-contain"
               animate={{
                 boxShadow: [
                   '0 0 20px rgba(59,130,246,0.5)',

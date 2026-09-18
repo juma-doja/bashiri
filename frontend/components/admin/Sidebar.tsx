@@ -63,7 +63,11 @@ export function AdminSidebar({ isOpen = false, onClose }: AdminSidebarProps) {
       >
         {/* Mobile Close Button */}
         <div className="md:hidden flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <h1 className="text-lg font-black" style={{ color: "var(--brand-primary)" }}>BASHIRI ADMIN</h1>
+          <img 
+            src="/bashiri-logo-horizontal.svg" 
+            alt="Bashiri Elite" 
+            className="h-5 w-auto object-contain"
+          />
           <button 
             onClick={() => {
               console.log('Close button clicked');
@@ -78,8 +82,12 @@ export function AdminSidebar({ isOpen = false, onClose }: AdminSidebarProps) {
 
         {/* Desktop Header */}
         <div className="hidden md:block px-5 py-6">
-          <h1 className="text-lg font-black" style={{ color: "var(--brand-primary)" }}>BASHIRI ADMIN</h1>
-          <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>@{admin?.username}</p>
+          <img 
+            src="/bashiri-logo-horizontal.svg" 
+            alt="Bashiri Elite" 
+            className="h-6 w-auto object-contain mb-2"
+          />
+          <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>@{admin?.username}</p>
         </div>
 
         <nav className="flex-1 px-3 space-y-1 py-4 md:py-0">

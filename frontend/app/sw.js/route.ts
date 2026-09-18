@@ -57,13 +57,13 @@ export async function GET() {
  * ============================================================
  */
 
-const CACHE_VERSION = "bashiri-v6";
+const CACHE_VERSION = "bashiri-v7";
 const STATIC_CACHE = \`\${CACHE_VERSION}-static\`;
 const OFFLINE_URL = "/offline.html";
 
 const PRECACHE_URLS = [
   "/offline.html",
-  "/icon-192.png",
+  "/bashiri-app-icon-192.png",
 ];
 
 /* ============================================================
@@ -322,9 +322,9 @@ messaging.onBackgroundMessage((payload) => {
     {
       body,
 
-      icon: "/icon-192.png",
+      icon: "/bashiri-app-icon-192.png",
 
-      badge: "/icon-192.png",
+      badge: "/bashiri-app-icon-192.png",
 
       data,
 

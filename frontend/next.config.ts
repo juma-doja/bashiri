@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'crests.football-data.org' },
     ],
   },
+  // Ensure favicon is properly served
+  output: 'standalone',
 };
 
 export default nextConfig;

@@ -69,14 +69,11 @@ export function HeroCard() {
           }
         >
           <img
-            src="/icon.png"
+            src="/bashiri-mark-gold.svg"
             alt="Bashiri Logo"
-            className="w-16 h-16 object-contain rounded-2xl"
+            className="w-16 h-16 object-contain"
             loading="eager"
             fetchPriority="high"
-            style={{
-              borderRadius: "24px",
-            }}
           />
         </motion.div>
 

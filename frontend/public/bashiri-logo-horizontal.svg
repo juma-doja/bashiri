@@ -1,0 +1,23 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360">
+  <g transform="translate(30,55) scale(0.95)">
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Main B silhouette -->
+  <path d="M92 28 H178 C215 28 239 46 239 77 C239 98 226 113 207 120 C230 126 245 143 245 168 C245 202 220 222 181 222 H92 L123 190 H178 C194 190 204 182 204 166 C204 151 194 144 177 144 H139 L164 116 H178 C192 116 200 108 200 94 C200 80 191 72 176 72 H132 L92 28 Z"
+        fill="#D4AF37" stroke="#D4AF37" stroke-width="2"/>
+  <!-- Predictive motion / data signals -->
+  <path d="M42 92 H124" stroke="#D4AF37" stroke-width="13"/>
+  <path d="M57 121 H108" stroke="#D4AF37" stroke-width="11"/>
+  <path d="M72 149 H98" stroke="#D4AF37" stroke-width="10"/>
+  <circle cx="31" cy="92" r="8" fill="#D4AF37" stroke="none"/>
+  <circle cx="44" cy="121" r="7" fill="#D4AF37" stroke="none"/>
+  <!-- Forward diagonal cut suggesting prediction / movement -->
+  <path d="M104 222 L154 168" stroke="#D4AF37" stroke-width="18"/>
+</g>
+</g>
+  <text x="310" y="155" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="86" font-weight="800" letter-spacing="15">BASHIRI</text>
+  <line x1="315" y1="195" x2="400" y2="195" stroke="#D4AF37" stroke-width="7"/>
+  <text x="425" y="214" fill="#D4AF37" font-family="Space Grotesk, Arial, sans-serif" font-size="43" font-weight="700" letter-spacing="13">ELITE</text>
+  <line x1="600" y1="195" x2="685" y2="195" stroke="#D4AF37" stroke-width="7"/>
+  <text x="315" y="270" fill="#A1A1AA" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="500">Football predictions and sports insights</text>
+</svg>

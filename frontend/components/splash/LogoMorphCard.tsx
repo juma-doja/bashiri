@@ -30,7 +30,7 @@ export function LogoMorphCard({ isTransitioning }: LogoMorphCardProps) {
     >
       {!isTransitioning && (
         <motion.img
-          src="/icon.png"
+          src="/bashiri-mark-gold.svg"
           alt="Bashiri"
           className="w-full h-full object-contain"
           animate={{ opacity: isTransitioning ? 0 : 1 }}

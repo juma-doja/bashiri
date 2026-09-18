@@ -6,7 +6,7 @@ import { snoozeInstallPrompt } from "@/lib/pwa-install-utils";
 
 export function InstallPromptSheet() {
   const { isOpen, platform, deferredPrompt, close } = usePWAInstallStore();
-  const installIconSrc = platform === "ios" ? "/apple-touch-icon.png" : "/icon-192.png";
+  const installIconSrc = platform === "ios" ? "/apple-touch-icon.png" : "/bashiri-app-icon-192.png";
 
   function handleDismiss() {
     snoozeInstallPrompt();
