@@ -13,14 +13,14 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 def generate_result_recaps():
-    from predictions.models import Match, AIPick
+    from predictions.models import Match, BashiriPickSnapshot
     from predictions.settlement_engine import settle_ai_pick
 
     today = timezone.localdate()
-    yesterday = today - timedelta(days=1)
+    two_days_ago = today - timedelta(days=2)
     finished_recent = Match.objects.filter(
         status="FINISHED",
-        kickoff_at__date__gte=yesterday,
+        kickoff_at__date__gte=two_days_ago,
         kickoff_at__date__lte=today,
         home_score__isnull=False, away_score__isnull=False,
     ).select_related("home_team", "away_team", "league")
@@ -33,33 +33,80 @@ def generate_result_recaps():
             type="LIVE_MATCH", match_id=match.id, is_active=True
         ).update(is_active=False)
 
-        # Check if RESULT_RECAP already exists
+        # Check if RESULT_RECAP already exists for this match
         if Card.objects.filter(type="RESULT_RECAP", match_id=match.id).exists():
             continue
 
-        # Get AI Pick for this match
-        ai_pick = AIPick.objects.filter(match=match, feed="STANDARD").first()
-        if not ai_pick:
+        # Get Bashiri Pick Snapshot for this match (EXACTLY what was shown in TopPickCard)
+        bashiri_snapshot = BashiriPickSnapshot.objects.filter(match=match).first()
+        if not bashiri_snapshot:
             continue
 
-        # Settle the pick if not already settled
-        if ai_pick.status == "PENDING" or ai_pick.status == "LIVE":
-            settlement = settle_ai_pick(
-                ai_pick.market,
-                ai_pick.selection,
-                match.home_score,
-                match.away_score
-            )
-            ai_pick.status = settlement.status
-            ai_pick.actual_home_score = match.home_score
-            ai_pick.actual_away_score = match.away_score
-            ai_pick.result = settlement.status
-            ai_pick.settled_at = timezone.now()
-            ai_pick.save(update_fields=['status', 'actual_home_score', 'actual_away_score', 'result', 'settled_at'])
+        # Settle the snapshot if not already settled
+        if bashiri_snapshot.status == "PENDING" or bashiri_snapshot.status == "LIVE":
+            # Map market_key to settlement engine format
+            market_mapping = {
+                'HOME_GOALS_OVER_0_5': 'home_over_0_5',
+                'HOME_GOALS_OVER_1_5': 'home_over_1_5',
+                'AWAY_GOALS_OVER_0_5': 'away_over_0_5',
+                'AWAY_GOALS_OVER_1_5': 'away_over_1_5',
+                'OVER_UNDER_1_5': 'over_1_5',
+                'OVER_UNDER_2_5': 'over_2_5',
+                '1X2_HOME': '1x2_home',
+                '1X2_DRAW': '1x2_draw',
+                '1X2_AWAY': '1x2_away',
+                'BTTS_YES': 'btts_yes',
+                'BTTS_NO': 'btts_no',
+                'DC_1X': 'dc_1x',
+                'DC_X2': 'dc_x2',
+                'DC_12': 'dc_12',
+            }
+            
+            # Map option_key to settlement engine format
+            option_mapping = {
+                'home_over_0_5': 'Over',
+                'home_under_0_5': 'Under',
+                'home_over_1_5': 'Over',
+                'home_under_1_5': 'Under',
+                'away_over_0_5': 'Over',
+                'away_under_0_5': 'Under',
+                'away_over_1_5': 'Over',
+                'away_under_1_5': 'Under',
+                'over_1_5': 'Over',
+                'under_1_5': 'Under',
+                'over_2_5': 'Over',
+                'under_2_5': 'Under',
+                'home': 'Home',
+                'draw': 'Draw',
+                'away': 'Away',
+                'yes': 'Yes',
+                'no': 'No',
+                '1x': '1X',
+                'x2': 'X2',
+                '12': '12',
+            }
 
-        # Create RESULT_RECAP card
-        from predictions.ai_pick_config import get_market_label, get_selection_label
-        was_correct = ai_pick.status == "WON"
+            settlement_market = market_mapping.get(bashiri_snapshot.market_key, bashiri_snapshot.market_key.lower())
+            settlement_option = option_mapping.get(bashiri_snapshot.option_key, bashiri_snapshot.option_key)
+            
+            try:
+                settlement = settle_ai_pick(
+                    settlement_market,
+                    settlement_option,
+                    match.home_score,
+                    match.away_score
+                )
+                bashiri_snapshot.status = settlement.status
+                bashiri_snapshot.actual_home_score = match.home_score
+                bashiri_snapshot.actual_away_score = match.away_score
+                bashiri_snapshot.settled_at = timezone.now()
+                bashiri_snapshot.save(update_fields=['status', 'actual_home_score', 'actual_away_score', 'settled_at'])
+            except Exception as e:
+                logger.error(f"Failed to settle bashiri snapshot for match {match.id}: {e}")
+                continue
+
+        # Create RESULT_RECAP card with Bashiri Pick data
+        was_correct = bashiri_snapshot.status == "WON"
 
         Card.objects.create(
             type="RESULT_RECAP", match_id=match.id,
@@ -68,11 +115,11 @@ def generate_result_recaps():
                     "home_team": match.home_team.name, "away_team": match.away_team.name,
                     "home_score": match.home_score, "away_score": match.away_score,
                 },
-                "ai_predicted": get_selection_label(ai_pick.market, ai_pick.selection),
-                "ai_market": get_market_label(ai_pick.market),
-                "ai_confidence": ai_pick.probability_percent,
+                "ai_predicted": bashiri_snapshot.option_label,
+                "ai_market": bashiri_snapshot.market_label,
+                "ai_confidence": bashiri_snapshot.confidence,
                 "was_correct": was_correct,
-                "tier": ai_pick.tier,
+                "is_bashiri_pick": True,  # Flag to indicate this is from Bashiri Pick
             },
         )
         created_count += 1

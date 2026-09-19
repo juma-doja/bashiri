@@ -8,7 +8,7 @@ export interface Card {
   created_at: string;
 }
 
-export function getFeed(limit = 20, offset = 0) {
+export function getFeed(limit = 30, offset = 0) {
   return apiClient<{ count: number; results: Card[] }>(`/feed/?limit=${limit}&offset=${offset}`, { skipAuth: true });
 }
 

@@ -125,8 +125,8 @@ make_interval_task_seconds("Quick Sync Live Matches", "predictions.tasks.sync_li
 # Sync mechi zilizoisha hivi karibuni — kila dakika 5
 make_interval_task("Sync Recently Finished Matches", "predictions.tasks.sync_recently_finished_matches", 5)
 
-# AI Picks — kila siku saa 12:30 (NEW AI PICK SYSTEM)
-make_task("Generate Daily AI Picks", "predictions.ai_pick_tasks.generate_daily_ai_picks", {"minute": "30", "hour": "12"})
+# AI Picks — kila dakika 3 (NEW AI PICK SYSTEM)
+make_interval_task("Generate AI Picks", "predictions.ai_pick_tasks.generate_ai_picks", 3)
 
 # Update AI Pick Status — kila dakika 10 (NEW AI PICK SYSTEM)
 make_interval_task("Update AI Pick Status", "predictions.ai_pick_tasks.update_pick_status_periodic", 10)
@@ -134,8 +134,8 @@ make_interval_task("Update AI Pick Status", "predictions.ai_pick_tasks.update_pi
 # Settle Bashiri Pick snapshots for finished matches — kila dakika 5
 make_interval_task("Settle Bashiri Pick Snapshots", "predictions.tasks.settle_bashiri_pick_snapshots_task", 5)
 
-# Generate AI Track Record — kila siku saa 12:30
-make_task("Generate AI Track Record", "predictions.tasks.generate_ai_track_record_snapshot", {"minute": "30", "hour": "12"})
+# Generate AI Track Record — kila dakika 3 (synchronized with AI Picks)
+make_interval_task("Generate AI Track Record", "predictions.tasks.generate_ai_track_record_snapshot", 3)
 
 # Odds API tasks - Live odds every 5 minutes
 make_interval_task("Fetch Live Odds", "predictions.tasks.fetch_live_odds_task", 5)
@@ -144,7 +144,7 @@ make_interval_task("Fetch Live Odds", "predictions.tasks.fetch_live_odds_task", 
 make_interval_task("Fetch Upcoming Odds", "predictions.tasks.fetch_upcoming_odds_task", 15)
 
 # Feed tasks
-make_interval_task("Generate Result Recaps", "feed.tasks.generate_result_recaps", 15)
+make_interval_task("Generate Result Recaps", "feed.tasks.generate_result_recaps", 10)
 make_task("Clean old shares", "tips.tasks.clean_old_shares_task", {"minute": "0", "hour": "3"})
 make_task("Deactivate old tips", "tips.tasks.deactivate_old_tips_task", {"minute": "0", "hour": "3"})
 

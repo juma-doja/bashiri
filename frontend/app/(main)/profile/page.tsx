@@ -1,13 +1,13 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { Crown, Target, TrendingUp, Zap, Settings, LogOut, Award, Calendar, Camera, Loader2, Edit2, Share2, MapPin, ChevronLeft, X, Flame, Sparkles, Power, Eye, Trash2, Trophy, Music2, Gamepad2 } from "lucide-react";
+import { Crown, Target, TrendingUp, Zap, Settings, LogOut, Award, Calendar, Camera, Loader2, Edit2, Share2, MapPin, ChevronLeft, X, Flame, Sparkles, Power, Eye, Trash2, Trophy, Music2, Gamepad2, ImagePlus } from "lucide-react";
 import { useAuthStore } from "@/stores/auth.store";
 import { PremiumButton } from "@/components/ui/Button";
 import { PremiumCard, GlassCard } from "@/components/ui/GlassCard";
 import { PremiumBadge } from "@/components/ui/Badge";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
-import { updateAvatar, completeProfile, deleteAccount } from "@/lib/api/auth";
+import { updateAvatar, completeProfile, deleteAccount, updateBackgroundImage } from "@/lib/api/auth";
 import { getUserTips } from "@/lib/api/tips";
 import type { UserTipList } from "@/lib/types/tips";
 import { ShareProfileModal } from "@/components/profile/ShareProfileModal";
@@ -29,11 +29,13 @@ export default function ProfilePage() {
   const router = useRouter();
   const { user, logout, setUser } = useAuthStore();
   const [uploading, setUploading] = useState(false);
+  const [uploadingBackground, setUploadingBackground] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [editUsername, setEditUsername] = useState("");
   const [editDob, setEditDob] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const backgroundInputRef = useRef<HTMLInputElement>(null);
   const [userTips, setUserTips] = useState<UserTipList[]>([]);
   const [loadingTips, setLoadingTips] = useState(true);
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -140,6 +142,59 @@ export default function ProfilePage() {
     fileInputRef.current?.click();
   }
 
+  function handleBackgroundClick() {
+    backgroundInputRef.current?.click();
+  }
+
+  async function handleBackgroundUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (10MB max for background)
+    if (file.size > 10 * 1024 * 1024) {
+      setAlertModal({
+        isOpen: true,
+        title: "Picha Kubwa Sana",
+        message: "Picha ya background isiyozidi 10MB inaruhusiwa.",
+        variant: "warning"
+      });
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setAlertModal({
+        isOpen: true,
+        title: "Aina ya Picha",
+        message: "Aina ya picha inaruhusiwa: JPEG, PNG, au WebP.",
+        variant: "warning"
+      });
+      return;
+    }
+
+    setUploadingBackground(true);
+    try {
+      const updatedUser = await updateBackgroundImage(file);
+      setUser(updatedUser);
+      setAlertModal({
+        isOpen: true,
+        title: "Imeshindika",
+        message: "Background image imesasiliwa kwa mafanikio!",
+        variant: "success"
+      });
+    } catch (error) {
+      setAlertModal({
+        isOpen: true,
+        title: "Imeshindika",
+        message: "Imeshindika ku-upload background image. Jaribu tena.",
+        variant: "error"
+      });
+    } finally {
+      setUploadingBackground(false);
+    }
+  }
+
   function handleAvatarView(imageUrl: string) {
     setViewAvatarModal({ isOpen: true, imageUrl });
   }
@@ -202,77 +257,110 @@ export default function ProfilePage() {
     <div className="min-h-dvh bg-[#050508] overflow-y-auto no-scrollbar">
       {/* Cover */}
       <div className="relative h-48 overflow-hidden">
-        {/* Animated Multi-Color Mist Effect */}
+        {/* User Background Image or Default Animation */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#050508] via-[#050508] to-[#050508]" />
-
-          {!reduceMotion && (
+          {user.background_image_url ? (
+            <img
+              src={user.background_image_url}
+              alt="Profile Background"
+              className="w-full h-full object-cover"
+            />
+          ) : (
             <>
-              {/* Optimized single gradient layer */}
-              <motion.div
-                className="absolute inset-0 opacity-35"
-                animate={{
-                  backgroundPosition: ["0% 0%", "200% 200%", "0% 0%"],
-                  scale: [1, 1.1, 1],
-                }}
-                transition={{
-                  duration: 15,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                style={{
-                  background: "radial-gradient(ellipse at 30% 40%, rgba(212, 175, 55, 0.2) 0%, transparent 60%), radial-gradient(ellipse at 70% 60%, rgba(207, 175, 123, 0.15) 0%, transparent 50%)",
-                  backgroundSize: "300% 300%",
-                  willChange: "transform",
-                }}
-              />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#050508] via-[#050508] to-[#050508]" />
 
-              {/* Optimized floating particles - reduced from 24 to 8 */}
-              <div className="absolute inset-0">
-                {PROFILE_PARTICLES.map((particle, i) => {
+              {!reduceMotion && (
+                <>
+                  {/* Optimized single gradient layer */}
+                  <motion.div
+                    className="absolute inset-0 opacity-35"
+                    animate={{
+                      backgroundPosition: ["0% 0%", "200% 200%", "0% 0%"],
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{
+                      duration: 15,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                    style={{
+                      background: "radial-gradient(ellipse at 30% 40%, rgba(212, 175, 55, 0.2) 0%, transparent 60%), radial-gradient(ellipse at 70% 60%, rgba(207, 175, 123, 0.15) 0%, transparent 50%)",
+                      backgroundSize: "300% 300%",
+                      willChange: "transform",
+                    }}
+                  />
 
-                  // Cycle through three colors: gold, green, sea blue/silver
-                  const colorIndex = i % 3;
-                  const colors = [
-                    { r: 212, g: 175, b: 55 },   // Gold
-                    { r: 76, g: 175, b: 80 },    // Green
-                    { r: 135, g: 206, b: 250 }  // Sea blue
-                  ];
-                  const color = colors[colorIndex];
+                  {/* Optimized floating particles - reduced from 24 to 8 */}
+                  <div className="absolute inset-0">
+                    {PROFILE_PARTICLES.map((particle, i) => {
 
-                  return (
-                    <motion.div
-                      key={i}
-                      className="absolute rounded-full"
-                      animate={{
-                        x: [`${particle.startX}%`, `${particle.endX}%`, `${particle.startX}%`],
-                        y: [`${particle.startY}%`, `${particle.endY}%`, `${particle.startY}%`],
-                        opacity: [0, 0.7, 0.3, 0.7, 0],
-                        scale: [0, 1.2, 0.8, 1, 0],
-                      }}
-                      transition={{
-                        duration: particle.duration,
-                        repeat: Infinity,
-                        delay: particle.delay,
-                        ease: "easeInOut",
-                      }}
-                      style={{
-                        width: `${particle.size}px`,
-                        height: `${particle.size}px`,
-                        background: `rgba(${color.r}, ${color.g}, ${color.b}, ${particle.alpha})`,
-                        filter: "blur(2px)",
-                        willChange: "transform",
-                      }}
-                    />
-                  );
-                })}
-              </div>
+                      // Cycle through three colors: gold, green, sea blue/silver
+                      const colorIndex = i % 3;
+                      const colors = [
+                        { r: 212, g: 175, b: 55 },   // Gold
+                        { r: 76, g: 175, b: 80 },    // Green
+                        { r: 135, g: 206, b: 250 }  // Sea blue
+                      ];
+                      const color = colors[colorIndex];
+
+                      return (
+                        <motion.div
+                          key={i}
+                          className="absolute rounded-full"
+                          animate={{
+                            x: [`${particle.startX}%`, `${particle.endX}%`, `${particle.startX}%`],
+                            y: [`${particle.startY}%`, `${particle.endY}%`, `${particle.startY}%`],
+                            opacity: [0, 0.7, 0.3, 0.7, 0],
+                            scale: [0, 1.2, 0.8, 1, 0],
+                          }}
+                          transition={{
+                            duration: particle.duration,
+                            repeat: Infinity,
+                            delay: particle.delay,
+                            ease: "easeInOut",
+                          }}
+                          style={{
+                            width: `${particle.size}px`,
+                            height: `${particle.size}px`,
+                            background: `rgba(${color.r}, ${color.g}, ${color.b}, ${particle.alpha})`,
+                            filter: "blur(2px)",
+                            willChange: "transform",
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>
-        
+
         {/* Gradient overlay for smooth transition */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#050508]" />
+
+        {/* Background Upload Button */}
+        <motion.button
+          onClick={handleBackgroundClick}
+          disabled={uploadingBackground}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="absolute bottom-4 left-4 z-20 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/80 transition-all disabled:opacity-50 disabled:hover:scale-100"
+          title="Badilisha background ya profaili"
+        >
+          {uploadingBackground ? (
+            <Loader2 size={18} className="animate-spin" />
+          ) : (
+            <ImagePlus size={18} />
+          )}
+        </motion.button>
+        <input
+          ref={backgroundInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/jpg,image/webp"
+          onChange={handleBackgroundUpload}
+          className="hidden"
+        />
         
         <div className="absolute top-0 right-0 flex gap-2 p-4 z-10" style={{ paddingTop: 'calc(16px + env(safe-area-inset-top, 0px))' }}>
           <motion.button

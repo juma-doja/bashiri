@@ -2,7 +2,7 @@
 AI Pick Generation and Settlement Tasks
 
 Celery tasks for:
-1. Generating AI picks from predictions with tier qualification
+1. Generating AI picks from predictions using same logic as dashboard
 2. Settling AI picks when matches finish
 3. Updating AI Pick status based on match status
 """
@@ -14,7 +14,6 @@ from django.db import transaction
 from datetime import timedelta
 
 from .models import AIPick, Match
-from .ai_pick_config import qualify_ai_pick, get_market_label, get_selection_label, ELITE_MARKETS, FREE_MARKETS
 from .settlement_engine import settle_ai_pick
 from .ml.poisson_model import predict_fixture
 
@@ -35,17 +34,27 @@ def generate_ai_picks(feed_type="STANDARD"):
     today = timezone.localdate()
     two_days_ahead = today + timedelta(days=2)
 
+    # Only include leagues that are supported by Poisson model
+    SUPPORTED_LEAGUES = ['Bundesliga', 'Campeonato Brasileiro Série A', 'Championship', 'EPL', 'LaLiga', 'Ligue1', 'Serie A', 'UEFA Champions League']
+
     matches = Match.objects.filter(
         kickoff_at__date__gte=today,
         kickoff_at__date__lte=two_days_ahead,
-        status="SCHEDULED"
+        status="SCHEDULED",
+        league__poisson_key__in=SUPPORTED_LEAGUES
     ).select_related('league', 'home_team', 'away_team')
 
     picks_created = 0
     picks_skipped = 0
 
     for match in matches:
-        # Skip if pick already exists for this match
+        # Skip if AI Pick card already exists for this match in feed
+        existing_card = Card.objects.filter(type="AI_PICK", match_id=match.id).first()
+        if existing_card:
+            picks_skipped += 1
+            continue
+
+        # Skip if AIPick already exists for this match in database
         existing_pick = AIPick.objects.filter(match=match, feed=feed_type).first()
         if existing_pick:
             picks_skipped += 1
@@ -59,139 +68,40 @@ def generate_ai_picks(feed_type="STANDARD"):
                 match.away_team.name,
             )
 
-            # Evaluate all available markets for qualification
-            best_pick = None
-            best_rec_score = 0
+            # Use the same logic as dashboard for consistency
+            # Import compute_global_top_pick from services
+            from .services import compute_global_top_pick
 
-            # Map prediction data to market keys
-            market_candidates = []
+            # Get global top pick using same logic as dashboard
+            global_best = compute_global_top_pick(prediction)
 
-            # 1X2 markets
-            if prediction.get('match_result'):
-                mr = prediction['match_result']
-                market_candidates.append({
-                    'market': '1x2_home',
-                    'selection': 'Home',
-                    'probability': mr.get('home_win', 0),
-                })
-                market_candidates.append({
-                    'market': '1x2_draw',
-                    'selection': 'Draw',
-                    'probability': mr.get('draw', 0),
-                })
-                market_candidates.append({
-                    'market': '1x2_away',
-                    'selection': 'Away',
-                    'probability': mr.get('away_win', 0),
-                })
-
-            # BTTS markets
-            if prediction.get('btts'):
-                btts = prediction['btts']
-                market_candidates.append({
-                    'market': 'btts_yes',
-                    'selection': 'Yes',
-                    'probability': btts.get('btts_yes', 0),
-                })
-                market_candidates.append({
-                    'market': 'btts_no',
-                    'selection': 'No',
-                    'probability': btts.get('btts_no', 0),
-                })
-
-            # Double Chance markets
-            if prediction.get('double_chance'):
-                dc = prediction['double_chance']
-                market_candidates.append({
-                    'market': 'dc_1x',
-                    'selection': '1X',
-                    'probability': dc.get('1x', 0),
-                })
-                market_candidates.append({
-                    'market': 'dc_x2',
-                    'selection': 'X2',
-                    'probability': dc.get('x2', 0),
-                })
-                market_candidates.append({
-                    'market': 'dc_12',
-                    'selection': '12',
-                    'probability': dc.get('12', 0),
-                })
-
-            # Over/Under markets
-            if prediction.get('over_under'):
-                ou = prediction['over_under']
-                if ou.get('over_1_5'):
-                    market_candidates.append({
-                        'market': 'over_1_5',
-                        'selection': 'Over',
-                        'probability': ou.get('over_1_5', 0),
-                    })
-                if ou.get('over_2_5'):
-                    market_candidates.append({
-                        'market': 'over_2_5',
-                        'selection': 'Over',
-                        'probability': ou.get('over_2_5', 0),
-                    })
-
-            # Team goals markets
-            if prediction.get('home_goals'):
-                hg = prediction['home_goals']
-                if hg.get('over_0_5'):
-                    market_candidates.append({
-                        'market': 'home_over_0_5',
-                        'selection': 'Over',
-                        'probability': hg.get('over_0_5', 0),
-                    })
-                if hg.get('over_1_5'):
-                    market_candidates.append({
-                        'market': 'home_over_1_5',
-                        'selection': 'Over',
-                        'probability': hg.get('over_1_5', 0),
-                    })
-
-            if prediction.get('away_goals'):
-                ag = prediction['away_goals']
-                if ag.get('over_0_5'):
-                    market_candidates.append({
-                        'market': 'away_over_0_5',
-                        'selection': 'Over',
-                        'probability': ag.get('over_0_5', 0),
-                    })
-                if ag.get('over_1_5'):
-                    market_candidates.append({
-                        'market': 'away_over_1_5',
-                        'selection': 'Over',
-                        'probability': ag.get('over_1_5', 0),
-                    })
-
-            # Find best qualified pick
-            for candidate in market_candidates:
-                # Poisson prediction payloads expose percentages (0-100),
-                # while the qualification thresholds use decimals (0-1).
-                if candidate['probability'] > 1:
-                    candidate['probability'] /= 100
-
-                tier = qualify_ai_pick(
-                    candidate['market'],
-                    candidate['probability'],
-                    feed_type
-                )
-
-                if tier:
-                    # Calculate recommendation score (tier * probability)
-                    tier_score = {'ELITE': 3, 'STRONG': 2, 'MINIMUM': 1}.get(tier, 0)
-                    rec_score = tier_score * candidate['probability']
-
-                    if rec_score > best_rec_score:
-                        best_rec_score = rec_score
-                        best_pick = {
-                            **candidate,
-                            'tier': tier,
-                        }
+            if global_best is None:
+                # NO_STRONG_PICK - create card with no pick
+                best_pick = None
+            else:
+                # Map global_best to our format
+                best_pick = {
+                    'market': global_best['market_key'],
+                    'selection': global_best['option_key'],
+                    'probability': global_best['confidence'] / 100,  # Convert percentage to decimal
+                    'tier': global_best.get('tier') or 'STRONG',  # Default to STRONG if tier is None
+                }
 
             # Create AI Pick if qualified
             if best_pick:
+                # Import market definitions for labels
+                from .services import MARKET_DEFINITIONS
+
+                market_def = MARKET_DEFINITIONS.get(best_pick['market'], {})
+                market_label = market_def.get('label', best_pick['market'])
+                
+                # Find option label
+                option_label = best_pick['selection']
+                for opt in market_def.get('options', []):
+                    if opt['key'] == best_pick['selection']:
+                        option_label = opt['label']
+                        break
+
                 with transaction.atomic():
                     pick = AIPick.objects.create(
                         pick_id=uuid.uuid4(),
@@ -232,8 +142,8 @@ def generate_ai_picks(feed_type="STANDARD"):
                             'ai_pick': {
                                 'option_key': best_pick['selection'].lower(),
                                 'selection': best_pick['selection'],
-                                'selection_label': get_selection_label(best_pick['selection']),
-                                'market_label': get_market_label(best_pick['market']),
+                                'selection_label': option_label,
+                                'market_label': market_label,
                                 'probability_percent': round(best_pick['probability'] * 100, 1),
                                 'tier': best_pick['tier'],
                                 'status': 'PENDING',
@@ -242,6 +152,24 @@ def generate_ai_picks(feed_type="STANDARD"):
                         }
                     )
             else:
+                # Create NO_STRONG_PICK card
+                Card.objects.create(
+                    type="AI_PICK",
+                    match_id=match.id,
+                    data={
+                        'match': {
+                            'id': match.id,
+                            'home_team': match.home_team.name,
+                            'away_team': match.away_team.name,
+                            'home_team_crest_url': match.home_team.crest_url,
+                            'away_team_crest_url': match.away_team.crest_url,
+                            'kickoff_at': match.kickoff_at.isoformat(),
+                            'league': match.league.name,
+                            'is_big_match': match.is_big_match,
+                        },
+                        'ai_pick': None  # NO_STRONG_PICK
+                    }
+                )
                 picks_skipped += 1
 
         except Exception as e:

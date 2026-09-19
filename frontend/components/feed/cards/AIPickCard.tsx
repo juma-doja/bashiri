@@ -1,14 +1,18 @@
 "use client";
 import { motion } from "framer-motion";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { Brain, Sparkles, Target, AlertCircle, Check, X, Minus, Clock, type LucideIcon } from "lucide-react";
+import { Brain, Sparkles, Target, AlertCircle, Check, X, Minus, Clock, TrendingUp, type LucideIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface AIPickMatch {
+  id?: number;
   home_team?: string;
   away_team?: string;
   home_team_crest_url?: string;
   away_team_crest_url?: string;
   kickoff_at?: string;
+  league?: string;
+  is_big_match?: boolean;
 }
 
 interface AIPick {
@@ -21,6 +25,7 @@ interface AIPick {
   selection?: string | null;
   selection_label?: string | null;
   market_label?: string | null;
+  pick_id?: string;
 }
 
 interface AIPickData {
@@ -35,8 +40,15 @@ function normalizeProbability(value: number | string | null | undefined): number
 }
 
 export function AIPickCard({ data }: { data: AIPickData }) {
+  const router = useRouter();
   const { match, ai_pick } = data;
   if (!match) return null;
+
+  const handleCardClick = () => {
+    if (match.id) {
+      router.push(`/create/${match.id}/predict`);
+    }
+  };
 
   // Handle case where ai_pick might be null (NO_STRONG_PICK)
   if (!ai_pick) {
@@ -44,6 +56,7 @@ export function AIPickCard({ data }: { data: AIPickData }) {
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
+        onClick={handleCardClick}
       >
         <GlassCard hover texture>
           <div className="p-5">
@@ -87,10 +100,6 @@ export function AIPickCard({ data }: { data: AIPickData }) {
                         src={match.away_team_crest_url}
                         alt={match.away_team}
                         className="w-full h-full object-contain p-1"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                        }}
                       />
                     ) : (
                       <Target size={16} className="text-[#D4AF37]" />
@@ -104,10 +113,16 @@ export function AIPickCard({ data }: { data: AIPickData }) {
               <p className="text-sm text-white">Hakuna soko lenye uhakika wa kutosha kwa mechi hii.</p>
             </div>
 
-            <div className="mt-5 flex items-center gap-3 text-xs" style={{ color: "var(--text-secondary)" }}>
-              <div className="flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5" style={{ color: "var(--text-secondary)" }} />
-                <span>{match.kickoff_at ? new Date(match.kickoff_at).toLocaleString("sw-TZ", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "N/A"}</span>
+            <div className="mt-5 flex items-center justify-between">
+              <div className="flex items-center gap-3 text-xs" style={{ color: "var(--text-secondary)" }}>
+                <div className="flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5" style={{ color: "var(--text-secondary)" }} />
+                  <span>{match.kickoff_at ? new Date(match.kickoff_at).toLocaleString("sw-TZ", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "N/A"}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs" style={{ color: "rgba(212,175,55,0.8)" }}>
+                <TrendingUp size={12} />
+                <span>Angalia Masoko</span>
               </div>
             </div>
           </div>
@@ -157,10 +172,11 @@ export function AIPickCard({ data }: { data: AIPickData }) {
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
+      onClick={handleCardClick}
     >
       <GlassCard hover texture>
         <div className="p-5">
-          {/* Top Header */}
+          {/* Top Header - Bashiri Pick Style */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5 rounded-full border px-2 py-1 text-[9px] font-medium uppercase tracking-wider" style={{ borderColor: "rgba(212,175,55,0.15)", background: "rgba(212,175,55,0.05)", color: "var(--brand-accent)" }}>
@@ -181,7 +197,7 @@ export function AIPickCard({ data }: { data: AIPickData }) {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+              <span className="text-2xl font-bold" style={{ color: "var(--brand-primary)" }}>
                 {probability}%
               </span>
               {isSettled && (
@@ -246,7 +262,7 @@ export function AIPickCard({ data }: { data: AIPickData }) {
             </div>
           </div>
 
-          {/* Prediction Section - Main Focal Point */}
+          {/* Prediction Section - Main Focal Point (Bashiri Pick Style) */}
           <div className="mb-4">
             <p className="text-2xl font-bold mb-1" style={{ color: "var(--text-primary)" }}>
               {ai_pick.selection_label || (selection ? selectionLabel[selection] : null) || selection || "Hakuna pick"}
@@ -256,12 +272,20 @@ export function AIPickCard({ data }: { data: AIPickData }) {
             </p>
           </div>
 
-          {/* Footer */}
-          <div className="flex items-center gap-2 text-xs" style={{ color: "var(--text-secondary)" }}>
-            <Clock size={12} style={{ opacity: 0.6 }} />
-            <span>
-              {match.kickoff_at ? new Date(match.kickoff_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "N/A"}
-            </span>
+          {/* Bashiri Pick Footer */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs" style={{ color: "var(--text-secondary)" }}>
+              <Clock size={12} style={{ opacity: 0.6 }} />
+              <span>
+                {match.kickoff_at ? new Date(match.kickoff_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "N/A"}
+              </span>
+            </div>
+            {!isSettled && (
+              <div className="flex items-center gap-1.5 text-xs" style={{ color: "rgba(212,175,55,0.8)" }}>
+                <TrendingUp size={12} />
+                <span>AI Ina Uhakika Mzuri</span>
+              </div>
+            )}
           </div>
         </div>
       </GlassCard>

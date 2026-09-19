@@ -24,6 +24,7 @@ from .views import (
     RequestPasswordResetView,
     UnfollowUserView,
     UpdateAvatarView,
+    UpdateBackgroundImageView,
     UpdateSettingsView,
 )
 
@@ -40,6 +41,7 @@ urlpatterns = [
     path("onboarding/", OnboardingView.as_view(), name="onboarding"),
     path("settings/", UpdateSettingsView.as_view(), name="update-settings"),
     path("update-avatar/", UpdateAvatarView.as_view(), name="update-avatar"),
+    path("update-background/", UpdateBackgroundImageView.as_view(), name="update-background"),
     path("profile/<str:username>/", PublicProfileView.as_view(), name="public-profile"),
     path("delete-account/", DeleteAccountView.as_view(), name="delete-account"),
     

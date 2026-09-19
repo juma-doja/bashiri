@@ -56,7 +56,7 @@ export function FeedContainer({ externalRefreshKey }: { externalRefreshKey?: num
     else setLoadingMore(true);
     const currentOffset = reset ? 0 : offsetRef.current;
     try {
-      const data = await getFeed(20, currentOffset);
+      const data = await getFeed(30, currentOffset);
       setCards((prev) => {
         if (reset) return data.results;
         const existingIds = new Set(prev.map((card) => card.id));

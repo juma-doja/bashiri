@@ -8,6 +8,7 @@ export interface BashiriUser {
   username: string | null;
   date_of_birth: string | null;
   avatar_url: string;
+  background_image_url: string | null;
   is_subscriber: boolean;
   is_subscription_active: boolean;
   subscription_expires_at: string | null;

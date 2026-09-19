@@ -89,6 +89,17 @@ export function updateAvatar(avatar: File) {
   });
 }
 
+export function updateBackgroundImage(background: File) {
+  const formData = new FormData();
+  formData.append("background", background);
+  
+  return apiClient<BashiriUser>("/auth/update-background/", {
+    method: "POST",
+    body: formData,
+    skipContentType: true,
+  });
+}
+
 export function getPublicProfile(username: string) {
   return apiClient<{ user: BashiriUser; mic_reactions: Array<{ id: number; reaction: string; created_at: string }>; mic_count: number; is_following?: boolean }>(`/auth/profile/${username}/`, { skipAuth: true });
 }

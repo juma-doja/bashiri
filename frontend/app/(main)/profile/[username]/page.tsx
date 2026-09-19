@@ -1,9 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Film, Target, TrendingUp, Award, Loader2, User, Calendar, Heart, Eye, ArrowLeft, Flame, Medal, Brain, CheckCircle, XCircle, Clock, Shield, Crown, Users, Zap, Star, UserPlus, UserMinus, Trophy } from "lucide-react";
-import { getPublicProfile, followUser, unfollowUser, checkFollowStatus, getFollowing } from "@/lib/api/auth";
+import { Film, Target, TrendingUp, Award, Loader2, User, Calendar, Heart, Eye, ArrowLeft, Flame, Medal, Brain, CheckCircle, XCircle, Clock, Shield, Crown, Users, Zap, Star, UserPlus, UserMinus, Trophy, ImagePlus } from "lucide-react";
+import { getPublicProfile, followUser, unfollowUser, checkFollowStatus, getFollowing, updateBackgroundImage } from "@/lib/api/auth";
 import { getUserTips, getTipLeaderboard } from "@/lib/api/tips";
 import { getUserProgress } from "@/lib/api/gamification";
 import { MicVideoCard } from "@/components/mic/MicVideoCard";
@@ -30,6 +30,8 @@ export default function PublicProfilePage() {
   const [serverFollowStatus, setServerFollowStatus] = useState<boolean | null>(null);
   const [followersCount, setFollowersCount] = useState<number | null>(null);
   const [userProgress, setUserProgress] = useState<any>(null);
+  const [uploadingBackground, setUploadingBackground] = useState(false);
+  const backgroundInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadProfile();
@@ -227,6 +229,44 @@ export default function PublicProfilePage() {
   const micCount = profileData.mic_count || 0;
   const userTipsList = userTips || [];
 
+  // Check if this is the current user's profile
+  const isOwnProfile = currentUser?.username === username;
+
+  // Background upload functions (only for own profile)
+  function handleBackgroundClick() {
+    backgroundInputRef.current?.click();
+  }
+
+  async function handleBackgroundUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (10MB max for background)
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Background image isiyozidi 10MB inaruhusiwa.");
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert("Aina ya picha inaruhusiwa: JPEG, PNG, au WebP.");
+      return;
+    }
+
+    setUploadingBackground(true);
+    try {
+      const updatedUser = await updateBackgroundImage(file);
+      // Update current user in store
+      // Note: This only works for own profile
+      setProfileData({ ...profileData, user: updatedUser });
+    } catch (error) {
+      alert("Imeshindika ku-upload background image. Jaribu tena.");
+    } finally {
+      setUploadingBackground(false);
+    }
+  }
+
   return (
     <div className="min-h-dvh bg-[#0A0A0A] px-4 pb-24 pt-safe pt-10 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -243,6 +283,42 @@ export default function PublicProfilePage() {
           <p className="text-sm text-white/50">Performance analytics & tips</p>
         </div>
       </div>
+
+      {/* Cover Section with Background Image */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative h-48 overflow-hidden rounded-2xl mb-6"
+      >
+        {/* User Background Image or Default */}
+        <div className="absolute inset-0">
+          {user.background_image_url ? (
+            <img
+              src={user.background_image_url}
+              alt="Profile Background"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-[#0A0A0A] via-[#050508] to-[#0A0A0A]" />
+          )}
+        </div>
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0A0A0A]" />
+
+        {/* Profile Content */}
+        <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-accent)] flex items-center justify-center">
+              <User size={20} className="text-black" />
+            </div>
+            <div>
+              <h1 className="text-lg font-black text-white">Profaili</h1>
+              <p className="text-xs text-white/50">Performance analytics & tips</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Profile Header */}
       <motion.div

@@ -134,7 +134,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "id", "phone_number", "username", "date_of_birth", "avatar_url",
+            "id", "phone_number", "username", "date_of_birth", "avatar_url", "background_image_url",
             "is_subscriber", "is_subscription_active", "subscription_expires_at",
             "current_streak", "best_streak", "total_predictions",
             "correct_predictions", "accuracy_percentage", "profile_complete",
@@ -153,12 +153,28 @@ class UpdateAvatarSerializer(serializers.Serializer):
         # Validate file size (max 5MB)
         if value.size > 5 * 1024 * 1024:
             raise serializers.ValidationError("Picha isiyozidi 5MB inaruhusiwa.")
-        
+
         # Validate file type
         allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
         if value.content_type not in allowed_types:
             raise serializers.ValidationError("Aina ya picha inaruhusiwa: JPEG, PNG, au WebP.")
-        
+
+        return value
+
+
+class UpdateBackgroundImageSerializer(serializers.Serializer):
+    background = serializers.ImageField()
+
+    def validate_background(self, value):
+        # Validate file size (max 10MB for background)
+        if value.size > 10 * 1024 * 1024:
+            raise serializers.ValidationError("Background image isiyozidi 10MB inaruhusiwa.")
+
+        # Validate file type
+        allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
+        if value.content_type not in allowed_types:
+            raise serializers.ValidationError("Aina ya picha inaruhusiwa: JPEG, PNG, au WebP.")
+
         return value
 
 

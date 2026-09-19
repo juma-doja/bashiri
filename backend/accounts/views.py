@@ -23,6 +23,7 @@ from .serializers import (
     RegisterSerializer,
     RequestPasswordResetSerializer,
     UpdateAvatarSerializer,
+    UpdateBackgroundImageSerializer,
     UserSerializer,
 )
 
@@ -251,12 +252,12 @@ class UpdateAvatarView(APIView):
                 {"detail": "Picha haijapokelewa. Tafadhali chagua picha."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         serializer = UpdateAvatarSerializer(data=request.FILES)
         serializer.is_valid(raise_exception=True)
-        
+
         avatar = serializer.validated_data["avatar"]
-        
+
         # Upload to Cloudinary
         try:
             from cloudinary.uploader import upload
@@ -269,17 +270,61 @@ class UpdateAvatarView(APIView):
                 ],
                 resource_type="image"
             )
-            
+
             # Update user avatar_url
             request.user.avatar_url = result["secure_url"]
             request.user.save(update_fields=["avatar_url"])
-            
+
             return Response(UserSerializer(request.user).data)
-        
+
         except Exception as e:
             print(f"Cloudinary upload error: {e}")
             return Response(
                 {"detail": "Imeshindwa ku-upload picha. Jaribu tena."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class UpdateBackgroundImageView(APIView):
+    """Upload and update user profile background image"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Check if file is in request
+        if 'background' not in request.FILES:
+            return Response(
+                {"detail": "Background image haijapokelewa. Tafadhali chagua picha."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = UpdateBackgroundImageSerializer(data=request.FILES)
+        serializer.is_valid(raise_exception=True)
+
+        background = serializer.validated_data["background"]
+
+        # Upload to Cloudinary
+        try:
+            from cloudinary.uploader import upload
+            result = upload(
+                background,
+                folder="bashiri/backgrounds",
+                transformation=[
+                    {"width": 1200, "height": 400, "crop": "fill"},
+                    {"quality": "auto"}
+                ],
+                resource_type="image"
+            )
+
+            # Update user background_image_url
+            request.user.background_image_url = result["secure_url"]
+            request.user.save(update_fields=["background_image_url"])
+
+            return Response(UserSerializer(request.user).data)
+
+        except Exception as e:
+            print(f"Cloudinary background upload error: {e}")
+            return Response(
+                {"detail": "Imeshindwa ku-upload background image. Jaribu tena."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

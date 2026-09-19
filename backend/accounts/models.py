@@ -39,6 +39,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     onboarding_completed_at = models.DateTimeField(null=True, blank=True)
     tip_preferences = models.JSONField(default=list, blank=True)
     avatar_url = models.URLField(max_length=500, blank=True, default="")
+    background_image_url = models.URLField(max_length=500, blank=True, null=True)
     preferred_language = models.CharField(
         max_length=2, choices=[("sw", "Kiswahili"), ("en", "English")], default="sw"
     )
