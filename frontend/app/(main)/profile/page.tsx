@@ -179,7 +179,7 @@ export default function ProfilePage() {
       setUser(updatedUser);
       setAlertModal({
         isOpen: true,
-        title: "Imeshindika",
+        title: "Imefanikiwa",
         message: "Background image imesasiliwa kwa mafanikio!",
         variant: "success"
       });

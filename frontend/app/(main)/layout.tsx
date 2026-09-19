@@ -12,6 +12,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { getMe } from "@/lib/api/auth";
 import { shouldShowOnboarding } from "@/lib/auth/onboarding";
 import { MusicPlayerProvider } from "@/components/music/MusicPlayerProvider";
+import { ResultRecapProvider } from "@/components/feed/ResultRecapProvider";
 
 function MainLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -73,6 +74,7 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
           <CommandPaletteProvider />
           <FloatingReviewButton onClick={() => router.push("/review")} />
           <FloatingWhatsAppButton />
+          <ResultRecapProvider />
         </div>
       </MusicPlayerProvider>
     </PWAInstallProvider>
