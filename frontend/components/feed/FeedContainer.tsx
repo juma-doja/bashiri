@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { getFeed, Card } from "@/lib/api/feed";
 import { CardSkeleton, FootballFieldLoader } from "@/components/ui/Skeleton";
-import { BookButton } from "@/components/ui/BookButton";
+
 import { PredictionTutorial } from "@/components/predictions/PredictionTutorial";
 import { AIPickCard } from "./cards/AIPickCard";
 import { LiveMatchCard } from "./cards/LiveMatchCard";
@@ -15,7 +15,7 @@ import { DidYouKnowCard } from "./cards/DidYouKnowCard";
 import { DebateCard } from "./cards/DebateCard";
 import { MicWinnerCard } from "./cards/MicWinnerCard";
 import { BestStreakCard } from "./cards/BestStreakCard";
-import { ChevronDown } from "lucide-react";
+
 
 function renderCard(card: Card) {
   switch (card.type) {
@@ -37,39 +37,36 @@ function renderCard(card: Card) {
 export function FeedContainer({ externalRefreshKey }: { externalRefreshKey?: number }) {
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [feedError, setFeedError] = useState<string | null>(null);
   const [showTutorial, setShowTutorial] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [isPageVisible, setIsPageVisible] = useState(true);
+  const [allLoaded, setAllLoaded] = useState(false);
   
   const feedRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   const lastRefreshTimeRef = useRef<number>(0);
   const loadMoreInFlightRef = useRef(false);
-  const offsetRef = useRef(0);
+  const loadObserverRef = useRef<IntersectionObserver | null>(null);
 
-  const loadMore = useCallback(async (reset = false) => {
+  const loadAllCards = useCallback(async (reset = false) => {
     if (loadMoreInFlightRef.current && !reset) return;
     loadMoreInFlightRef.current = true;
     if (reset) setFeedError(null);
-    else setLoadingMore(true);
-    const currentOffset = reset ? 0 : offsetRef.current;
     try {
-      const data = await getFeed(30, currentOffset);
+      // Load all cards at once (no pagination)
+      const data = await getFeed(1000, 0); // Large limit to get all cards
       setCards((prev) => {
         if (reset) return data.results;
         const existingIds = new Set(prev.map((card) => card.id));
         return [...prev, ...data.results.filter((card) => !existingIds.has(card.id))];
       });
-      offsetRef.current = currentOffset + data.results.length;
-      setHasMore(currentOffset + data.results.length < data.count);
+      setAllLoaded(true);
     } catch (error) {
       console.error("Failed to load feed:", error);
       setFeedError(error instanceof Error ? error.message : "Imeshindikana kupakia feed.");
     } finally {
       setLoading(false);
-      setLoadingMore(false);
       loadMoreInFlightRef.current = false;
     }
   }, []);
@@ -77,10 +74,10 @@ export function FeedContainer({ externalRefreshKey }: { externalRefreshKey?: num
   // Trigger full refresh when externalRefreshKey changes
   useEffect(() => {
     if (externalRefreshKey && externalRefreshKey > 0) {
-      const refreshTimeout = window.setTimeout(() => { void loadMore(true); }, 0);
+      const refreshTimeout = window.setTimeout(() => { void loadAllCards(true); }, 0);
       return () => window.clearTimeout(refreshTimeout);
     }
-  }, [externalRefreshKey, loadMore]);
+  }, [externalRefreshKey, loadAllCards]);
 
   // Smart refresh: append new data without reset
   const smartRefresh = useCallback(async () => {
@@ -95,7 +92,7 @@ export function FeedContainer({ externalRefreshKey }: { externalRefreshKey?: num
     
     try {
       // Fetch latest items and prepend them if they're new
-      const data = await getFeed(10, 0);
+      const data = await getFeed(1000, 0);
       
       setCards(prevCards => {
         const existingIds = new Set(prevCards.map(card => card.id));
@@ -138,6 +135,29 @@ export function FeedContainer({ externalRefreshKey }: { externalRefreshKey?: num
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
+  // Infinite scroll with Intersection Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && !allLoaded && !loadMoreInFlightRef.current) {
+          // Auto-load more cards when scrolling to bottom
+          // Since we load all at once with large limit, this is mostly for future-proofing
+          if (!allLoaded) {
+            loadAllCards();
+          }
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [allLoaded, loadAllCards]);
+
   // Smart polling with conditions
   useEffect(() => {
     const poll = () => {
@@ -147,16 +167,16 @@ export function FeedContainer({ externalRefreshKey }: { externalRefreshKey?: num
     };
 
     // Initial load
-    const initialLoadTimeout = window.setTimeout(() => { void loadMore(true); }, 0);
+    const initialLoadTimeout = window.setTimeout(() => { void loadAllCards(true); }, 0);
 
-    // Set up smart polling (every 30 seconds instead of 15)
+    // Set up smart polling (every 30 seconds)
     const interval = setInterval(poll, 30000);
 
     return () => {
       clearInterval(interval);
       window.clearTimeout(initialLoadTimeout);
     };
-  }, [isVisible, isPageVisible, loadMore, smartRefresh]);
+  }, [isVisible, isPageVisible, loadAllCards, smartRefresh]);
 
   if (loading) {
     return (
@@ -206,23 +226,22 @@ export function FeedContainer({ externalRefreshKey }: { externalRefreshKey?: num
           <div key={card.id}>{renderCard(card)}</div>
         ))}
       </div>
+      <div ref={loadMoreRef} className="h-4" />
       {feedError ? (
         <div className="mt-8 flex flex-col items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 py-8 text-center">
           <p className="text-sm text-red-300">{feedError}</p>
           <button
             type="button"
-            onClick={() => { void loadMore(true); }}
+            onClick={() => { void loadAllCards(true); }}
             className="rounded-xl px-4 py-2 text-sm font-bold text-black"
             style={{ background: "var(--brand-accent)" }}
           >
             Jaribu tena
           </button>
         </div>
-      ) : hasMore && (
-        <div className="mt-8">
-          <BookButton onClick={() => { void loadMore(); }} icon={ChevronDown} loading={loadingMore}>
-            Pakia Zaidi
-          </BookButton>
+      ) : allLoaded && cards.length > 0 && (
+        <div className="mt-8 text-center">
+          <p className="text-xs text-white/40">Imeisha matokeo yote</p>
         </div>
       )}
       {showTutorial && <PredictionTutorial onClose={() => setShowTutorial(false)} />}
