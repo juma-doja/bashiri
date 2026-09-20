@@ -6,8 +6,9 @@ import { FeedContainer } from "@/components/feed/FeedContainer";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { getNotifications } from "@/lib/api/notifications";
+import { getFeed } from "@/lib/api/feed";
 import { useAuthStore } from "@/stores/auth.store";
-import { Bell, Target, Search, X, TrendingUp, Brain } from "lucide-react";
+import { Bell, Target, Search, X, TrendingUp, Brain, Trophy, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ReviewPromptModal } from "@/components/review/ReviewPromptModal";
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
@@ -18,6 +19,7 @@ export default function HomePage() {
   const user = useAuthStore((state) => state.user);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [highConfidenceMatches, setHighConfidenceMatches] = useState<any[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   
@@ -115,6 +117,21 @@ export default function HomePage() {
     };
   }, [user]);
 
+  // Load high confidence matches from real data
+  useEffect(() => {
+    const loadHighConfidenceMatches = async () => {
+      try {
+        const data = await getFeed(1000, 0);
+        const highConfidence = data.results.filter((card: any) => card.type === 'HIGH_CONFIDENCE');
+        setHighConfidenceMatches(highConfidence);
+      } catch (error) {
+        console.error('Failed to load high confidence matches:', error);
+      }
+    };
+
+    loadHighConfidenceMatches();
+  }, []);
+
   return (
     <PullToRefresh onRefresh={handleRefresh}>
       <div className="min-h-dvh pb-safe">
@@ -204,6 +221,165 @@ export default function HomePage() {
           <div className="pt-4 pb-8">
             <HeroCarousel />
           </div>
+
+          {/* High Confidence Tips Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-8"
+          >
+            <GlassCard hover glow texture className="p-6 relative overflow-hidden">
+              {/* Background Image */}
+              <div
+                className="absolute inset-0 opacity-40 bg-cover bg-center"
+                style={{
+                  backgroundImage: "url('/background.jpg')",
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/20 to-black/50" />
+              
+              {/* Animated Gradient Overlay */}
+              <motion.div
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+                className="absolute inset-0 opacity-30"
+                style={{
+                  background: "linear-gradient(90deg, #38BDF8, #D4AF37, #38BDF8)",
+                  backgroundSize: "200% 200%"
+                }}
+              />
+              
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                      style={{ 
+                        background: "linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(212, 175, 55, 0.2))",
+                        border: "2px solid rgba(56, 189, 248, 0.3)"
+                      }}
+                    >
+                      <Target size={28} style={{ color: "#38BDF8" }} />
+                    </motion.div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-white mb-1">High Confidence Tips</h2>
+                      <p className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>
+                        Matches with home/away win probability ≥ 50%
+                      </p>
+                    </div>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(56,189,248,0.4)" }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => router.push("/high-confidence")}
+                    className="px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2"
+                    style={{
+                      background: "linear-gradient(135deg, #38BDF8 0%, #D4AF37 100%)",
+                      color: "#000",
+                      boxShadow: "0 10px 30px rgba(56,189,248,0.3)"
+                    }}
+                  >
+                    View All Tips
+                    <ArrowRight size={16} />
+                  </motion.button>
+                </div>
+
+                {/* Stats Row */}
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-center p-4 rounded-2xl"
+                    style={{ background: "rgba(56, 189, 248, 0.1)", border: "1px solid rgba(56, 189, 248, 0.2)" }}
+                  >
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="text-3xl font-black mb-1" style={{ color: "#38BDF8" }}
+                    >
+                      {highConfidenceMatches.length}
+                    </motion.div>
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>Matches Today</p>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-center p-4 rounded-2xl"
+                    style={{ background: "rgba(212, 175, 55, 0.1)", border: "1px solid rgba(212, 175, 55, 0.2)" }}
+                  >
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                      className="text-3xl font-black mb-1" style={{ color: "#D4AF37" }}
+                    >
+                      {highConfidenceMatches.length > 0 
+                        ? Math.round(highConfidenceMatches.reduce((sum, m) => sum + m.data.prediction.confidence, 0) / highConfidenceMatches.length) 
+                        : 0}%
+                    </motion.div>
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>Avg Confidence</p>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="text-center p-4 rounded-2xl"
+                    style={{ background: "rgba(0, 255, 135, 0.1)", border: "1px solid rgba(0, 255, 135, 0.2)" }}
+                  >
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+                      className="text-3xl font-black mb-1" style={{ color: "#00FF87" }}
+                    >
+                      {highConfidenceMatches.filter(m => m.data.prediction.winner === "home").length}
+                    </motion.div>
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>Home Wins</p>
+                  </motion.div>
+                </div>
+
+                {/* Real Match Preview */}
+                <div className="grid grid-cols-2 gap-4">
+                  {highConfidenceMatches.slice(0, 2).map((match, index) => {
+                    const isHomeWin = match.data.prediction.winner === "home";
+                    const teamColor = isHomeWin ? "#00FF87" : "#FF6464";
+                    const bgColor = isHomeWin ? "rgba(0,255,135,0.08)" : "rgba(255,100,100,0.08)";
+                    const borderColor = isHomeWin ? "rgba(0,255,135,0.2)" : "rgba(255,100,100,0.2)";
+                    
+                    return (
+                      <motion.div
+                        key={match.id}
+                        initial={{ opacity: 0, x: index === 0 ? -20 : 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.5 + index * 0.1 }}
+                        className="p-4 rounded-2xl cursor-pointer hover:scale-105 transition-transform"
+                        style={{ background: bgColor, border: `1px solid ${borderColor}` }}
+                        onClick={() => router.push(`/create/${match.match_id}/predict`)}
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          <Trophy size={16} style={{ color: teamColor }} />
+                          <p className="text-xs font-bold" style={{ color: teamColor }}>
+                            {isHomeWin ? "HOME WIN" : "AWAY WIN"}
+                          </p>
+                        </div>
+                        <p className="text-sm font-bold text-white mb-1">{match.data.match.home_team} vs {match.data.match.away_team}</p>
+                        <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>{match.data.prediction.confidence}% Confidence</p>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            </GlassCard>
+          </motion.div>
 
           {/* Live Odds Section */}
           <div className="mb-8">

@@ -2,178 +2,158 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getCards } from "@/lib/api/feed";
-import { GlassCard } from "@/components/ui/GlassCard";
-import { CardSkeleton } from "@/components/ui/Skeleton";
 import { motion } from "framer-motion";
-import { ArrowLeft, Zap, Target, TrendingUp } from "lucide-react";
-import { useAuthStore } from "@/stores/auth.store";
-import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { Target, Trophy, TrendingUp, Calendar, Filter, ArrowLeft } from "lucide-react";
+import { getFeed } from "@/lib/api/feed";
+import { HighConfidenceCard } from "@/components/feed/cards/HighConfidenceCard";
 
 export default function HighConfidencePage() {
   const router = useRouter();
-  const { requireAuth, hasHydrated } = useRequireAuth();
-  const user = useAuthStore((s) => s.user);
-  const [cards, setCards] = useState<any[]>([]);
+  const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState<"3_days" | "7_days" | "15_days" | "30_days">("3_days");
 
   useEffect(() => {
-    if (!hasHydrated) return;
+    loadMatches();
+  }, [timeRange]);
 
-    if (!requireAuth("Ona High Confidence Picks — jisajili kwa dakika chache!")) {
-      router.push("/home");
-      return;
-    }
-
-    if (user) {
-      fetchHighConfidencePicks();
-    }
-  }, [user, requireAuth, router, hasHydrated]);
-
-  const fetchHighConfidencePicks = async () => {
-    setLoading(true);
+  const loadMatches = async () => {
     try {
-      const data = await getCards();
-      if (data) {
-        const highConfCards = data.filter((card: any) => 
-          card.type === "AI_PICK" && card.data?.ai_pick?.confidence >= 85
-        );
-        setCards(highConfCards);
-      }
-    } catch (e) {
-      console.error("Failed to fetch high confidence picks:", e);
+      setLoading(true);
+      const data = await getFeed(1000, 0);
+      const highConfidenceMatches = data.results.filter((card: any) => card.type === "HIGH_CONFIDENCE");
+      setMatches(highConfidenceMatches);
+    } catch (error) {
+      console.error("Failed to load high confidence matches:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  const calculateStats = () => {
+    if (matches.length === 0) return { total: 0, avgConfidence: 0, homeWins: 0, awayWins: 0 };
+    
+    const total = matches.length;
+    const avgConfidence = Math.round(matches.reduce((sum, m) => sum + m.data.prediction.confidence, 0) / total);
+    const homeWins = matches.filter(m => m.data.prediction.winner === "home").length;
+    const awayWins = matches.filter(m => m.data.prediction.winner === "away").length;
+    
+    return { total, avgConfidence, homeWins, awayWins };
+  };
+
+  const stats = calculateStats();
+
   return (
-    <div className="min-h-dvh bg-[#050508] px-5 pt-safe pb-6" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 32px)" }}>
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => router.back()} aria-label="Rudi nyuma">
-          <ArrowLeft size={20} style={{ color: "rgba(255,255,255,0.6)" }} />
-        </button>
-        <div className="flex items-center gap-2">
-          <Zap size={20} style={{ color: "var(--danger)" }} />
-          <h1 className="text-xl font-bold text-white">High Confidence Picks</h1>
-        </div>
-      </div>
-
-      {/* Stats Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
-      >
-        <GlassCard hover className="p-4">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold" style={{ color: "var(--danger)" }}>
-                {cards.length}
-              </div>
-              <div className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.5)" }}>
-                High Confidence
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1">
-                <Target size={16} style={{ color: "var(--brand-primary)" }} />
-                <span className="text-2xl font-bold" style={{ color: "var(--brand-primary)" }}>
-                  {cards.length > 0 ? Math.round(cards.reduce((acc: number, c: any) => acc + (c.data?.ai_pick?.confidence || 0), 0) / cards.length) : 0}%
-                </span>
-              </div>
-              <div className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.5)" }}>
-                Avg Confidence
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1">
-                <TrendingUp size={16} style={{ color: "#00C878" }} />
-                <span className="text-2xl font-bold" style={{ color: "#00C878" }}>
-                  85%+
-                </span>
-              </div>
-              <div className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.5)" }}>
-                Min Threshold
-              </div>
-            </div>
+    <main className="min-h-screen px-4 pb-8 pt-6 sm:px-5 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 flex items-center gap-3"
+        >
+          <button
+            onClick={() => router.back()}
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            <ArrowLeft size={20} style={{ color: "rgba(255,255,255,0.7)" }} />
+          </button>
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--text-secondary)]">Premium Picks</p>
+            <h1 className="text-2xl font-black text-white sm:text-3xl">High Confidence Tips (≥50%)</h1>
           </div>
-        </GlassCard>
-      </motion.div>
+        </motion.div>
 
-      {/* High Confidence Picks List */}
-      {loading ? (
-        <div className="space-y-3">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <CardSkeleton key={i} />
-          ))}
-        </div>
-      ) : cards.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-full text-center py-20">
-          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-            <Zap size={24} className="text-white/30" />
+        {/* Stats Overview */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4"
+        >
+          <div className="p-4 rounded-2xl" style={{ background: "rgba(56, 189, 248, 0.1)", border: "1px solid rgba(56, 189, 248, 0.2)" }}>
+            <div className="flex items-center gap-2 mb-2">
+              <Target size={18} style={{ color: "#38BDF8" }} />
+              <p className="text-xs font-semibold" style={{ color: "rgba(255,255,255,0.6)" }}>Total Matches</p>
+            </div>
+            <p className="text-3xl font-black" style={{ color: "#38BDF8" }}>{stats.total}</p>
           </div>
-          <h2 className="text-lg font-semibold text-white mb-2">
-            Hakuna High Confidence Picks bado
-          </h2>
-          <p className="text-sm text-white/50">
-            Picks zenye confidence ya 85%+ zitaonekana hapa
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {cards.map((card: any, index: number) => (
-            <motion.div
-              key={card.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              onClick={() => router.push(`/create/${card.data?.match_id}/predict`)}
+          <div className="p-4 rounded-2xl" style={{ background: "rgba(212, 175, 55, 0.1)", border: "1px solid rgba(212, 175, 55, 0.2)" }}>
+            <div className="flex items-center gap-2 mb-2">
+              <Trophy size={18} style={{ color: "#D4AF37" }} />
+              <p className="text-xs font-semibold" style={{ color: "rgba(255,255,255,0.6)" }}>Avg Confidence</p>
+            </div>
+            <p className="text-3xl font-black" style={{ color: "#D4AF37" }}>{stats.avgConfidence}%</p>
+          </div>
+          <div className="p-4 rounded-2xl" style={{ background: "rgba(0, 255, 135, 0.1)", border: "1px solid rgba(0, 255, 135, 0.2)" }}>
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp size={18} style={{ color: "#00FF87" }} />
+              <p className="text-xs font-semibold" style={{ color: "rgba(255,255,255,0.6)" }}>Home Wins</p>
+            </div>
+            <p className="text-3xl font-black" style={{ color: "#00FF87" }}>{stats.homeWins}</p>
+          </div>
+          <div className="p-4 rounded-2xl" style={{ background: "rgba(255, 100, 100, 0.1)", border: "1px solid rgba(255, 100, 100, 0.2)" }}>
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp size={18} style={{ color: "#FF6464" }} />
+              <p className="text-xs font-semibold" style={{ color: "rgba(255,255,255,0.6)" }}>Away Wins</p>
+            </div>
+            <p className="text-3xl font-black" style={{ color: "#FF6464" }}>{stats.awayWins}</p>
+          </div>
+        </motion.div>
+
+        {/* Time Range Filter */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-6 flex items-center gap-3"
+        >
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+            <Filter size={16} style={{ color: "rgba(255,255,255,0.6)" }} />
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value as any)}
+              className="bg-transparent text-sm font-semibold text-white outline-none"
             >
-              <GlassCard hover className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-bold px-2 py-1 rounded-lg" style={{ background: "rgba(255,107,107,0.2)", color: "var(--danger)" }}>
-                        High Confidence
-                      </span>
-                      <span className="text-xs font-bold px-2 py-1 rounded-lg" style={{ background: "rgba(212,175,55,0.2)", color: "var(--brand-primary)" }}>
-                        #{index + 1}
-                      </span>
-                    </div>
-                    <h3 className="text-sm font-semibold text-white mb-1">
-                      {card.data?.match?.home_team?.name} vs {card.data?.match?.away_team?.name}
-                    </h3>
-                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
-                      {card.data?.match?.league?.name}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold" style={{ color: "var(--danger)" }}>
-                      {card.data?.ai_pick?.confidence}%
-                    </div>
-                    <div className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
-                      Confidence
-                    </div>
-                  </div>
-                </div>
-                
-                {card.data?.ai_pick?.prediction && (
-                  <div className="mt-3 p-3 rounded-xl" style={{ background: "rgba(255,107,107,0.1)" }}>
-                    <p className="text-xs font-semibold mb-1" style={{ color: "var(--danger)" }}>
-                      Prediction:
-                    </p>
-                    <p className="text-sm text-white">
-                      {card.data.ai_pick.prediction}
-                    </p>
-                  </div>
-                )}
-              </GlassCard>
-            </motion.div>
-          ))}
-        </div>
-      )}
-    </div>
+              <option value="3_days">Last 3 Days</option>
+              <option value="7_days">Last 7 Days</option>
+              <option value="15_days">Last 15 Days</option>
+              <option value="30_days">Last 30 Days</option>
+            </select>
+          </div>
+        </motion.div>
+
+        {/* Matches Grid */}
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-12 h-12 rounded-full border-4 border-t-white/30 border-white animate-spin" />
+          </div>
+        ) : matches.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-16"
+          >
+            <Target size={48} style={{ color: "rgba(255,255,255,0.3)" }} />
+            <p className="mt-4 text-lg font-semibold text-white">No high confidence matches available</p>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>Check back later for new predictions</p>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {matches.map((match, index) => (
+              <motion.div
+                key={match.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <HighConfidenceCard data={match.data} matchId={match.match_id} />
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
