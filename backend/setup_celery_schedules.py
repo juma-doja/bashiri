@@ -128,8 +128,8 @@ make_interval_task("Sync Recently Finished Matches", "predictions.tasks.sync_rec
 # AI Picks — kila dakika 3 (NEW AI PICK SYSTEM)
 make_interval_task("Generate AI Picks", "predictions.ai_pick_tasks.generate_ai_picks", 3)
 
-# High Confidence Matches — kila dakika 5
-make_interval_task("Generate High Confidence Matches", "predictions.high_confidence_tasks.generate_high_confidence_matches", 5)
+# High Confidence Matches — kila dakika 3
+make_interval_task("Generate High Confidence Matches", "predictions.high_confidence_tasks.generate_high_confidence_matches", 3)
 
 # Remove Finished High Confidence Cards — kila dakika 10
 make_interval_task("Remove Finished High Confidence Cards", "predictions.high_confidence_tasks.remove_finished_high_confidence_cards", 10)
