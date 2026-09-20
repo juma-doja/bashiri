@@ -53,7 +53,7 @@ export function AIWeeklyReport() {
         border: "1px solid rgba(212,175,55,0.15)",
         boxShadow: "0 4px 24px rgba(0,0,0,0.12), 0 0 1px rgba(212,175,55,0.1)"
       }}
-      onClick={() => window.location.href = '/ai-picks'}
+      onClick={() => window.location.href = '/high-confidence'}
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">

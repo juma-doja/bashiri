@@ -14,13 +14,13 @@ import { timeAgo } from '@/lib/utils'
 import { clsx } from 'clsx'
 
 const TYPE_CFG: Record<string, { emoji: string; color: string; getPath: (data: any) => string }> = {
-  DAILY_PICKS:           { emoji:'🔥', color:'var(--brand-primary)',  getPath: () => '/ai-picks' },
+  DAILY_PICKS:           { emoji:'🔥', color:'var(--brand-primary)',  getPath: () => '/high-confidence' },
   FAVORITE_TEAM_MATCH:   { emoji:'⚽', color:'var(--success)',  getPath: (data) => `/match/${data.match_id}/overview` },
   HIGH_CONFIDENCE:       { emoji:'⚡', color:'var(--danger)',  getPath: () => '/high-confidence' },
   RESULT:                { emoji:'📊', color:'var(--info)',  getPath: (data) => `/match/${data.match_id}/overview` },
   SUPPORT_REPLY:         { emoji:'💬', color:'var(--success)',  getPath: (data) => `/settings/support/${data.ticket_id}` },
   MIC_WINNER:            { emoji:'🏆', color:'var(--warning)',  getPath: (data) => `/match/${data.match_id}/mic` },
-  MORNING_PICKS:         { emoji:'☀️', color:'var(--brand-primary)',  getPath: () => '/ai-picks' },
+  MORNING_PICKS:         { emoji:'☀️', color:'var(--brand-primary)',  getPath: () => '/high-confidence' },
   LIVE_MATCH_ALERT:      { emoji:'🔴', color:'var(--danger)',  getPath: (data) => `/match/${data.match_id}/overview` },
   EVENING_RECAP:         { emoji:'🌙', color:'var(--brand-accent)',  getPath: () => '/evening-recap' },
   WEEKLY_SUMMARY:        { emoji:'📈', color:'var(--success)',  getPath: () => '/weekly-summary' },
