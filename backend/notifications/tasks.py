@@ -35,14 +35,14 @@ def notify_daily_picks():
 
         Notification.objects.create(
             user=user, type="DAILY_PICKS",
-            title="AI Picks za Leo Ziko Tayari! 🔥",
-            body=f"Angalia predictions {today_picks.count()} za AI kwa mechi za leo.",
+            title="High Confidence Tips za Leo Ziko Tayari! 🔥",
+            body=f"Angalia predictions {today_picks.count()} za high confidence kwa mechi za leo.",
             data={"card_ids": [c.id for c in today_picks]},
         )
         send_push_to_user(
-            user, "AI Picks za Leo Ziko Tayari! 🔥",
-            f"Angalia predictions {today_picks.count()} za AI kwa mechi za leo.",
-            click_action="/ai-picks",
+            user, "High Confidence Tips za Leo Ziko Tayari! 🔥",
+            f"Angalia predictions {today_picks.count()} za high confidence kwa mechi za leo.",
+            click_action="/high-confidence",
         )
         count += 1
     return f"Notifications zilizotumwa: {count}"
@@ -160,14 +160,14 @@ def notify_morning_picks():
 
         Notification.objects.create(
             user=user, type="MORNING_PICKS",
-            title="Today's 5 Best Picks ☀️",
-            body=f"Angalia predictions 5 bora za AI kwa mechi za leo.",
+            title="Today's 5 Best High Confidence Tips ☀️",
+            body=f"Angalia predictions 5 bora za high confidence kwa mechi za leo.",
             data={"card_ids": [c.id for c in today_picks]},
         )
         send_push_to_user(
-            user, "Today's 5 Best Picks ☀️",
-            f"Angalia predictions 5 bora za AI kwa mechi za leo.",
-            click_action="/ai-picks",
+            user, "Today's 5 Best High Confidence Tips ☀️",
+            f"Angalia predictions 5 bora za high confidence kwa mechi za leo.",
+            click_action="/high-confidence",
         )
         count += 1
     return f"Morning picks notifications: {count}"
