@@ -3,7 +3,7 @@ High Confidence Match Tracking Task
 Filters matches with home/away win >= 55% and tracks performance
 """
 import logging
-from datetime import timedelta
+from datetime import timedelta, datetime as dt
 from django.utils import timezone
 from django.db.models import Q
 from celery import shared_task
@@ -21,24 +21,25 @@ def generate_high_confidence_matches():
     Generate cards for matches with home/away win >= 55%
     Only for HOME_WIN and AWAY_WIN markets
     """
-    today = timezone.localdate()
-    three_days_ahead = today + timedelta(days=3)
+    # Use UTC dates for consistency between manual and automatic runs
+    today_utc = dt.utcnow().date()
+    three_days_ahead = today_utc + timedelta(days=3)
     
     # Get upcoming matches - only from supported leagues
     supported_leagues = [
         "Bundesliga",
         "Campeonato Brasileiro Série A",
         "Championship",
-        "EPL",
-        "LaLiga",
-        "Ligue1",
+        "Premier League",
+        "La Liga",
+        "Ligue 1",
         "Serie A",
         "UEFA Champions League"
     ]
     
     upcoming_matches = Match.objects.filter(
         status="SCHEDULED",
-        kickoff_at__date__gte=today,
+        kickoff_at__date__gte=today_utc - timedelta(days=1),  # Include yesterday to handle timezone issues
         kickoff_at__date__lte=three_days_ahead,
         home_score__isnull=True,
         away_score__isnull=True,
