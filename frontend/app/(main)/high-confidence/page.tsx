@@ -8,12 +8,18 @@ import { getFeed } from "@/lib/api/feed";
 import { HighConfidenceCard } from "@/components/feed/cards/HighConfidenceCard";
 import { FootballFieldLoader } from "@/components/ui/Skeleton";
 import { generateHighConfidencePDF } from "@/lib/api/predictions";
+import { DatePicker } from "@/components/ui/DatePicker";
+import { format } from "date-fns";
 
 export default function HighConfidencePage() {
   const router = useRouter();
   const [matches, setMatches] = useState<any[]>([]);
+  const [allMatches, setAllMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState<"3_days" | "7_days" | "15_days" | "30_days" | "1_month" | "next_3_days" | "next_7_days" | "next_30_days">("1_month");
+  const [selectedLeague, setSelectedLeague] = useState<string>("all");
+  const [leagues, setLeagues] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [useDateFilter, setUseDateFilter] = useState(false);
   const [selectedCards, setSelectedCards] = useState<Set<number>>(new Set());
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [generatingPDF, setGeneratingPDF] = useState(false);
@@ -23,44 +29,47 @@ export default function HighConfidencePage() {
 
   useEffect(() => {
     loadMatches();
-  }, [timeRange]);
+  }, []);
+
+  useEffect(() => {
+    // Filter matches by selected league and date
+    let filtered = allMatches;
+
+    // Filter by league
+    if (selectedLeague !== "all") {
+      filtered = filtered.filter((card: any) => {
+        const leagueName = card.data?.match?.league || "";
+        return leagueName === selectedLeague;
+      });
+    }
+
+    // Filter by date if enabled
+    if (useDateFilter) {
+      const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+      filtered = filtered.filter((card: any) => {
+        const kickoffDate = card.data?.match?.kickoff_at;
+        if (!kickoffDate) return false;
+        const cardDateStr = format(new Date(kickoffDate), 'yyyy-MM-dd');
+        return cardDateStr === selectedDateStr;
+      });
+    }
+
+    setMatches(filtered);
+  }, [selectedLeague, selectedDate, useDateFilter, allMatches]);
 
   const loadMatches = async () => {
     try {
       setLoading(true);
       const data = await getFeed(1000, 0);
-      let highConfidenceMatches = data.results.filter((card: any) => card.type === "HIGH_CONFIDENCE");
-      
-      // Filter by time range
-      const now = new Date();
-      const isFuture = timeRange.startsWith("next_");
-      
-      if (isFuture) {
-        // Future ranges - filter by match kickoff time
-        let endDate = new Date(now);
-        if (timeRange === "next_3_days") endDate.setDate(endDate.getDate() + 3);
-        else if (timeRange === "next_7_days") endDate.setDate(endDate.getDate() + 7);
-        else if (timeRange === "next_30_days") endDate.setDate(endDate.getDate() + 30);
-        
-        highConfidenceMatches = highConfidenceMatches.filter((card: any) => {
-          const kickoffDate = new Date(card.data?.match?.kickoff_at);
-          return kickoffDate >= now && kickoffDate <= endDate;
-        });
-      } else {
-        // Past ranges - filter by card creation time
-        let startDate = new Date(now);
-        if (timeRange === "3_days") startDate.setDate(startDate.getDate() - 3);
-        else if (timeRange === "7_days") startDate.setDate(startDate.getDate() - 7);
-        else if (timeRange === "15_days") startDate.setDate(startDate.getDate() - 15);
-        else if (timeRange === "30_days") startDate.setDate(startDate.getDate() - 30);
-        else if (timeRange === "1_month") startDate.setDate(startDate.getDate() - 30);
-        
-        highConfidenceMatches = highConfidenceMatches.filter((card: any) => {
-          const createdDate = new Date(card.created_at);
-          return createdDate >= startDate;
-        });
-      }
-      
+      const highConfidenceMatches = data.results.filter((card: any) => card.type === "HIGH_CONFIDENCE");
+
+      // Extract unique leagues
+      const uniqueLeagues = Array.from(new Set(
+        highConfidenceMatches.map((card: any) => card.data?.match?.league || "Unknown")
+      )).sort();
+
+      setLeagues(uniqueLeagues);
+      setAllMatches(highConfidenceMatches);
       setMatches(highConfidenceMatches);
     } catch (error) {
       console.error("Failed to load high confidence matches:", error);
@@ -109,21 +118,22 @@ export default function HighConfidencePage() {
   };
 
   async function handleGeneratePDF() {
-    const cardsToExport = selectedCards.size > 0 
+    const cardsToExport = selectedCards.size > 0
       ? matches.filter(m => selectedCards.has(m.id))
       : matches;
-    
+
     if (cardsToExport.length === 0) return;
-    
+
     setGeneratingPDF(true);
     try {
-      const blob = await generateHighConfidencePDF(timeRange) as unknown as Blob;
-      
+      const selectedCardIds = cardsToExport.map(m => m.id);
+      const blob = await generateHighConfidencePDF(selectedLeague, selectedCardIds) as unknown as Blob;
+
       // Create URL for preview
       const url = window.URL.createObjectURL(blob);
       setPdfUrl(url);
       setShowPDFPreview(true);
-      
+
     } catch (error) {
       console.error("Failed to generate PDF:", error);
       alert("Failed to generate PDF. Please try again.");
@@ -134,14 +144,15 @@ export default function HighConfidencePage() {
 
   function handleDownloadPDF() {
     if (!pdfUrl) return;
-    
+
     const a = document.createElement('a');
     a.href = pdfUrl;
-    a.download = `bashiri_high_confidence_${timeRange.replace('_', '-')}.pdf`;
+    const leagueName = selectedLeague === "all" ? "all_leagues" : selectedLeague.replace(/\s+/g, '_');
+    a.download = `bashiri_high_confidence_${leagueName}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    
+
     setShowPDFPreview(false);
     setShowSuccessModal(true);
   }
@@ -218,30 +229,45 @@ export default function HighConfidencePage() {
           </div>
         </motion.div>
 
-        {/* Time Range Filter */}
+        {/* League and Date Filter */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+          className="mb-6 flex flex-col gap-3"
         >
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl w-full sm:w-auto" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
-            <Filter size={16} style={{ color: "rgba(255,255,255,0.6)" }} />
-            <select
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value as any)}
-              className="bg-transparent text-sm font-semibold text-white outline-none flex-1 sm:flex-none min-w-0"
-            >
-              <option value="3_days">Last 3 Days</option>
-              <option value="7_days">Last 7 Days</option>
-              <option value="15_days">Last 15 Days</option>
-              <option value="30_days">Last 30 Days</option>
-              <option value="1_month">Last Month</option>
-              <option value="next_3_days">Next 3 Days</option>
-              <option value="next_7_days">Next 7 Days</option>
-              <option value="next_30_days">Next 30 Days</option>
-            </select>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl w-full sm:w-auto" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+              <Filter size={16} style={{ color: "rgba(255,255,255,0.6)" }} />
+              <select
+                value={selectedLeague}
+                onChange={(e) => setSelectedLeague(e.target.value)}
+                className="bg-transparent text-sm font-semibold text-white outline-none flex-1 sm:flex-none min-w-0"
+              >
+                <option value="all">All Leagues</option>
+                {leagues.map((league) => (
+                  <option key={league} value={league}>{league}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={useDateFilter}
+                  onChange={(e) => setUseDateFilter(e.target.checked)}
+                  className="w-4 h-4 rounded"
+                  style={{ accentColor: "#D4AF37" }}
+                />
+                <span className="text-sm font-semibold text-white">Filter by Date</span>
+              </label>
+            </div>
           </div>
+          {useDateFilter && (
+            <div className="max-w-xs mx-auto sm:mx-0">
+              <DatePicker selectedDate={selectedDate} onDateChange={setSelectedDate} />
+            </div>
+          )}
           <div className="flex flex-wrap items-center gap-2">
             {isSelectMode ? (
               <>
@@ -260,6 +286,19 @@ export default function HighConfidencePage() {
                 >
                   <Square size={14} />
                   Ghairi Zote
+                </button>
+                <button
+                  onClick={handleGeneratePDF}
+                  disabled={generatingPDF || selectedCards.size === 0}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold transition-all hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ background: "rgba(212, 175, 55, 0.15)", color: "#D4AF37", border: "1px solid rgba(212, 175, 55, 0.3)" }}
+                >
+                  {generatingPDF ? (
+                    <div className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  ) : (
+                    <Download size={14} />
+                  )}
+                  {generatingPDF ? "..." : "PDF"}
                 </button>
                 <button
                   onClick={toggleSelectMode}
@@ -428,8 +467,8 @@ export default function HighConfidencePage() {
                 >
                   <CheckCircle size={32} style={{ color: "#00FF87" }} />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">PDF Imeshindwa!</h3>
-                <p className="text-sm text-white/60 mb-4">PDF ya high confidence tips imeshindwa.</p>
+                <h3 className="text-lg font-bold text-white mb-2">PDF Imefanikiwa!</h3>
+                <p className="text-sm text-white/60 mb-4">PDF ya high confidence tips imefanikiwa.</p>
                 <button
                   onClick={() => setShowSuccessModal(false)}
                   className="w-full rounded-xl py-3 font-bold text-black transition-all hover:scale-105"

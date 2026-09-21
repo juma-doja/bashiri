@@ -168,10 +168,10 @@ export function generateSavedMarketsPDF(tabName: string) {
   });
 }
 
-export function generateHighConfidencePDF(timeRange: string) {
+export function generateHighConfidencePDF(league: string, cardIds?: number[]) {
   return apiClient("/predictions/high-confidence-pdf/", {
     method: "POST",
-    body: JSON.stringify({ time_range: timeRange }),
+    body: JSON.stringify({ league: league, card_ids: cardIds }),
     responseType: 'blob'
   });
 }

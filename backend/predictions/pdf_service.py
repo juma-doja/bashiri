@@ -457,8 +457,24 @@ def generate_high_confidence_pdf(high_confidence_cards, time_range="3_days"):
     )
     
     content = []
-    
-    # PREMIUM HEADER
+
+    # PREMIUM HEADER with Logo
+    # Add logo image if available
+    try:
+        # Try PNG files first (ReportLab handles PNG better than SVG)
+        logo_path = os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'public', 'bashiri-app-icon-192.png')
+        if not os.path.exists(logo_path):
+            logo_path = os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'public', 'icon-192.png')
+        if not os.path.exists(logo_path):
+            logo_path = os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'public', 'apple-touch-icon.png')
+
+        if os.path.exists(logo_path):
+            logo = Image(logo_path, width=2.5*cm, height=2.5*cm)
+            logo.hAlign = 'CENTER'
+            content.append(logo)
+    except Exception as e:
+        print(f"Error loading logo: {e}")
+
     content.append(Paragraph("Bashiri High Confidence Tips", title_style))
     content.append(Paragraph(f"AI Predictions with ≥50% Confidence | {time_range.replace('_', ' ').title()}", subtitle_style))
     

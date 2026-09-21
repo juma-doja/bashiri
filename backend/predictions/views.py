@@ -537,60 +537,23 @@ class GenerateHighConfidencePDFView(APIView):
     def post(self, request):
         from .pdf_service import generate_high_confidence_pdf
 
-        time_range = request.data.get("time_range", "3_days")
-
-        # Calculate date range based on time_range (past or future)
-        from datetime import datetime, timedelta
-        now = datetime.now()
-        
-        # Check if it's a future range (starts with "next_")
-        is_future = time_range.startswith("next_")
-        start_date = None
-        end_date = None
-        
-        if is_future:
-            # Future ranges - show upcoming matches
-            if time_range == "next_3_days":
-                end_date = now + timedelta(days=3)
-            elif time_range == "next_7_days":
-                end_date = now + timedelta(days=7)
-            elif time_range == "next_30_days":
-                end_date = now + timedelta(days=30)
-            else:
-                end_date = now + timedelta(days=30)
-        else:
-            # Past ranges - show historical cards
-            if time_range == "3_days":
-                start_date = now - timedelta(days=3)
-            elif time_range == "7_days":
-                start_date = now - timedelta(days=7)
-            elif time_range == "15_days":
-                start_date = now - timedelta(days=15)
-            elif time_range == "30_days":
-                start_date = now - timedelta(days=30)
-            elif time_range == "1_month":
-                start_date = now - timedelta(days=30)
-            else:
-                start_date = now - timedelta(days=30)
+        league_filter = request.data.get("league", "all")
+        card_ids = request.data.get("card_ids", [])
 
         # Get high confidence cards from feed
-        if is_future:
-            # Future ranges - filter by match kickoff time
-            queryset = Card.objects.filter(
-                type="HIGH_CONFIDENCE",
-                match__kickoff_at__lte=end_date,
-                match__kickoff_at__gte=now
-            ).select_related(
-                "match", "match__league", "match__home_team", "match__away_team"
-            ).order_by("match__kickoff_at")
-        else:
-            # Past ranges - filter by card creation time
-            queryset = Card.objects.filter(
-                type="HIGH_CONFIDENCE",
-                created_at__gte=start_date
-            ).select_related(
-                "match", "match__league", "match__home_team", "match__away_team"
-            ).order_by("-created_at")
+        queryset = Card.objects.filter(
+            type="HIGH_CONFIDENCE"
+        ).select_related(
+            "match", "match__league", "match__home_team", "match__away_team"
+        ).order_by("-created_at")
+
+        # Filter by league if specified
+        if league_filter != "all":
+            queryset = queryset.filter(match__league__name=league_filter)
+
+        # Filter by specific card IDs if provided
+        if card_ids:
+            queryset = queryset.filter(id__in=card_ids)
 
         # Serialize the cards
         cards = []
@@ -607,11 +570,12 @@ class GenerateHighConfidencePDFView(APIView):
                 'data': card.data
             })
 
-        pdf_buffer = generate_high_confidence_pdf(cards, time_range)
+        pdf_buffer = generate_high_confidence_pdf(cards, league_filter)
 
         response = HttpResponse(pdf_buffer.getvalue(), content_type='application/pdf')
+        league_name = league_filter if league_filter != "all" else "all_leagues"
         response['Content-Disposition'] = (
-            f'attachment; filename="bashiri_high_confidence_{time_range.lower().replace("_", "-")}.pdf"'
+            f'attachment; filename="bashiri_high_confidence_{league_name}.pdf"'
         )
         return response
 
