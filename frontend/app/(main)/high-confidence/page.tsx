@@ -29,7 +29,38 @@ export default function HighConfidencePage() {
     try {
       setLoading(true);
       const data = await getFeed(1000, 0);
-      const highConfidenceMatches = data.results.filter((card: any) => card.type === "HIGH_CONFIDENCE");
+      let highConfidenceMatches = data.results.filter((card: any) => card.type === "HIGH_CONFIDENCE");
+      
+      // Filter by time range
+      const now = new Date();
+      const isFuture = timeRange.startsWith("next_");
+      
+      if (isFuture) {
+        // Future ranges - filter by match kickoff time
+        let endDate = new Date(now);
+        if (timeRange === "next_3_days") endDate.setDate(endDate.getDate() + 3);
+        else if (timeRange === "next_7_days") endDate.setDate(endDate.getDate() + 7);
+        else if (timeRange === "next_30_days") endDate.setDate(endDate.getDate() + 30);
+        
+        highConfidenceMatches = highConfidenceMatches.filter((card: any) => {
+          const kickoffDate = new Date(card.data?.match?.kickoff_at);
+          return kickoffDate >= now && kickoffDate <= endDate;
+        });
+      } else {
+        // Past ranges - filter by card creation time
+        let startDate = new Date(now);
+        if (timeRange === "3_days") startDate.setDate(startDate.getDate() - 3);
+        else if (timeRange === "7_days") startDate.setDate(startDate.getDate() - 7);
+        else if (timeRange === "15_days") startDate.setDate(startDate.getDate() - 15);
+        else if (timeRange === "30_days") startDate.setDate(startDate.getDate() - 30);
+        else if (timeRange === "1_month") startDate.setDate(startDate.getDate() - 30);
+        
+        highConfidenceMatches = highConfidenceMatches.filter((card: any) => {
+          const createdDate = new Date(card.created_at);
+          return createdDate >= startDate;
+        });
+      }
+      
       setMatches(highConfidenceMatches);
     } catch (error) {
       console.error("Failed to load high confidence matches:", error);
@@ -192,14 +223,14 @@ export default function HighConfidencePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-6 flex items-center justify-between gap-3"
+          className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
         >
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl w-full sm:w-auto" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
             <Filter size={16} style={{ color: "rgba(255,255,255,0.6)" }} />
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value as any)}
-              className="bg-transparent text-sm font-semibold text-white outline-none"
+              className="bg-transparent text-sm font-semibold text-white outline-none flex-1 sm:flex-none min-w-0"
             >
               <option value="3_days">Last 3 Days</option>
               <option value="7_days">Last 7 Days</option>
@@ -211,7 +242,7 @@ export default function HighConfidencePage() {
               <option value="next_30_days">Next 30 Days</option>
             </select>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {isSelectMode ? (
               <>
                 <button
@@ -302,16 +333,16 @@ export default function HighConfidencePage() {
                 {isSelectMode && (
                   <button
                     onClick={() => toggleCardSelection(match.id)}
-                    className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all"
+                    className="absolute top-2 right-2 z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all"
                     style={{
                       background: selectedCards.has(match.id) ? "rgba(0, 255, 135, 0.2)" : "rgba(255, 255, 255, 0.1)",
                       border: selectedCards.has(match.id) ? "1px solid rgba(0, 255, 135, 0.4)" : "1px solid rgba(255, 255, 255, 0.2)"
                     }}
                   >
                     {selectedCards.has(match.id) ? (
-                      <CheckSquare size={16} style={{ color: "#00FF87" }} />
+                      <CheckSquare size={18} style={{ color: "#00FF87" }} />
                     ) : (
-                      <Square size={16} style={{ color: "rgba(255, 255, 255, 0.6)" }} />
+                      <Square size={18} style={{ color: "rgba(255, 255, 255, 0.6)" }} />
                     )}
                   </button>
                 )}
@@ -324,12 +355,12 @@ export default function HighConfidencePage() {
         {/* PDF Preview Modal */}
         {showPDFPreview && pdfUrl && (
           <div 
-            className="fixed inset-0 flex items-center justify-center z-50"
+            className="fixed inset-0 flex items-center justify-center z-50 p-4"
             style={{ background: "rgba(0,0,0,0.8)" }}
             onClick={handleCancelPDF}
           >
             <div 
-              className="rounded-2xl p-6 max-w-4xl w-full mx-4"
+              className="rounded-2xl p-4 sm:p-6 w-full max-w-4xl"
               style={{ background: "#111111", border: "1px solid rgba(212, 175, 55, 0.3)" }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -348,10 +379,10 @@ export default function HighConfidencePage() {
                 <iframe src={pdfUrl} className="w-full h-[60vh]" />
               </div>
               
-              <div className="flex gap-2 justify-center">
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
                 <button
                   onClick={handleDownloadPDF}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:bg-white/10"
+                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:bg-white/10"
                   style={{ background: "rgba(212, 175, 55, 0.15)", color: "#D4AF37", border: "1px solid rgba(212, 175, 55, 0.3)" }}
                 >
                   <Download size={16} />
@@ -359,7 +390,7 @@ export default function HighConfidencePage() {
                 </button>
                 <button
                   onClick={handleOpenPDFInNewTab}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:bg-white/10"
+                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:bg-white/10"
                   style={{ background: "rgba(255, 255, 255, 0.1)", color: "white", border: "1px solid rgba(255, 255, 255, 0.2)" }}
                 >
                   <Share2 size={16} />
@@ -367,7 +398,7 @@ export default function HighConfidencePage() {
                 </button>
                 <button
                   onClick={handleCancelPDF}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:bg-white/10"
+                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:bg-white/10"
                   style={{ background: "rgba(255, 100, 100, 0.15)", color: "#FF6464", border: "1px solid rgba(255, 100, 100, 0.3)" }}
                 >
                   <X size={16} />

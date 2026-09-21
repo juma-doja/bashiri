@@ -12,10 +12,33 @@ export function HighConfidenceCard({ data, matchId }: HighConfidenceCardProps) {
   const router = useRouter();
   const { match, prediction } = data;
   
-  const isHomeWin = prediction.winner === "home";
-  const teamColor = isHomeWin ? "#00FF87" : "#FF6464";
-  const bgColor = isHomeWin ? "rgba(0,255,135,0.08)" : "rgba(255,100,100,0.08)";
-  const borderColor = isHomeWin ? "rgba(0,255,135,0.2)" : "rgba(255,100,100,0.2)";
+  // Color based on confidence percentage
+  const confidence = prediction.confidence || 0;
+  let teamColor: string;
+  let bgColor: string;
+  let borderColor: string;
+  
+  if (confidence >= 81) {
+    // 81-100: Green
+    teamColor = "#00FF87";
+    bgColor = "rgba(0,255,135,0.08)";
+    borderColor = "rgba(0,255,135,0.2)";
+  } else if (confidence >= 71) {
+    // 71-80: Gold
+    teamColor = "#D4AF37";
+    bgColor = "rgba(212,175,55,0.08)";
+    borderColor = "rgba(212,175,55,0.2)";
+  } else if (confidence >= 61) {
+    // 61-70: Blue (Sea blue)
+    teamColor = "#38BDF8";
+    bgColor = "rgba(56,189,248,0.08)";
+    borderColor = "rgba(56,189,248,0.2)";
+  } else {
+    // 50-60: Red
+    teamColor = "#FF6464";
+    bgColor = "rgba(255,100,100,0.08)";
+    borderColor = "rgba(255,100,100,0.2)";
+  }
 
   const handleCardClick = () => {
     router.push(`/create/${matchId}/predict`);
@@ -130,7 +153,7 @@ export function HighConfidenceCard({ data, matchId }: HighConfidenceCardProps) {
           whileTap={{ scale: 0.98 }}
           className="w-full py-3 rounded-xl font-bold transition-all"
           style={{
-            background: `linear-gradient(135deg, ${teamColor}, ${isHomeWin ? '#00C878' : '#FF4040'})`,
+            background: `linear-gradient(135deg, ${teamColor}, ${confidence >= 81 ? '#00C878' : confidence >= 71 ? '#CFAF7B' : confidence >= 61 ? '#0EA5E9' : '#FF4040'})`,
             color: "#000",
           }}
         >
