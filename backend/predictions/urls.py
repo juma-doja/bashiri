@@ -5,7 +5,7 @@ from .views import (
     LiveMatchesView, MatchAnalysisView, MatchDashboardView, MatchOddsView, MatchOverviewView, OddsListView,
     SavedMatchesListView, SavedMarketsListView, SaveMatchView, SaveMarketView, SearchView, TeamListView, FinishedMatchesView, SyncHistoricalView, GenerateSavedMarketsPDFView,
     PublicSavedMarketsListView, ToggleSavedMarketPublicView,
-    TeamStandingsView, HeadToHeadView, TeamDetailView, LeagueDetailView, BashiriPickAnalyticsView, HighConfidenceAnalyticsView,
+    TeamStandingsView, HeadToHeadView, TeamDetailView, LeagueDetailView, BashiriPickAnalyticsView, HighConfidenceAnalyticsView, GenerateHighConfidencePDFView,
 )
 
 urlpatterns = [
@@ -41,4 +41,6 @@ urlpatterns = [
     path("bashiri-pick-analytics/", BashiriPickAnalyticsView.as_view(), name="bashiri-pick-analytics"),
     # High Confidence Analytics (HighConfidenceCard picks only)
     path("high-confidence-analytics/", HighConfidenceAnalyticsView.as_view(), name="high-confidence-analytics"),
+    # High Confidence PDF generation
+    path("high-confidence-pdf/", GenerateHighConfidencePDFView.as_view(), name="generate-high-confidence-pdf"),
 ]

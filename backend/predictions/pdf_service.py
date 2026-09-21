@@ -162,18 +162,22 @@ def generate_saved_markets_pdf(saved_markets, tab_name="All Markets"):
             page_text
         )
         
-        # Add premium watermark logo with reduced opacity
+        # Add premium watermark logo with better visibility
         try:
-            # Try to find the logo in the frontend public directory
-            logo_path = os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'public', 'icon-192.png')
+            # Try to find the Bashiri logo in the frontend public directory
+            logo_path = os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'public', 'bashiri-mark-gold.svg')
+            if not os.path.exists(logo_path):
+                # Fallback to app icon
+                logo_path = os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'public', 'bashiri-app-icon-192.png')
+            
             if os.path.exists(logo_path):
                 canvas.saveState()
-                # Set reduced transparency for premium subtle watermark
-                canvas.setFillAlpha(0.08)  # 8% opacity - very subtle and premium
+                # Set better transparency for visible but subtle watermark
+                canvas.setFillAlpha(0.15)  # 15% opacity - more visible
                 # Center the logo on the page
                 page_width, page_height = A4
-                logo = Image(logo_path, width=10*cm, height=10*cm)  # Slightly larger for better visibility
-                logo.drawOn(canvas, (page_width - 10*cm) / 2, (page_height - 10*cm) / 2)
+                logo = Image(logo_path, width=8*cm, height=8*cm)  # Smaller but cleaner
+                logo.drawOn(canvas, (page_width - 8*cm) / 2, (page_height - 8*cm) / 2)
                 canvas.restoreState()
         except Exception:
             # If logo not found, skip watermark
@@ -354,6 +358,238 @@ def generate_saved_markets_pdf(saved_markets, tab_name="All Markets"):
         
         content.append(table)
         content.append(Spacer(1, 0.8*cm))  # Increased spacing between tables
+    
+    # Professional footer with branding
+    content.extend(create_professional_footer())
+    
+    # Build PDF
+    doc.build(content)
+    buffer.seek(0)
+    return buffer
+
+
+def generate_high_confidence_pdf(high_confidence_cards, time_range="3_days"):
+    """
+    Generate a PDF document with high confidence cards data.
+    
+    Args:
+        high_confidence_cards: List of high confidence card dictionaries with match and prediction data
+        time_range: Time range being generated (3_days, 7_days, 15_days, 30_days, 1_month)
+    
+    Returns:
+        BytesIO: PDF file content
+    """
+    buffer = BytesIO()
+    
+    # Generate unique document ID
+    document_id = str(uuid.uuid4())[:8].upper()
+    
+    # Custom page function to add watermark and page numbers
+    def add_page_footer(canvas, doc):
+        # Add page number
+        page_num = canvas.getPageNumber()
+        canvas.setFont('Helvetica', 9)
+        canvas.setFillColor(colors.HexColor('#999999'))
+        page_text = f"Page {page_num}"
+        text_width = canvas.stringWidth(page_text, 'Helvetica', 9)
+        
+        # Draw centered at bottom
+        canvas.drawString(
+            (A4[0] - text_width) / 2,
+            0.75 * cm,
+            page_text
+        )
+        
+        # Add premium watermark logo with better visibility
+        try:
+            # Try to find the Bashiri logo in the frontend public directory
+            logo_path = os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'public', 'bashiri-mark-gold.svg')
+            if not os.path.exists(logo_path):
+                # Fallback to app icon
+                logo_path = os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'public', 'bashiri-app-icon-192.png')
+            
+            if os.path.exists(logo_path):
+                canvas.saveState()
+                # Set better transparency for visible but subtle watermark
+                canvas.setFillAlpha(0.15)  # 15% opacity - more visible
+                # Center the logo on the page
+                page_width, page_height = A4
+                logo = Image(logo_path, width=8*cm, height=8*cm)  # Smaller but cleaner
+                logo.drawOn(canvas, (page_width - 8*cm) / 2, (page_height - 8*cm) / 2)
+                canvas.restoreState()
+        except Exception:
+            # If logo not found, skip watermark
+            pass
+    
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=2*cm,
+        leftMargin=2*cm,
+        topMargin=2*cm,
+        bottomMargin=1.5*cm,  # Reduced for page numbers
+        onFirstPage=add_page_footer,
+        onLaterPages=add_page_footer
+    )
+    
+    # Custom styles - PREMIUM TYPOGRAPHY
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontName='Helvetica-Bold',  # Using available bold font
+        fontSize=28,  # Increased from 24 for more impact
+        leading=36,
+        textColor=colors.HexColor('#D4AF37'),  # Gold color for premium feel
+        alignment=TA_CENTER,
+        spaceAfter=0.8*cm,
+    )
+    
+    subtitle_style = ParagraphStyle(
+        'CustomSubtitle',
+        parent=styles['Heading2'],
+        fontName='Helvetica',
+        fontSize=14,
+        leading=20,
+        textColor=colors.HexColor('#999999'),
+        alignment=TA_CENTER,
+        spaceAfter=1.5*cm,
+    )
+    
+    content = []
+    
+    # PREMIUM HEADER
+    content.append(Paragraph("Bashiri High Confidence Tips", title_style))
+    content.append(Paragraph(f"AI Predictions with ≥50% Confidence | {time_range.replace('_', ' ').title()}", subtitle_style))
+    
+    # Document ID and date
+    content.append(Paragraph(
+        f"Document ID: {document_id} | Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        ParagraphStyle(
+            'Meta',
+            fontName='Helvetica',
+            fontSize=9,
+            leading=12,
+            textColor=colors.HexColor('#999999'),
+            alignment=TA_CENTER,
+            spaceAfter=1.5*cm,
+        )
+    ))
+    
+    # Section divider
+    content.extend(create_section_divider("High Confidence Picks"))
+    
+    # Group cards by match
+    if high_confidence_cards:
+        for card in high_confidence_cards:
+            match = card.get('match', {})
+            prediction = card.get('data', {}).get('prediction', {})
+            
+            # Match info - use different field names based on card structure
+            home_team = match.get('home_team', {})
+            away_team = match.get('away_team', {})
+            
+            # Handle both dict and object structures
+            if isinstance(home_team, dict):
+                home_name = home_team.get('name', 'Unknown')
+            else:
+                home_name = str(home_team) if home_team else 'Unknown'
+                
+            if isinstance(away_team, dict):
+                away_name = away_team.get('name', 'Unknown')
+            else:
+                away_name = str(away_team) if away_team else 'Unknown'
+            
+            match_name = f"{home_name} vs {away_name}"
+            
+            league_obj = match.get('league', {})
+            if isinstance(league_obj, dict):
+                league = league_obj.get('name', 'Unknown League')
+            else:
+                league = str(league_obj) if league_obj else 'Unknown League'
+            
+            kickoff = match.get('kickoff_at', '')
+            
+            if kickoff:
+                try:
+                    kickoff_dt = datetime.fromisoformat(kickoff.replace('Z', '+00:00'))
+                    kickoff_str = kickoff_dt.strftime('%Y-%m-%d %H:%M')
+                except:
+                    kickoff_str = 'TBD'
+            else:
+                kickoff_str = 'TBD'
+            
+            # Prediction info - handle missing data
+            winner = prediction.get('winner', prediction.get('team', 'N/A'))
+            if not winner or winner == 'N/A':
+                winner = prediction.get('team', 'N/A')
+            
+            confidence = prediction.get('confidence', 0)
+            if confidence is None or confidence == 0:
+                confidence = prediction.get('confidence', 0)
+            
+            market = prediction.get('market_label', prediction.get('market', 'N/A'))
+            if not market or market == 'N/A':
+                market = prediction.get('market', 'N/A')
+            
+            # Format winner to be more readable
+            if winner == 'home':
+                winner_display = home_name
+            elif winner == 'away':
+                winner_display = away_name
+            else:
+                winner_display = str(winner).title() if winner else 'N/A'
+            
+            # Match header
+            content.append(Paragraph(
+                f"<b>{match_name}</b>",
+                ParagraphStyle(
+                    'MatchName',
+                    fontName='Helvetica-Bold',
+                    fontSize=14,
+                    leading=18,
+                    textColor=colors.white,
+                    spaceAfter=0.3*cm,
+                )
+            ))
+            
+            # Match details
+            content.append(Paragraph(
+                f"League: {league} | Kickoff: {kickoff_str}",
+                ParagraphStyle(
+                    'MatchDetails',
+                    fontName='Helvetica',
+                    fontSize=10,
+                    leading=14,
+                    textColor=colors.HexColor('#999999'),
+                    spaceAfter=0.5*cm,
+                )
+            ))
+            
+            # Prediction table
+            prediction_data = [
+                ['Selection', 'Market', 'Confidence'],
+                [winner_display, market, f"{confidence}%"]
+            ]
+            
+            table = Table(prediction_data, colWidths=[5.5*cm, 4*cm, 2.5*cm])
+            table.setStyle(create_premium_table_style())
+            
+            content.append(table)
+            content.append(Spacer(1, 0.8*cm))
+    else:
+        content.append(Paragraph(
+            "No high confidence cards available for this time range.",
+            ParagraphStyle(
+                'NoData',
+                fontName='Helvetica',
+                fontSize=12,
+                leading=16,
+                textColor=colors.HexColor('#999999'),
+                alignment=TA_CENTER,
+                spaceAfter=1*cm,
+            )
+        ))
     
     # Professional footer with branding
     content.extend(create_professional_footer())

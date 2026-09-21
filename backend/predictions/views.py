@@ -15,6 +15,7 @@ from rest_framework.throttling import AnonRateThrottle
 from core.cache_utils import cache_response
 
 from .models import ActiveDerby, Match, OddsBookmaker, SavedMatch, SavedMarket, Team, League, TeamStanding, HeadToHead
+from feed.models import Card
 from .serializers import ActiveDerbySerializer, MatchListSerializer, OddsBookmakerSerializer, SavedMatchSerializer, SavedMarketSerializer, TeamSerializer, LeagueSerializer, TeamStandingSerializer, HeadToHeadSerializer
 from .services import UnknownTeamError, build_prediction_dashboard, build_match_analysis, head_to_head, team_form, build_enhanced_prediction_dashboard, get_enhanced_team_data, get_enhanced_h2h_data
 
@@ -526,6 +527,91 @@ class GenerateSavedMarketsPDFView(APIView):
         response = HttpResponse(pdf_buffer.getvalue(), content_type='application/pdf')
         response['Content-Disposition'] = (
             f'attachment; filename="bashiri_saved_markets_{tab_name.lower().replace(" ", "_")}.pdf"'
+        )
+        return response
+
+
+class GenerateHighConfidencePDFView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        from .pdf_service import generate_high_confidence_pdf
+
+        time_range = request.data.get("time_range", "3_days")
+
+        # Calculate date range based on time_range (past or future)
+        from datetime import datetime, timedelta
+        now = datetime.now()
+        
+        # Check if it's a future range (starts with "next_")
+        is_future = time_range.startswith("next_")
+        start_date = None
+        end_date = None
+        
+        if is_future:
+            # Future ranges - show upcoming matches
+            if time_range == "next_3_days":
+                end_date = now + timedelta(days=3)
+            elif time_range == "next_7_days":
+                end_date = now + timedelta(days=7)
+            elif time_range == "next_30_days":
+                end_date = now + timedelta(days=30)
+            else:
+                end_date = now + timedelta(days=30)
+        else:
+            # Past ranges - show historical cards
+            if time_range == "3_days":
+                start_date = now - timedelta(days=3)
+            elif time_range == "7_days":
+                start_date = now - timedelta(days=7)
+            elif time_range == "15_days":
+                start_date = now - timedelta(days=15)
+            elif time_range == "30_days":
+                start_date = now - timedelta(days=30)
+            elif time_range == "1_month":
+                start_date = now - timedelta(days=30)
+            else:
+                start_date = now - timedelta(days=30)
+
+        # Get high confidence cards from feed
+        if is_future:
+            # Future ranges - filter by match kickoff time
+            queryset = Card.objects.filter(
+                type="HIGH_CONFIDENCE",
+                match__kickoff_at__lte=end_date,
+                match__kickoff_at__gte=now
+            ).select_related(
+                "match", "match__league", "match__home_team", "match__away_team"
+            ).order_by("match__kickoff_at")
+        else:
+            # Past ranges - filter by card creation time
+            queryset = Card.objects.filter(
+                type="HIGH_CONFIDENCE",
+                created_at__gte=start_date
+            ).select_related(
+                "match", "match__league", "match__home_team", "match__away_team"
+            ).order_by("-created_at")
+
+        # Serialize the cards
+        cards = []
+        for card in queryset:
+            cards.append({
+                'id': card.id,
+                'match': {
+                    'id': card.match.id,
+                    'home_team': {'name': card.match.home_team.name},
+                    'away_team': {'name': card.match.away_team.name},
+                    'league': {'name': card.match.league.name},
+                    'kickoff_at': card.match.kickoff_at.isoformat() if card.match.kickoff_at else None
+                },
+                'data': card.data
+            })
+
+        pdf_buffer = generate_high_confidence_pdf(cards, time_range)
+
+        response = HttpResponse(pdf_buffer.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = (
+            f'attachment; filename="bashiri_high_confidence_{time_range.lower().replace("_", "-")}.pdf"'
         )
         return response
 

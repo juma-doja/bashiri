@@ -168,6 +168,14 @@ export function generateSavedMarketsPDF(tabName: string) {
   });
 }
 
+export function generateHighConfidencePDF(timeRange: string) {
+  return apiClient("/predictions/high-confidence-pdf/", {
+    method: "POST",
+    body: JSON.stringify({ time_range: timeRange }),
+    responseType: 'blob'
+  });
+}
+
 export function getPublicSavedMarkets() {
   return apiClient<SavedMarket[]>("/predictions/public-saved-markets/");
 }

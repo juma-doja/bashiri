@@ -20,6 +20,7 @@ CARD_TYPES = [
     ("DEBATE", "Debate"),
     ("MIC_WINNER", "Mic Winner"),
     ("BEST_STREAK_USER", "Best Streak User"),
+    ("HIGH_CONFIDENCE", "High Confidence"),
 ]
 
 
