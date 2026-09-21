@@ -6,6 +6,7 @@ import { useAdminAuthStore } from "@/stores/admin-auth.store";
 import { BashiriButton } from "@/components/ui/Button";
 import { BashiriInput } from "@/components/ui/Input";
 import { PhoneInput } from "@/components/ui/PhoneInput";
+import { FootballFieldLoader } from "@/components/ui/Skeleton";
 
 const isPhoneValid = (value: string) => /^\+255\d{9}$/.test(value);
 
@@ -43,23 +44,40 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div 
-      className="min-h-dvh flex items-center justify-center px-6 bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: "url('/admin-bg.jpg')" }}
-    >
-      <div className="w-full max-w-sm rounded-3xl p-6 backdrop-blur-xl bg-black/40 border border-white/10 shadow-2xl">
-        <h1 className="text-xl font-black mb-1" style={{ color: "#38BDF8" }}>BASHIRI ADMIN</h1>
-        <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.7)" }}>Ingia kama msimamizi wa mfumo.</p>
-
-        <div className="space-y-4">
-          <PhoneInput label="Namba ya Simu" value={phone} onChange={setPhone} />
-          <BashiriInput label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          {error && <p className="text-xs text-bashiri-red">{error}</p>}
-          <BashiriButton className="w-full" size="lg" loading={loading} onClick={handleLogin}>
-            Ingia →
-          </BashiriButton>
+    <>
+      {loading ? (
+        <div
+          className="fixed inset-0 flex items-center justify-center z-[9999]"
+          style={{
+            background: "linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05), #0A0A0A)",
+            backdropFilter: "blur(10px)"
+          }}
+        >
+          <div className="flex flex-col items-center gap-4">
+            <FootballFieldLoader size={120} />
+            <p className="text-white font-semibold animate-pulse">Signing you in...</p>
+          </div>
         </div>
-      </div>
-    </div>
+      ) : (
+        <div
+          className="min-h-dvh flex items-center justify-center px-6 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url('/admin-bg.jpg')" }}
+        >
+          <div className="w-full max-w-sm rounded-3xl p-6 backdrop-blur-xl bg-black/40 border border-white/10 shadow-2xl">
+            <h1 className="text-xl font-black mb-1" style={{ color: "#38BDF8" }}>BASHIRI ADMIN</h1>
+            <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.7)" }}>Ingia kama msimamizi wa mfumo.</p>
+
+            <div className="space-y-4">
+              <PhoneInput label="Namba ya Simu" value={phone} onChange={setPhone} />
+              <BashiriInput label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+              {error && <p className="text-xs text-bashiri-red">{error}</p>}
+              <BashiriButton className="w-full" size="lg" onClick={handleLogin}>
+                Ingia →
+              </BashiriButton>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
