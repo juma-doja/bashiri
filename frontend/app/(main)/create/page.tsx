@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getFixtures, getLeagues, Match, League } from "@/lib/api/predictions";
 import { getHeroSlides, HeroSlide } from "@/lib/api/hero-carousel";
-import { CardSkeleton, GoalPostLoader } from "@/components/ui/Skeleton";
+import { CardSkeleton, FootballFieldLoader } from "@/components/ui/Skeleton";
 import { BookButton } from "@/components/ui/BookButton";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Calendar, ChevronDown, ArrowLeft, ChevronDown as LoadMoreIcon, Target, TrendingUp, Flame } from "lucide-react";
@@ -243,7 +243,7 @@ export default function CreatePredictionStep1() {
       <div className="px-4 sm:px-6 md:px-8 lg:px-12 space-y-6 md:space-y-8">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 md:py-24">
-            <GoalPostLoader />
+            <FootballFieldLoader />
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center min-h-[18rem] md:min-h-[24rem] text-center pt-10 md:pt-16">
