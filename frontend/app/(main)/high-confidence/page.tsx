@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Target, Trophy, TrendingUp, Calendar, Filter, ArrowLeft, BarChart3 } from "lucide-react";
 import { getFeed } from "@/lib/api/feed";
 import { HighConfidenceCard } from "@/components/feed/cards/HighConfidenceCard";
+import { FootballFieldLoader } from "@/components/ui/Skeleton";
 
 export default function HighConfidencePage() {
   const router = useRouter();
@@ -135,7 +136,7 @@ export default function HighConfidencePage() {
         {/* Matches Grid */}
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <div className="w-12 h-12 rounded-full border-4 border-t-white/30 border-white animate-spin" />
+            <FootballFieldLoader />
           </div>
         ) : matches.length === 0 ? (
           <motion.div

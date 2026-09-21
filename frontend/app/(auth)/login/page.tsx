@@ -1,7 +1,7 @@
 "use client";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { BashiriButton } from "@/components/ui/Button";
 import { BashiriInput } from "@/components/ui/Input";
 import { BashiriDateInput } from "@/components/ui/DateInput";
@@ -11,6 +11,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { consumeReturnTo } from "@/lib/return-to";
 import { isNetworkError, showNetworkErrorToast } from "@/lib/toast-utils";
 import { getPostAuthPath } from "@/lib/auth/onboarding";
+import { FootballFieldLoader } from "@/components/ui/Skeleton";
 
 type Tab = "login" | "register";
 
@@ -117,6 +118,28 @@ function LoginPageContent() {
     }
   }
 
+  // Full page loading state
+  if (loading) {
+    return (
+      <div
+        className="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
+        style={{
+          background: "linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05), #0A0A0A)",
+          backdropFilter: "blur(10px)"
+        }}
+      >
+        <FootballFieldLoader size={120} showText={false} />
+        <motion.p
+          className="mt-6 text-sm font-bold text-white"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          Signing you in...
+        </motion.p>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       className="rounded-3xl p-6"
@@ -153,7 +176,7 @@ function LoginPageContent() {
             showPasswordToggle
           />
           {error && <p className="text-xs text-bashiri-red">{error}</p>}
-          <BashiriButton className="w-full" size="lg" loading={loading} onClick={handleLogin}>
+          <BashiriButton className="w-full" size="lg" onClick={handleLogin}>
             Ingia →
           </BashiriButton>
           <button
@@ -237,7 +260,7 @@ function LoginPageContent() {
                 showPasswordToggle
               />
               {error && <p className="text-xs text-bashiri-red">{error}</p>}
-              <BashiriButton className="w-full" size="lg" loading={loading} onClick={handleRegister}>
+              <BashiriButton className="w-full" size="lg" onClick={handleRegister}>
                 Jisajili →
               </BashiriButton>
               <button

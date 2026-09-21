@@ -1,5 +1,6 @@
 import { clsx } from "clsx";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export function Skeleton({ className }: { className?: string }) {
   return (
@@ -182,50 +183,87 @@ export function TrophyLoader() {
   );
 }
 
-export function FootballFieldLoader() {
+export function FootballFieldLoader({ size = 96, showText = true }: { size?: number; showText?: boolean }) {
+  const containerSize = size;
+  const centerSize = size / 2;
+  const logoSize = size / 3;
+
   return (
-    <div className="flex flex-col items-center justify-center p-8">
-      <motion.div
-        className="w-20 h-12 border-2 border-[#D4AF37]/30 rounded-lg relative overflow-hidden"
-        animate={{
-          borderColor: ["rgba(212,175,55,0.3)", "rgba(212,175,55,0.6)", "rgba(212,175,55,0.3)"]
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      >
-        {/* Field lines */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-full h-px bg-[#D4AF37]/20" />
-        </div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="h-full w-px bg-[#D4AF37]/20" />
-        </div>
-        
-        {/* Moving ball */}
+    <div className="flex flex-col items-center justify-center" style={{ padding: showText ? '32px' : '0' }}>
+      <div className="relative flex items-center justify-center" style={{ width: containerSize, height: containerSize }}>
+        {/* Outer orbit line (clockwise) - partial circle - blue (like button) */}
         <motion.div
-          className="absolute w-3 h-3 rounded-full bg-gradient-to-br from-white to-gray-300"
+          className="absolute inset-0 rounded-full border-2 border-[#38BDF8]/40 border-t-transparent border-r-transparent border-b-transparent"
           animate={{
-            x: [0, 68, 0],
-            y: [0, 36, 0]
+            rotate: [0, 360]
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
+        
+        {/* Middle orbit line (counter-clockwise) - partial circle - white */}
+        <motion.div
+          className="absolute inset-1 rounded-full border-2 border-white/30 border-b-transparent border-l-transparent border-r-transparent"
+          animate={{
+            rotate: [360, 0]
           }}
           transition={{
             duration: 3,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: "linear"
           }}
         />
-      </motion.div>
-      <motion.p
-        className="mt-4 text-sm font-medium"
-        style={{ color: "rgba(255,255,255,0.6)" }}
-        animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 1.5, repeat: Infinity }}
-      >
-        Inapakia...
-      </motion.p>
+        
+        {/* Inner orbit line (clockwise) - partial circle - white */}
+        <motion.div
+          className="absolute inset-2 rounded-full border-2 border-white/25 border-t-transparent border-l-transparent border-b-transparent"
+          animate={{
+            rotate: [0, 360]
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
+        
+        {/* Center logo - static (no rotation) */}
+        <div className="rounded-full border-2 border-[#D4AF37]/40 flex items-center justify-center" style={{ width: centerSize, height: centerSize }}>
+          <motion.div
+            className="flex items-center justify-center"
+            style={{ width: logoSize, height: logoSize }}
+            animate={{
+              scale: [1, 1.1, 1]
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <Image
+              src="/bashiri-mark-gold.svg"
+              alt="Bashiri Logo"
+              width={logoSize}
+              height={logoSize}
+              className="w-full h-full object-contain"
+            />
+          </motion.div>
+        </div>
+      </div>
+      {showText && (
+        <motion.p
+          className="mt-4 text-sm font-medium"
+          style={{ color: "rgba(255,255,255,0.6)" }}
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          Inapakia...
+        </motion.p>
+      )}
     </div>
   );
 }

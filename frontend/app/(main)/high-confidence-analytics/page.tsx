@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { getHighConfidenceAnalytics, getLeagues, HighConfidenceAnalytics, League } from "@/lib/api/predictions";
 import { ArrowLeft, TrendingUp, TrendingDown, Target, Calendar, Filter, Trophy, Activity, Sparkles, BarChart3 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { CardSkeleton } from "@/components/ui/Skeleton";
+import { CardSkeleton, FootballFieldLoader } from "@/components/ui/Skeleton";
 import { AccuracySphere } from "@/components/profile/AccuracySphere";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -79,7 +79,7 @@ export default function HighConfidenceAnalyticsPage() {
               <h1 className="text-xl font-black text-white sm:text-2xl">High Confidence Analytics</h1>
             </div>
           </header>
-          <CardSkeleton />
+          <FootballFieldLoader />
         </div>
       </main>
     );

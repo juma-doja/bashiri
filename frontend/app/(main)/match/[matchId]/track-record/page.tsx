@@ -7,7 +7,7 @@ import { AnalysisMarketRow } from "@/components/predictions/AnalysisMarketRow";
 import { SubscriptionSheet } from "@/components/predictions/SubscriptionSheet";
 import { MatchHubTabs } from "@/components/match-hub/MatchHubTabs";
 import { DerbyThemeProvider } from "@/components/match-hub/DerbyThemeProvider";
-import { CardSkeleton } from "@/components/ui/Skeleton";
+import { CardSkeleton, FootballFieldLoader } from "@/components/ui/Skeleton";
 import { ArrowLeft } from "lucide-react";
 
 export default function MatchTrackRecordPage() {
@@ -41,7 +41,7 @@ export default function MatchTrackRecordPage() {
     );
   }
 
-  if (!analysis) return <div className="px-4 pt-safe pt-10" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 32px)" }}><CardSkeleton /></div>;;
+  if (!analysis) return <div className="px-4 pt-safe pt-10" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 32px)" }}><FootballFieldLoader /></div>;;
 
   const { ai_scorecard, ai_recommendation, actual_score, expected_goals, match } = analysis;
   const scoreColor = ai_scorecard.correct >= 6 ? "#00FF87" : ai_scorecard.correct >= 3 ? "#FFD600" : "#FF4757";

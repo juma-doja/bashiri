@@ -8,7 +8,7 @@ import { TopPickCard } from "@/components/predictions/TopPickCard";
 import { ConfidenceLegend } from "@/components/predictions/ConfidenceLegend";
 import { SubscriptionSheet } from "@/components/predictions/SubscriptionSheet";
 import { Spinner } from "@/components/ui/Spinner";
-import { CardSkeleton } from "@/components/ui/Skeleton";
+import { CardSkeleton, FootballFieldLoader } from "@/components/ui/Skeleton";
 import { Bookmark, ArrowRight, ArrowLeft, Trophy, RefreshCw } from "lucide-react";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { MatchHubTabs } from "@/components/match-hub/MatchHubTabs";
@@ -176,7 +176,7 @@ export default function PredictDashboardPage() {
     );
   }
 
-  if (!dashboard) return <div className="px-4 pt-safe pt-6"><CardSkeleton /></div>;
+  if (!dashboard) return <div className="px-4 pt-safe pt-6"><FootballFieldLoader /></div>;
   const isFinished = dashboard.match.status === "FINISHED";
 
   // Categorize markets by team/full match

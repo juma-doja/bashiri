@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { getMatchOverview, getTeamDetail, type MatchFormEntry, type MatchOverview, type TeamStanding } from "@/lib/api/predictions";
 import { BookButton } from "@/components/ui/BookButton";
-import { CardSkeleton } from "@/components/ui/Skeleton";
+import { CardSkeleton, FootballFieldLoader } from "@/components/ui/Skeleton";
 import { PremiumCard } from "@/components/ui/GlassCard";
 import { motion } from "framer-motion";
 import { MatchHubTabs } from "@/components/match-hub/MatchHubTabs";
@@ -83,7 +83,7 @@ export default function MatchOverviewPage() {
     };
   }, [data?.match]);
 
-  if (loading) return <div className="px-4 pt-safe pt-6"><CardSkeleton /></div>;
+  if (loading) return <div className="px-4 pt-safe pt-6"><FootballFieldLoader /></div>;
   if (error) return (
     <div className="px-4 pt-safe pt-6">
       <div className="flex items-center gap-3 mb-4">

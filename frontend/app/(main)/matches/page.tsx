@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { getFixtures, getLiveMatches, getFinishedMatches, searchMatches, Match, getLeagues, League } from "@/lib/api/predictions";
 import { commandSearch, CommandSearchResults } from "@/lib/api/command-search";
 import { Search, ChevronDown, ArrowLeft, ChevronDown as LoadMoreIcon, X, Target, Calendar, Flame, Plus, RefreshCw, Clock } from "lucide-react";
-import { CardSkeleton, BallBounceLoader } from "@/components/ui/Skeleton";
+import { CardSkeleton, FootballFieldLoader } from "@/components/ui/Skeleton";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { BookButton } from "@/components/ui/BookButton";
 import { DatePicker } from "@/components/ui/DatePicker";
@@ -655,7 +655,7 @@ export default function MatchesPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {loading ? (
             <div className="col-span-full flex flex-col items-center justify-center py-16">
-              <BallBounceLoader />
+              <FootballFieldLoader />
             </div>
           ) : error ? (
             <div className="col-span-full flex flex-col items-center gap-3 py-12 text-center">

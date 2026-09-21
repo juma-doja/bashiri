@@ -5,7 +5,7 @@ import { getMicReactions, getMoodSummary, canPost, getFanOfMatch, MicReaction } 
 import { MicReactionPlayer } from "@/components/mic/MicReactionPlayer";
 import { MicReactionFullView } from "@/components/mic/MicReactionFullView";
 import { BashiriButton } from "@/components/ui/Button";
-import { CardSkeleton } from "@/components/ui/Skeleton";
+import { CardSkeleton, FootballFieldLoader } from "@/components/ui/Skeleton";
 import { Mic, Clock, Grid, Maximize2, X, ArrowLeft } from "lucide-react";
 import { MatchHubTabs } from "@/components/match-hub/MatchHubTabs";
 import { DerbyThemeProvider } from "@/components/match-hub/DerbyThemeProvider";
@@ -128,7 +128,7 @@ export default function BashiriMicPage() {
     });
   }, [matchId, teamFilter]);
 
-  if (loading) return <div className="px-4 pt-safe pt-10" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 32px)" }}><CardSkeleton /></div>;
+  if (loading) return <div className="px-4 pt-safe pt-10" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 32px)" }}><FootballFieldLoader /></div>;
 
   return (
     <DerbyThemeProvider matchId={matchId}>

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useTipsStore } from '@/stores/tips.store'
 import { useFetchTips } from '@/hooks/useTips'
 import { TipCard } from '@/components/tips/TipCard'
-import { TrophyLoader } from '@/components/ui/Skeleton'
+import { FootballFieldLoader } from '@/components/ui/Skeleton'
 import { TipFilter } from '@/components/tips/TipFilter'
 import { TipstersLeaderboard } from '@/components/tips/TipstersLeaderboard'
 import { useRouter } from 'next/navigation'
@@ -282,7 +282,7 @@ export default function TipsPage() {
         {/* Loading State */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-16 sm:py-20">
-            <TrophyLoader />
+            <FootballFieldLoader />
           </div>
         )}
 

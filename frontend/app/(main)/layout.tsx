@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/navigation/BottomNav";
 import { AuthRequiredSheet } from "@/components/auth/AuthRequiredSheet";
 import { PWAInstallProvider } from "@/components/pwa/PWAInstallProvider";
 import { InstallPromptSheet } from "@/components/pwa/InstallPromptSheet";
+import { PWAInstallCard } from "@/components/pwa/PWAInstallCard";
 import { CommandPaletteProvider } from "@/components/pulse/CommandPaletteProvider";
 import { FloatingWhatsAppButton } from "@/components/contact/FloatingWhatsAppButton";
 import { FloatingReviewButton } from "@/components/review/FloatingReviewButton";
@@ -71,6 +72,7 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
           {!shouldHideBottomNav && <BottomNav />}
           <AuthRequiredSheet />
           <InstallPromptSheet />
+          <PWAInstallCard />
           <CommandPaletteProvider />
           <FloatingReviewButton onClick={() => router.push("/review")} />
           <FloatingWhatsAppButton />
