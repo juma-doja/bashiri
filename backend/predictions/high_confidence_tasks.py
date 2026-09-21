@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.db.models import Q
 from celery import shared_task
 
-from .models import Match
+from .models import Match, HighConfidenceSnapshot
 from .services import predict_fixture
 from feed.models import Card
 
@@ -108,6 +108,14 @@ def generate_high_confidence_matches():
                         "created_at": timezone.now().isoformat(),
                     },
                 )
+
+                # Create snapshot for tracking
+                HighConfidenceSnapshot.objects.create(
+                    match=match,
+                    winner=winner,
+                    confidence=confidence,
+                )
+
                 created_count += 1
                 logger.info(f"Created high confidence card for {match.home_team.name} vs {match.away_team.name} - {winner} {confidence}%")
             else:
@@ -124,21 +132,47 @@ def generate_high_confidence_matches():
 @shared_task
 def remove_finished_high_confidence_cards():
     """
-    Remove high confidence cards for finished matches
+    Remove high confidence cards for finished matches and settle snapshots
     """
     today = timezone.localdate()
-    
+
     # Get finished matches
     finished_matches = Match.objects.filter(
         status="FINISHED",
         kickoff_at__date__lte=today,
-    ).values_list("id", flat=True)
-    
+    )
+
+    # Settle snapshots for finished matches
+    settled_count = 0
+    for match in finished_matches:
+        # Get snapshot for this match
+        snapshot = HighConfidenceSnapshot.objects.filter(match=match).first()
+        if snapshot and snapshot.status == "PENDING":
+            # Determine if prediction was correct
+            actual_home = match.home_score
+            actual_away = match.away_score
+
+            if actual_home is not None and actual_away is not None:
+                # Check if prediction was correct
+                if snapshot.winner == "home":
+                    is_correct = actual_home > actual_away
+                else:  # away
+                    is_correct = actual_away > actual_home
+
+                # Update snapshot
+                snapshot.status = "WON" if is_correct else "LOST"
+                snapshot.actual_home_score = actual_home
+                snapshot.actual_away_score = actual_away
+                snapshot.settled_at = timezone.now()
+                snapshot.save()
+                settled_count += 1
+                logger.info(f"Settled high confidence snapshot for {match}: {snapshot.status}")
+
     # Delete cards for finished matches
     deleted_count = Card.objects.filter(
         type="HIGH_CONFIDENCE",
-        match_id__in=finished_matches
+        match_id__in=finished_matches.values_list("id", flat=True)
     ).delete()[0]
-    
-    logger.info(f"Removed {deleted_count} finished high confidence cards")
-    return f"Removed {deleted_count} finished cards"
+
+    logger.info(f"Settled {settled_count} high confidence snapshots, removed {deleted_count} cards")
+    return f"Settled {settled_count} snapshots, removed {deleted_count} cards"

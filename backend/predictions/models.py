@@ -474,3 +474,42 @@ class BashiriPickSnapshot(models.Model):
     @property
     def is_settled(self):
         return self.status in ["WON", "LOST", "PUSH", "VOID"]
+
+
+class HighConfidenceSnapshot(models.Model):
+    """
+    Snapshot ya High Confidence picks (home/away win >= 50%).
+    Hii inatumiwa kwa tracking accuracy ya high confidence picks.
+    """
+    STATUS_CHOICES = [
+        ("PENDING", "Pending"),
+        ("WON", "Won"),
+        ("LOST", "Lost"),
+    ]
+
+    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name="high_confidence_snapshots")
+
+    # Snapshot data (immutable - exactly what was shown in HighConfidenceCard)
+    winner = models.CharField(max_length=10, help_text="Prediction winner: 'home' or 'away'")
+    confidence = models.FloatField(help_text="Confidence percentage from prediction, e.g., 55.4")
+
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True, help_text="When this snapshot was created")
+
+    # Result data (nullable until settlement)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="PENDING", db_index=True)
+    actual_home_score = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Final home score")
+    actual_away_score = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Final away score")
+    settled_at = models.DateTimeField(null=True, blank=True, help_text="When match was settled")
+
+    class Meta:
+        db_table = "predictions_highconfidencesnapshot"
+        ordering = ["-created_at"]
+        unique_together = ["match"]  # One snapshot per match
+
+    def __str__(self):
+        return f"High Confidence Snapshot: {self.match} - {self.winner} ({self.confidence}%)"
+
+    @property
+    def is_settled(self):
+        return self.status in ["WON", "LOST"]

@@ -1679,3 +1679,224 @@ class BashiriPickAnalyticsView(APIView):
             'daily_trend': daily_trend,
             'recent_picks': recent_picks_data
         })
+
+
+class HighConfidenceAnalyticsView(APIView):
+    """
+    GET /api/predictions/high-confidence-analytics/ — Analytics for High Confidence snapshots.
+    These are EXACTLY the picks shown in HighConfidenceCard (home/away win >= 50%).
+    Filters by league, date range, and confidence level.
+    """
+    permission_classes = [AllowAny]
+    throttle_classes = [NoThrottle]
+
+    def get(self, request):
+        from datetime import timedelta
+        from .models import HighConfidenceSnapshot
+
+        # Get filter parameters
+        league = request.query_params.get("league")  # League name
+        range_filter = request.query_params.get("range", "last_30_days")  # last_7_days, last_30_days, last_90_days, custom
+        start_date_str = request.query_params.get("start_date")  # YYYY-MM-DD for custom range
+        end_date_str = request.query_params.get("end_date")  # YYYY-MM-DD for custom range
+        min_confidence = request.query_params.get("min_confidence")  # Minimum confidence percentage
+        max_confidence = request.query_params.get("max_confidence")  # Maximum confidence percentage
+
+        # Calculate date range
+        today = timezone.localdate()
+        start_date = None
+        end_date = None
+
+        if range_filter == "last_7_days":
+            start_date = today - timedelta(days=7)
+            end_date = today
+        elif range_filter == "last_30_days":
+            start_date = today - timedelta(days=30)
+            end_date = today
+        elif range_filter == "last_90_days":
+            start_date = today - timedelta(days=90)
+            end_date = today
+        elif range_filter == "custom" and start_date_str and end_date_str:
+            try:
+                start_date = timezone.make_aware(datetime.datetime.strptime(start_date_str, "%Y-%m-%d")).date()
+                end_date = timezone.make_aware(datetime.datetime.strptime(end_date_str, "%Y-%m-%d")).date()
+            except ValueError:
+                return Response({"detail": "Invalid date format. Use YYYY-MM-DD"}, status=400)
+        else:
+            # Default to last 30 days
+            start_date = today - timedelta(days=30)
+            end_date = today
+
+        # Build base query - filter for HighConfidenceSnapshot records
+        queryset = HighConfidenceSnapshot.objects.filter(
+            created_at__date__gte=start_date,
+            created_at__date__lte=end_date
+        ).select_related('match')
+
+        # Apply league filter
+        if league:
+            queryset = queryset.filter(match__league__name=league)
+
+        # Apply confidence filters
+        if min_confidence:
+            queryset = queryset.filter(confidence__gte=float(min_confidence))
+        if max_confidence:
+            queryset = queryset.filter(confidence__lte=float(max_confidence))
+
+        # Get all snapshots
+        all_snapshots = queryset.order_by('-created_at')
+        total_snapshots = all_snapshots.count()
+
+        # Get settled snapshots (WON, LOST)
+        settled_snapshots = all_snapshots.filter(status__in=['WON', 'LOST'])
+        total_settled = settled_snapshots.count()
+
+        # Calculate overall accuracy
+        won_snapshots = settled_snapshots.filter(status='WON').count()
+        lost_snapshots = settled_snapshots.filter(status='LOST').count()
+
+        decisions = won_snapshots + lost_snapshots
+        accuracy = round((won_snapshots / decisions * 100), 1) if decisions > 0 else 0.0
+
+        # Calculate current streak
+        recent_settled = settled_snapshots.order_by('settled_at')
+        current_streak = 0
+        temp_streak = 0
+        for snapshot in recent_settled:
+            if snapshot.status == 'WON':
+                temp_streak += 1
+            elif snapshot.status == 'LOST':
+                temp_streak = 0
+            else:
+                continue
+            current_streak = max(current_streak, temp_streak)
+
+        # Calculate best streak
+        best_streak = 0
+        temp_streak = 0
+        for snapshot in settled_snapshots.order_by('settled_at'):
+            if snapshot.status == 'WON':
+                temp_streak += 1
+            elif snapshot.status == 'LOST':
+                temp_streak = 0
+            else:
+                continue
+            best_streak = max(best_streak, temp_streak)
+
+        # League breakdown
+        league_stats = {}
+        for snapshot in settled_snapshots:
+            league_name = snapshot.match.league.name
+            if league_name not in league_stats:
+                league_stats[league_name] = {'total': 0, 'won': 0, 'lost': 0}
+            league_stats[league_name]['total'] += 1
+            if snapshot.status == 'WON':
+                league_stats[league_name]['won'] += 1
+            elif snapshot.status == 'LOST':
+                league_stats[league_name]['lost'] += 1
+
+        league_breakdown = []
+        for league_name, stats in league_stats.items():
+            league_decisions = stats['won'] + stats['lost']
+            league_accuracy = round((stats['won'] / league_decisions * 100), 1) if league_decisions > 0 else 0.0
+            league_breakdown.append({
+                'league': league_name,
+                'total': stats['total'],
+                'won': stats['won'],
+                'lost': stats['lost'],
+                'accuracy': league_accuracy
+            })
+
+        # Sort by accuracy
+        league_breakdown.sort(key=lambda x: x['accuracy'], reverse=True)
+
+        # Confidence ranges breakdown
+        confidence_ranges = [
+            {'min': 80, 'max': 100, 'label': '80%+'},
+            {'min': 70, 'max': 79.9, 'label': '70-79%'},
+            {'min': 60, 'max': 69.9, 'label': '60-69%'},
+            {'min': 50, 'max': 59.9, 'label': '50-59%'}
+        ]
+
+        confidence_breakdown = []
+        for conf_range in confidence_ranges:
+            range_snapshots = settled_snapshots.filter(
+                confidence__gte=conf_range['min'],
+                confidence__lte=conf_range['max']
+            )
+            range_won = range_snapshots.filter(status='WON').count()
+            range_lost = range_snapshots.filter(status='LOST').count()
+            range_decisions = range_won + range_lost
+            range_accuracy = round((range_won / range_decisions * 100), 1) if range_decisions > 0 else 0.0
+            confidence_breakdown.append({
+                'label': conf_range['label'],
+                'total': range_snapshots.count(),
+                'won': range_won,
+                'lost': range_lost,
+                'accuracy': range_accuracy
+            })
+
+        # Daily trend
+        daily_trend = []
+        current_date = start_date
+        while current_date <= end_date:
+            day_snapshots = settled_snapshots.filter(created_at__date=current_date)
+            day_total = day_snapshots.count()
+            day_won = day_snapshots.filter(status='WON').count()
+            day_lost = day_snapshots.filter(status='LOST').count()
+            day_decisions = day_won + day_lost
+            day_accuracy = round((day_won / day_decisions * 100), 1) if day_decisions > 0 else 0.0
+
+            daily_trend.append({
+                'date': current_date.isoformat(),
+                'accuracy': day_accuracy,
+                'total': day_total,
+                'won': day_won,
+                'lost': day_lost
+            })
+            current_date += timedelta(days=1)
+
+        # Recent snapshots (last 20)
+        recent_snapshots = all_snapshots[:20]
+        recent_picks_data = []
+        for snapshot in recent_snapshots:
+            recent_picks_data.append({
+                'snapshot_id': snapshot.id,
+                'match_id': snapshot.match.id,
+                'home_team': snapshot.match.home_team.name,
+                'away_team': snapshot.match.away_team.name,
+                'league': snapshot.match.league.name,
+                'winner': snapshot.winner,
+                'confidence': snapshot.confidence,
+                'status': snapshot.status,
+                'created_at': snapshot.created_at.isoformat(),
+                'settled_at': snapshot.settled_at.isoformat() if snapshot.settled_at else None,
+                'actual_home_score': snapshot.actual_home_score,
+                'actual_away_score': snapshot.actual_away_score,
+            })
+
+        return Response({
+            'summary': {
+                'total_picks': total_snapshots,
+                'settled_picks': total_settled,
+                'won': won_snapshots,
+                'lost': lost_snapshots,
+                'accuracy': accuracy,
+                'current_streak': current_streak,
+                'best_streak': best_streak,
+                'date_range': {
+                    'start': start_date.isoformat(),
+                    'end': end_date.isoformat()
+                },
+                'filters_applied': {
+                    'league': league,
+                    'range': range_filter,
+                    'min_confidence': min_confidence,
+                    'max_confidence': max_confidence
+                }
+            },
+            'league_breakdown': league_breakdown,
+            'confidence_breakdown': confidence_breakdown,
+            'daily_trend': daily_trend,
+            'recent_picks': recent_picks_data
+        })

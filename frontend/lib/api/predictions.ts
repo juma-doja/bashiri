@@ -571,3 +571,89 @@ export function getBashiriPickAnalytics(params?: {
   if (params?.max_confidence) query.append("max_confidence", params.max_confidence.toString());
   return apiClient<BashiriPickAnalytics>(`/predictions/bashiri-pick-analytics/${query ? '?' + query : ''}`, { skipAuth: true });
 }
+
+// High Confidence Analytics types
+export interface HighConfidenceAnalyticsSummary {
+  total_picks: number;
+  settled_picks: number;
+  won: number;
+  lost: number;
+  accuracy: number;
+  current_streak: number;
+  best_streak: number;
+  date_range: {
+    start: string;
+    end: string;
+  };
+  filters_applied: {
+    league: string | null;
+    range: string;
+    min_confidence: string | null;
+    max_confidence: string | null;
+  };
+}
+
+export interface HighConfidenceLeagueBreakdown {
+  league: string;
+  total: number;
+  won: number;
+  lost: number;
+  accuracy: number;
+}
+
+export interface HighConfidenceConfidenceBreakdown {
+  label: string;
+  total: number;
+  won: number;
+  lost: number;
+  accuracy: number;
+}
+
+export interface HighConfidenceDailyTrend {
+  date: string;
+  accuracy: number;
+  total: number;
+  won: number;
+  lost: number;
+}
+
+export interface HighConfidenceRecentPick {
+  snapshot_id: number;
+  match_id: number;
+  home_team: string;
+  away_team: string;
+  league: string;
+  winner: string;
+  confidence: number;
+  status: string;
+  created_at: string;
+  settled_at: string | null;
+  actual_home_score: number | null;
+  actual_away_score: number | null;
+}
+
+export interface HighConfidenceAnalytics {
+  summary: HighConfidenceAnalyticsSummary;
+  league_breakdown: HighConfidenceLeagueBreakdown[];
+  confidence_breakdown: HighConfidenceConfidenceBreakdown[];
+  daily_trend: HighConfidenceDailyTrend[];
+  recent_picks: HighConfidenceRecentPick[];
+}
+
+export function getHighConfidenceAnalytics(params?: {
+  league?: string;
+  range?: "last_7_days" | "last_30_days" | "last_90_days" | "custom";
+  start_date?: string;
+  end_date?: string;
+  min_confidence?: number;
+  max_confidence?: number;
+}) {
+  const query = new URLSearchParams();
+  if (params?.league) query.append("league", params.league);
+  if (params?.range) query.append("range", params.range);
+  if (params?.start_date) query.append("start_date", params.start_date);
+  if (params?.end_date) query.append("end_date", params.end_date);
+  if (params?.min_confidence) query.append("min_confidence", params.min_confidence.toString());
+  if (params?.max_confidence) query.append("max_confidence", params.max_confidence.toString());
+  return apiClient<HighConfidenceAnalytics>(`/predictions/high-confidence-analytics/${query ? '?' + query : ''}`, { skipAuth: true });
+}

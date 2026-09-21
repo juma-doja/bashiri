@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Target, Trophy, TrendingUp, Calendar, Filter, ArrowLeft } from "lucide-react";
+import { Target, Trophy, TrendingUp, Calendar, Filter, ArrowLeft, BarChart3 } from "lucide-react";
 import { getFeed } from "@/lib/api/feed";
 import { HighConfidenceCard } from "@/components/feed/cards/HighConfidenceCard";
 
@@ -107,7 +107,7 @@ export default function HighConfidencePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-6 flex items-center gap-3"
+          className="mb-6 flex items-center justify-between gap-3"
         >
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
             <Filter size={16} style={{ color: "rgba(255,255,255,0.6)" }} />
@@ -122,6 +122,14 @@ export default function HighConfidencePage() {
               <option value="30_days">Last 30 Days</option>
             </select>
           </div>
+          <button
+            onClick={() => router.push("/high-confidence-analytics")}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl transition-all hover:bg-white/10"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            <BarChart3 size={16} style={{ color: "rgba(255,255,255,0.6)" }} />
+            <span className="text-sm font-semibold text-white">View Analytics</span>
+          </button>
         </motion.div>
 
         {/* Matches Grid */}
