@@ -49,7 +49,8 @@ export default function HighConfidencePage() {
       filtered = filtered.filter((card: any) => {
         const kickoffDate = card.data?.match?.kickoff_at;
         if (!kickoffDate) return false;
-        const cardDateStr = format(new Date(kickoffDate), 'yyyy-MM-dd');
+        // Extract date from UTC string directly to avoid timezone issues
+        const cardDateStr = kickoffDate.split('T')[0]; // Get YYYY-MM-DD part
         return cardDateStr === selectedDateStr;
       });
     }

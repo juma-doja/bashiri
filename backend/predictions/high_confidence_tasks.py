@@ -18,13 +18,16 @@ logger = logging.getLogger(__name__)
 @shared_task
 def generate_high_confidence_matches():
     """
-    Generate cards for matches with home/away win >= 55%
+    Generate cards for matches with home/away win >= 50%
     Only for HOME_WIN and AWAY_WIN markets
     """
-    # Use UTC dates for consistency between manual and automatic runs
-    today_utc = dt.utcnow().date()
+    # Use UTC with timezone-aware datetime for better timezone handling
+    now_utc = timezone.now()
+    today_utc = now_utc.date()
     # Extend to 30 days ahead to pick future matches like October 9-10
     thirty_days_ahead = today_utc + timedelta(days=30)
+
+    logger.info(f"Generating high confidence matches - UTC Now: {now_utc}, Today: {today_utc}, Range: {today_utc} to {thirty_days_ahead}")
     
     # Get upcoming matches - only from supported leagues
     supported_leagues = [
@@ -40,12 +43,14 @@ def generate_high_confidence_matches():
     
     upcoming_matches = Match.objects.filter(
         status="SCHEDULED",
-        kickoff_at__date__gte=today_utc - timedelta(days=1),  # Include yesterday to handle timezone issues
-        kickoff_at__date__lte=thirty_days_ahead,
+        kickoff_at__gte=now_utc - timedelta(days=1),  # Use full datetime instead of date to handle timezone properly
+        kickoff_at__lte=now_utc + timedelta(days=30),
         home_score__isnull=True,
         away_score__isnull=True,
         league__name__in=supported_leagues,
     ).select_related("home_team", "away_team", "league")
+
+    logger.info(f"Found {upcoming_matches.count()} upcoming matches in supported leagues")
     
     created_count = 0
     skipped_count = 0
@@ -54,6 +59,7 @@ def generate_high_confidence_matches():
         # Check if card already exists
         if Card.objects.filter(type="HIGH_CONFIDENCE", match_id=match.id).exists():
             skipped_count += 1
+            logger.debug(f"Skipped (card exists): {match.home_team.name} vs {match.away_team.name}")
             continue
         
         try:
@@ -84,11 +90,11 @@ def generate_high_confidence_matches():
                     winner = "away"
                     confidence = away_win_pct
                     team_name = match.away_team.name
-                
+
                 # Convert to integer if needed (match_result is already percentage)
                 if confidence > 1:
                     confidence = round(confidence, 1)
-                
+
                 # Create card
                 Card.objects.create(
                     type="HIGH_CONFIDENCE",
@@ -121,6 +127,7 @@ def generate_high_confidence_matches():
                 logger.info(f"Created high confidence card for {match.home_team.name} vs {match.away_team.name} - {winner} {confidence}%")
             else:
                 skipped_count += 1
+                logger.debug(f"Skipped (low confidence): {match.home_team.name} vs {match.away_team.name} - Home: {home_win_pct}%, Away: {away_win_pct}%")
                 
         except Exception as e:
             logger.error(f"Failed to process match {match.id}: {e}")
