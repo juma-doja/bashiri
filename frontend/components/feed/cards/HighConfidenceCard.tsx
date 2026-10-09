@@ -1,165 +1,63 @@
 "use client";
+
 import { motion } from "framer-motion";
-import { Trophy, Target, TrendingUp, Calendar, Clock } from "lucide-react";
+import { ArrowUpRight, CalendarDays, Check, Clock3, Target, Trophy } from "lucide-react";
+import { format, parseISO } from "date-fns";
 import { useRouter } from "next/navigation";
 
-interface HighConfidenceCardProps {
-  data: any;
-  matchId: number;
+interface HighConfidenceCardData {
+  match: { home_team: string; away_team: string; league: string; kickoff_at: string };
+  prediction: { winner: "home" | "away"; team: string; confidence: number; market: string };
 }
 
-export function HighConfidenceCard({ data, matchId }: HighConfidenceCardProps) {
+interface HighConfidenceCardProps {
+  data: HighConfidenceCardData;
+  matchId: number;
+  isSelectMode?: boolean;
+  selected?: boolean;
+  onToggleSelect?: () => void;
+}
+
+export function HighConfidenceCard({ data, matchId, isSelectMode = false, selected = false, onToggleSelect }: HighConfidenceCardProps) {
   const router = useRouter();
   const { match, prediction } = data;
-  
-  // Color based on confidence percentage
-  const confidence = prediction.confidence || 0;
-  let teamColor: string;
-  let bgColor: string;
-  let borderColor: string;
-  
-  if (confidence >= 81) {
-    // 81-100: Green
-    teamColor = "#00FF87";
-    bgColor = "rgba(0,255,135,0.08)";
-    borderColor = "rgba(0,255,135,0.2)";
-  } else if (confidence >= 71) {
-    // 71-80: Gold
-    teamColor = "#D4AF37";
-    bgColor = "rgba(212,175,55,0.08)";
-    borderColor = "rgba(212,175,55,0.2)";
-  } else if (confidence >= 61) {
-    // 61-70: Blue (Sea blue)
-    teamColor = "#38BDF8";
-    bgColor = "rgba(56,189,248,0.08)";
-    borderColor = "rgba(56,189,248,0.2)";
-  } else {
-    // 50-60: Red
-    teamColor = "#FF6464";
-    bgColor = "rgba(255,100,100,0.08)";
-    borderColor = "rgba(255,100,100,0.2)";
-  }
-
-  const handleCardClick = () => {
-    router.push(`/create/${matchId}/predict`);
-  };
+  const confidence = Math.max(0, Math.min(100, Number(prediction?.confidence) || 0));
+  const accent = confidence >= 80 ? "#61d7a5" : confidence >= 65 ? "#58b9ed" : "#e8bd5a";
+  const kickoff = parseISO(match.kickoff_at);
+  const kickoffIsValid = !Number.isNaN(kickoff.getTime());
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.02, boxShadow: `0 0 30px ${bgColor}` }}
-      whileTap={{ scale: 0.98 }}
-      onClick={handleCardClick}
-      className="w-full rounded-3xl cursor-pointer overflow-hidden"
-      style={{
-        background: `linear-gradient(135deg, ${bgColor} 0%, rgba(17, 17, 17, 0.95) 100%)`,
-        border: `1px solid ${borderColor}`,
-      }}
-    >
-      {/* Header */}
-      <div className="px-5 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", damping: 20 }}
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: bgColor, border: `1px solid ${borderColor}` }}
-            >
-              <Target size={18} style={{ color: teamColor }} />
-            </motion.div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: teamColor }}>
-                High Confidence
-              </p>
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
-                {prediction.market} Market
-              </p>
-            </div>
+    <article className={`h-full overflow-hidden rounded-xl border bg-[#101612] transition-colors ${selected ? "border-[#61d7a5]/55" : "border-white/[0.08] hover:border-white/15"}`}>
+      <div className="flex items-start justify-between gap-4 border-b border-white/[0.06] px-5 py-4">
+        <div className="min-w-0">
+          <p className="truncate text-[10px] font-bold uppercase tracking-[0.13em] text-white/40">{match.league}</p>
+          <div className="mt-1.5 flex items-center gap-2 text-[11px] text-white/50">
+            <CalendarDays size={12} className="shrink-0 text-[#61d7a5]" />
+            <span>{kickoffIsValid ? format(kickoff, "EEE, d MMM") : "Kickoff pending"}</span>
+            {kickoffIsValid && <><span className="text-white/20">/</span><Clock3 size={12} className="shrink-0" /><span>{format(kickoff, "HH:mm")}</span></>}
           </div>
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring" }}
-            className="px-3 py-1.5 rounded-full"
-            style={{ background: bgColor, border: `1px solid ${borderColor}` }}
-          >
-            <p className="text-lg font-bold" style={{ color: teamColor }}>
-              {prediction.confidence}%
-            </p>
-          </motion.div>
         </div>
+        {isSelectMode ? (
+          <button type="button" onClick={onToggleSelect} aria-pressed={selected} aria-label={selected ? "Deselect pick" : "Select pick"} className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition ${selected ? "border-[#61d7a5]/40 bg-[#61d7a5]/15 text-[#61d7a5]" : "border-white/10 bg-white/[0.03] text-white/40 hover:text-white"}`}>
+            {selected ? <Check size={16} /> : <span className="h-3.5 w-3.5 rounded border border-current" />}
+          </button>
+        ) : (
+          <div className="flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1.5" style={{ borderColor: `${accent}35`, background: `${accent}12`, color: accent }}><Target size={13} /><span className="text-sm font-black tabular-nums">{confidence}%</span></div>
+        )}
       </div>
 
-      {/* Main Content */}
-      <div className="p-5">
-        {/* Match Info */}
-        <div className="text-center mb-4">
-          <p className="text-xl font-bold text-white mb-2">
-            {match.home_team} <span style={{ color: "rgba(255,255,255,0.4)" }}>vs</span> {match.away_team}
-          </p>
-          <div className="flex items-center justify-center gap-2 text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
-            <Calendar size={12} />
-            <span>{new Date(match.kickoff_at).toLocaleDateString()}</span>
-            <Clock size={12} />
-            <span>{new Date(match.kickoff_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+      <div className="px-5 py-5">
+        <h3 className="text-base font-extrabold leading-6 text-white sm:text-lg">{match.home_team}<span className="mx-2 text-white/25">vs</span>{match.away_team}</h3>
+        <div className="mt-5 flex items-center justify-between gap-4 rounded-lg border border-white/[0.06] bg-black/15 px-4 py-3">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: `${accent}15`, color: accent }}><Trophy size={15} /></span>
+            <div className="min-w-0"><p className="text-[9px] font-bold uppercase tracking-[0.12em] text-white/35">{prediction?.market || "1X2"} pick</p><p className="truncate text-sm font-bold text-white/90">{prediction?.team || "Prediction unavailable"}</p></div>
           </div>
+          {!isSelectMode && <span className="shrink-0 text-xs font-extrabold tabular-nums" style={{ color: accent }}>{confidence}%</span>}
         </div>
-
-        {/* Prediction */}
-        <div className="rounded-2xl p-4 mb-4" style={{ background: bgColor, border: `1px solid ${borderColor}` }}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.3, type: "spring" }}
-                className="w-12 h-12 rounded-full flex items-center justify-center"
-                style={{ background: teamColor }}
-              >
-                <Trophy size={20} color="#000" />
-              </motion.div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.5)" }}>
-                  Predicted Winner
-                </p>
-                <p className="text-lg font-bold text-white">{prediction.team}</p>
-              </div>
-            </div>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-right"
-            >
-              <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.5)" }}>
-                Confidence
-              </p>
-              <p className="text-3xl font-black" style={{ color: teamColor }}>
-                {prediction.confidence}%
-              </p>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Action Button */}
-        <motion.button
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full py-3 rounded-xl font-bold transition-all"
-          style={{
-            background: `linear-gradient(135deg, ${teamColor}, ${confidence >= 81 ? '#00C878' : confidence >= 71 ? '#CFAF7B' : confidence >= 61 ? '#0EA5E9' : '#FF4040'})`,
-            color: "#000",
-          }}
-        >
-          View Full Prediction
-        </motion.button>
+        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/[0.07]"><motion.div initial={{ width: 0 }} animate={{ width: `${confidence}%` }} transition={{ duration: 0.5, ease: "easeOut" }} className="h-full rounded-full" style={{ background: accent }} /></div>
+        <button type="button" onClick={() => router.push(`/create/${matchId}/predict`)} className="mt-4 flex w-full items-center justify-between rounded-lg py-1 text-xs font-bold text-white/55 transition hover:text-[#61d7a5]"><span>Open full prediction</span><ArrowUpRight size={15} /></button>
       </div>
-    </motion.div>
+    </article>
   );
 }

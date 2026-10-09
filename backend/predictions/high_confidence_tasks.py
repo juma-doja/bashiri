@@ -59,7 +59,7 @@ def generate_high_confidence_matches():
         # Check if card already exists
         if Card.objects.filter(type="HIGH_CONFIDENCE", match_id=match.id).exists():
             skipped_count += 1
-            logger.debug(f"Skipped (card exists): {match.home_team.name} vs {match.away_team.name}")
+            logger.info(f"Skipped (card exists): {match.home_team.name} vs {match.away_team.name} | Kickoff: {match.kickoff_at}")
             continue
         
         try:
@@ -127,7 +127,7 @@ def generate_high_confidence_matches():
                 logger.info(f"Created high confidence card for {match.home_team.name} vs {match.away_team.name} - {winner} {confidence}%")
             else:
                 skipped_count += 1
-                logger.debug(f"Skipped (low confidence): {match.home_team.name} vs {match.away_team.name} - Home: {home_win_pct}%, Away: {away_win_pct}%")
+                logger.info(f"Skipped (low confidence): {match.home_team.name} vs {match.away_team.name} - Home: {home_win_pct}%, Away: {away_win_pct}%")
                 
         except Exception as e:
             logger.error(f"Failed to process match {match.id}: {e}")

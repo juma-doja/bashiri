@@ -53,6 +53,32 @@ class FeedListView(APIView):
         return Response({"count": len(ranked), "results": CardSerializer(page, many=True).data})
 
 
+class HighConfidenceCardsListView(APIView):
+    """GET /api/feed/high-confidence/ — complete paginated high-confidence archive."""
+    permission_classes = [AllowAny]
+    throttle_classes = []
+
+    def get(self, request):
+        try:
+            limit = int(request.query_params.get("limit", 100))
+            offset = int(request.query_params.get("offset", 0))
+        except (TypeError, ValueError):
+            limit, offset = 100, 0
+
+        limit = max(1, min(limit, 500))
+        offset = max(0, offset)
+        queryset = Card.objects.filter(
+            is_active=True,
+            type="HIGH_CONFIDENCE",
+        ).select_related(
+            "match", "match__home_team", "match__away_team", "match__league"
+        ).order_by("match__kickoff_at", "-created_at")
+
+        count = queryset.count()
+        results = queryset[offset:offset + limit]
+        return Response({"count": count, "results": CardSerializer(results, many=True).data})
+
+
 class PollVoteView(APIView):
     permission_classes = [IsAuthenticated]
 

@@ -12,6 +12,13 @@ export function getFeed(limit = 100, offset = 0) {
   return apiClient<{ count: number; results: Card[] }>(`/feed/?limit=${limit}&offset=${offset}`, { skipAuth: true });
 }
 
+export function getHighConfidenceCards(limit = 500, offset = 0) {
+  return apiClient<{ count: number; results: Card[] }>(
+    `/feed/high-confidence/?limit=${limit}&offset=${offset}`,
+    { skipAuth: true },
+  );
+}
+
 export function voteOnPoll(cardId: number, choice: string) {
   return apiClient(`/feed/polls/${cardId}/vote/`, { method: "POST", body: JSON.stringify({ choice }) });
 }
