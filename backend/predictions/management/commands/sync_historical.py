@@ -4,7 +4,7 @@ predictions/management/commands/sync_historical.py
 Historical synchronization command - Layer 1 of the two-layer architecture.
 
 Imports historical football data for specific seasons per league.
-This is a MANUAL command - NEVER schedule via Celery Beat.
+This command can be run manually or via its configured Celery Beat task.
 
 Usage:
     python manage.py sync_historical --all-available
@@ -47,7 +47,7 @@ LEAGUE_SEASONS = {
 class Command(BaseCommand):
     help = (
         "Import historical football data for specific seasons. "
-        "Manual command only - NEVER schedule via Celery Beat. "
+        "Repeat-safe and scheduled daily via Celery Beat. "
         "Idempotent - safe to run multiple times."
     )
 

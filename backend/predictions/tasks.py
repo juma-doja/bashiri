@@ -21,8 +21,7 @@ logger = logging.getLogger(__name__)
 def sync_daily_task():
     """
     Celery task for daily incremental sync.
-    This is the ONLY sync task that should be scheduled via Celery Beat.
-    Historical sync must NEVER be scheduled automatically.
+    This keeps current and upcoming fixtures updated between full history imports.
     """
     call_command("sync_daily")
     return "sync_daily imekamilika"
@@ -31,11 +30,11 @@ def sync_daily_task():
 @shared_task
 def sync_historical_task():
     """
-    Celery task for historical sync (seasons 2023, 2024, 2025, 2026).
-    This should be run ONCE then disabled from Celery Beat.
+    Celery task for the repeat-safe historical sync across available leagues/seasons.
+    Celery Beat schedules it daily at 02:35 Africa/Dar_es_Salaam.
     """
     call_command("sync_historical", "--all-available")
-    return "sync_historical imekamilika kwa seasons 2023, 2024, 2025, 2026"
+    return "sync_historical imekamilika kwa leagues na seasons zote zilizowekwa."
 
 
 @shared_task
