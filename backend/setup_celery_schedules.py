@@ -113,8 +113,8 @@ make_interval_task("Verify Slips", "tips.tasks.verify_slips_task", 5)
 make_interval_task("Update Leaderboard", "tips.tasks.update_leaderboard_task", 10)
 make_task("Create Best Streak Card", "tips.tasks.create_best_streak_card_task", {"minute": "0", "hour": "5"})
 
-# Sync KAMILI — mara moja kwa siku (fixtures mpya + backup ya matokeo)
-make_task("Sync Football Data", "predictions.tasks.sync_daily_task", {"minute": "0", "hour": "3"})
+# Sync KAMILI — mara moja kwa siku saa 05:00 (fixtures mpya + backup ya matokeo)
+make_task("Sync Football Data", "predictions.tasks.sync_daily_task", {"minute": "0", "hour": "5"})
 
 # Full historical match sync — kila siku saa 02:35 Africa/Dar_es_Salaam.
 make_task(
