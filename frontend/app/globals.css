@@ -126,7 +126,7 @@ html, body {
   color: var(--text-primary);
   overscroll-behavior-y: none;
   color-scheme: dark;
-  font-family: "Inter", "Segoe UI", sans-serif;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
 }
 
 /* Font hierarchy for Bashiri */
@@ -140,7 +140,7 @@ h1, h2, h3, h4, h5, h6,
 .xg-value,
 .rank-number,
 .badge-number {
-  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
 }
 
 body {

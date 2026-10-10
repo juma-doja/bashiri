@@ -27,7 +27,7 @@ export function getMyTickets() {
   return apiClient<SupportTicket[]>("/support/tickets/");
 }
 
-export function createTicket(payload: { type: string; subject: string; message: string }) {
+export function createTicket(payload: { type: string; subject: string; message: string; guest_phone?: string; guest_name?: string }) {
   return apiClient<SupportTicketDetail>("/support/tickets/", { method: "POST", body: JSON.stringify(payload) });
 }
 

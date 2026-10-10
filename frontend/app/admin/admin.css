@@ -1,0 +1,117 @@
+/* Admin workspace visual system */
+.admin-page-content {
+  --admin-surface: #101712;
+  --admin-surface-raised: #131d17;
+  --admin-line: rgba(255, 255, 255, 0.075);
+  --admin-muted: rgba(233, 241, 236, 0.48);
+  min-width: 0;
+  color: #f3f7f4;
+}
+
+.admin-page-content h1 {
+  color: #f3f7f4;
+  font-size: 24px;
+  font-weight: 760;
+  line-height: 1.2;
+}
+
+.admin-page-content h2 {
+  color: #f3f7f4;
+  font-size: 16px;
+  font-weight: 720;
+  line-height: 1.3;
+}
+
+.admin-page-content h3 {
+  color: #f3f7f4;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.admin-page-content div[class~="rounded-2xl"][style*="17, 17, 17"] {
+  background-color: var(--admin-surface) !important;
+  border-color: var(--admin-line) !important;
+  border-radius: 14px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.admin-page-content table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.admin-page-content thead tr {
+  background: rgba(255, 255, 255, 0.025) !important;
+}
+
+.admin-page-content th {
+  color: rgba(226, 237, 230, 0.48) !important;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  padding: 13px 16px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-page-content td {
+  border-top-color: var(--admin-line) !important;
+  padding: 13px 16px;
+  vertical-align: middle;
+}
+
+.admin-page-content tbody tr {
+  transition: background-color 140ms ease;
+}
+
+.admin-page-content tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.025);
+}
+
+.admin-page-content input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+.admin-page-content textarea,
+.admin-page-content select {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 10px;
+  background-color: #0b100d !important;
+  color: #f3f7f4;
+  outline: none;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.admin-page-content input:focus,
+.admin-page-content textarea:focus,
+.admin-page-content select:focus {
+  border-color: rgba(97, 215, 165, 0.55);
+  box-shadow: 0 0 0 3px rgba(97, 215, 165, 0.08);
+}
+
+.admin-page-content input::placeholder,
+.admin-page-content textarea::placeholder {
+  color: rgba(231, 239, 234, 0.32);
+}
+
+.admin-page-content button {
+  touch-action: manipulation;
+}
+
+.admin-page-content button:focus-visible,
+.admin-page-content a:focus-visible {
+  outline: 2px solid rgba(97, 215, 165, 0.7);
+  outline-offset: 2px;
+}
+
+.admin-page-content video {
+  background: #080d0b;
+}
+
+@media (max-width: 640px) {
+  .admin-page-content h1 {
+    font-size: 21px;
+  }
+
+  .admin-page-content table {
+    min-width: 620px;
+  }
+}

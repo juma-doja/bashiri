@@ -5,12 +5,16 @@ import { getUserDetail, updateUser, manualActivateSubscription, deleteUser, rese
 import { BashiriButton } from "@/components/ui/Button";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { AlertModal } from "@/components/ui/AlertModal";
+import { useAdminAuthStore } from "@/stores/admin-auth.store";
 
 export default function AdminUserDetailPage() {
   const router = useRouter();
   const params = useParams();
   const userId = Number(params.id);
+  const adminId = useAdminAuthStore((state) => state.admin?.id);
   const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [busyAction, setBusyAction] = useState("");
   const [reason, setReason] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -24,37 +28,80 @@ export default function AdminUserDetailPage() {
   });
 
   useEffect(() => {
-    getUserDetail(userId).then(setUser);
+    let active = true;
+    setLoading(true);
+    getUserDetail(userId)
+      .then((data) => { if (active) setUser(data); })
+      .catch((error: unknown) => setAlertModal({
+        isOpen: true,
+        title: "Imeshindwa kupakia",
+        message: error instanceof Error ? error.message : "Imeshindwa kupakia maelezo ya mtumiaji.",
+        variant: "error",
+      }))
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, [userId]);
 
+  function showActionError(error: unknown) {
+    setAlertModal({
+      isOpen: true,
+      title: "Action imeshindikana",
+      message: error instanceof Error ? error.message : "Tafadhali jaribu tena.",
+      variant: "error",
+    });
+  }
+
   async function toggleBan() {
-    const updated = await updateUser(userId, { is_active: !user.is_active });
-    setUser(updated);
+    setBusyAction("access");
+    try {
+      const updated = await updateUser(userId, { is_active: !user.is_active });
+      setUser(updated);
+    } catch (error) {
+      showActionError(error);
+    } finally {
+      setBusyAction("");
+    }
   }
 
   async function toggleAdmin() {
-    const updated = await updateUser(userId, { is_staff: !user.is_staff });
-    setUser(updated);
+    setBusyAction("admin");
+    try {
+      const updated = await updateUser(userId, { is_staff: !user.is_staff });
+      setUser(updated);
+    } catch (error) {
+      showActionError(error);
+    } finally {
+      setBusyAction("");
+    }
   }
 
   async function handleManualActivate(plan: "weekly" | "monthly") {
-    await manualActivateSubscription({ user_id: userId, plan, reason });
-    const refreshed = await getUserDetail(userId);
-    setUser(refreshed);
-    setReason("");
+    if (!reason.trim()) {
+      setAlertModal({ isOpen: true, title: "Sababu inahitajika", message: "Andika sababu ya kuwasha subscription kabla ya kuendelea.", variant: "warning" });
+      return;
+    }
+    setBusyAction("subscription");
+    try {
+      await manualActivateSubscription({ user_id: userId, plan, reason: reason.trim() });
+      const refreshed = await getUserDetail(userId);
+      setUser(refreshed);
+      setReason("");
+      setAlertModal({ isOpen: true, title: "Subscription imewashwa", message: `Mpango wa ${plan} umewashwa kwa mtumiaji.`, variant: "success" });
+    } catch (error) {
+      showActionError(error);
+    } finally {
+      setBusyAction("");
+    }
   }
 
   async function handleDeleteUser() {
+    setBusyAction("delete");
     try {
       await deleteUser(userId);
       router.push("/admin/users");
-    } catch (error: any) {
-      setAlertModal({
-        isOpen: true,
-        title: "Imeshindwa",
-        message: error.message || "Imeshindwa kufuta mtumiaji",
-        variant: "error"
-      });
+    } catch (error) {
+      showActionError(error);
+      setBusyAction("");
     }
   }
 
@@ -72,12 +119,15 @@ export default function AdminUserDetailPage() {
     try {
       await resetUserPassword(userId, newPassword);
       setResetDone(true);
+    } catch (error) {
+      showActionError(error);
     } finally {
       setResetting(false);
     }
   }
 
-  if (!user) return <p style={{ color: "rgba(255,255,255,0.5)" }}>Inapakia...</p>;
+  if (loading && !user) return <div className="flex min-h-64 items-center justify-center text-sm text-white/45">Inapakia maelezo ya mtumiaji...</div>;
+  if (!user) return <div className="rounded-xl border border-[#f18f75]/20 bg-[#f18f75]/[0.06] p-5 text-sm text-[#f2a28b]">Mtumiaji hakuweza kupatikana. Tumia back kurudi kwenye directory.</div>;
 
   return (
     <div>
@@ -107,14 +157,15 @@ export default function AdminUserDetailPage() {
 
         <div className="flex gap-3 flex-wrap">
           <BashiriButton variant={user.is_active ? "outline" : "primary"} onClick={toggleBan}>
-            {user.is_active ? "Ban Mtumiaji" : "Ondoa Ban"}
+            {busyAction === "access" ? "Inahifadhi..." : user.is_active ? "Ban Mtumiaji" : "Ondoa Ban"}
           </BashiriButton>
-          <BashiriButton variant="outline" onClick={toggleAdmin}>
-            {user.is_staff ? "Ondoa Admin" : "Fanya Admin"}
+          <BashiriButton variant="outline" onClick={toggleAdmin} disabled={busyAction !== "" || user.id === adminId}>
+            {busyAction === "admin" ? "Inahifadhi..." : user.id === adminId ? "Akaunti yako ya Admin" : user.is_staff ? "Ondoa Admin" : "Fanya Admin"}
           </BashiriButton>
           <BashiriButton
             variant="outline"
             onClick={() => setShowDeleteConfirm(true)}
+            disabled={busyAction !== "" || user.id === adminId}
             style={{ borderColor: "var(--danger)", color: "var(--danger)" }}
           >
             <Trash2 size={16} className="mr-2" />
@@ -135,6 +186,8 @@ export default function AdminUserDetailPage() {
                 </BashiriButton>
                 <BashiriButton
                   onClick={handleDeleteUser}
+                  loading={busyAction === "delete"}
+                  disabled={busyAction !== ""}
                   style={{ background: "var(--danger)", borderColor: "var(--danger)" }}
                 >
                   Futa
@@ -154,8 +207,8 @@ export default function AdminUserDetailPage() {
           onChange={(e) => setReason(e.target.value)}
         />
         <div className="flex gap-2 flex-wrap">
-          <BashiriButton size="md" onClick={() => handleManualActivate("weekly")}>Weekly</BashiriButton>
-          <BashiriButton size="md" onClick={() => handleManualActivate("monthly")}>Monthly</BashiriButton>
+          <BashiriButton size="md" loading={busyAction === "subscription"} disabled={busyAction !== ""} onClick={() => handleManualActivate("weekly")}>Weekly</BashiriButton>
+          <BashiriButton size="md" loading={busyAction === "subscription"} disabled={busyAction !== ""} onClick={() => handleManualActivate("monthly")}>Monthly</BashiriButton>
         </div>
       </div>
 

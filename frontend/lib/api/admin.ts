@@ -95,20 +95,21 @@ export function adminLogin(phone_number: string, password: string) {
   });
 }
 
-export function getDashboardStats() {
-  return adminFetch("/dashboard/stats/");
+export function getDashboardStats<T = Record<string, unknown>>() {
+  return adminFetch<T>("/dashboard/stats/");
 }
 
 export function getVisitorAnalytics<T = Record<string, unknown>>() {
   return adminFetch<T>("/dashboard/visitors/");
 }
 
-export function getUsers(params: { search?: string; is_subscriber?: boolean; is_active?: boolean; offset?: number } = {}) {
+export function getUsers(params: { search?: string; is_subscriber?: boolean; is_active?: boolean; offset?: number; limit?: number } = {}) {
   const query = new URLSearchParams();
   if (params.search) query.set("search", params.search);
   if (params.is_subscriber !== undefined) query.set("is_subscriber", String(params.is_subscriber));
   if (params.is_active !== undefined) query.set("is_active", String(params.is_active));
   if (params.offset) query.set("offset", String(params.offset));
+  if (params.limit) query.set("limit", String(params.limit));
   return adminFetch(`/dashboard/users/?${query.toString()}`);
 }
 

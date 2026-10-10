@@ -1,0 +1,1287 @@
+Total High Confidence Cards: 183
+
+================================================================================
+MECHI ZOTE ZENYE >50% CONFIDENCE
+================================================================================
+
+EC Vitória vs Chapecoense AF
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-07
+  Muda: 23:00
+  Confidence: 54.3%
+  Predicted Winner: home
+----------------------------------------
+Botafogo FR vs CR Vasco da Gama
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-07
+  Muda: 23:30
+  Confidence: 60.6%
+  Predicted Winner: home
+----------------------------------------
+Santos FC vs CR Flamengo
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-08
+  Muda: 22:30
+  Confidence: 51.2%
+  Predicted Winner: away
+----------------------------------------
+Fluminense FC vs Coritiba FBC
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-09
+  Muda: 00:30
+  Confidence: 63.7%
+  Predicted Winner: home
+----------------------------------------
+SE Palmeiras vs EC Bahia
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-09
+  Muda: 00:30
+  Confidence: 64.8%
+  Predicted Winner: home
+----------------------------------------
+West Ham United FC vs Queens Park Rangers FC
+  Liga: Championship
+  Tarehe: 2026-10-09
+  Muda: 19:00
+  Confidence: 62.3%
+  Predicted Winner: home
+----------------------------------------
+FC Augsburg vs FC Bayern München
+  Liga: Bundesliga
+  Tarehe: 2026-10-10
+  Muda: 00:00
+  Confidence: 77.8%
+  Predicted Winner: away
+----------------------------------------
+TSG 1899 Hoffenheim vs Hamburger SV
+  Liga: Bundesliga
+  Tarehe: 2026-10-10
+  Muda: 00:00
+  Confidence: 58.4%
+  Predicted Winner: home
+----------------------------------------
+Borussia Dortmund vs SV Werder Bremen
+  Liga: Bundesliga
+  Tarehe: 2026-10-10
+  Muda: 00:00
+  Confidence: 72.0%
+  Predicted Winner: home
+----------------------------------------
+RB Leipzig vs Eintracht Frankfurt
+  Liga: Bundesliga
+  Tarehe: 2026-10-10
+  Muda: 00:00
+  Confidence: 56.9%
+  Predicted Winner: home
+----------------------------------------
+Arsenal FC vs Leeds United FC
+  Liga: Premier League
+  Tarehe: 2026-10-10
+  Muda: 11:30
+  Confidence: 66.6%
+  Predicted Winner: home
+----------------------------------------
+Blackburn Rovers FC vs Cardiff City FC
+  Liga: Championship
+  Tarehe: 2026-10-10
+  Muda: 14:00
+  Confidence: 50.2%
+  Predicted Winner: home
+----------------------------------------
+Lille OSC vs Le Havre AC
+  Liga: Ligue 1
+  Tarehe: 2026-10-10
+  Muda: 15:15
+  Confidence: 63.7%
+  Predicted Winner: home
+----------------------------------------
+FC Internazionale Milano vs Parma Calcio 1913
+  Liga: Serie A
+  Tarehe: 2026-10-10
+  Muda: 16:00
+  Confidence: 80.3%
+  Predicted Winner: home
+----------------------------------------
+Manchester United FC vs Tottenham Hotspur FC
+  Liga: Premier League
+  Tarehe: 2026-10-10
+  Muda: 16:30
+  Confidence: 51.8%
+  Predicted Winner: home
+----------------------------------------
+AS Monaco FC vs Toulouse FC
+  Liga: Ligue 1
+  Tarehe: 2026-10-10
+  Muda: 18:45
+  Confidence: 57.4%
+  Predicted Winner: home
+----------------------------------------
+Paris Saint-Germain FC vs Le Mans FC
+  Liga: Ligue 1
+  Tarehe: 2026-10-10
+  Muda: 18:45
+  Confidence: 77.8%
+  Predicted Winner: home
+----------------------------------------
+Stade Brestois 29 vs Angers SCO
+  Liga: Ligue 1
+  Tarehe: 2026-10-10
+  Muda: 18:45
+  Confidence: 50.6%
+  Predicted Winner: home
+----------------------------------------
+SSC Napoli vs Frosinone Calcio
+  Liga: Serie A
+  Tarehe: 2026-10-10
+  Muda: 18:45
+  Confidence: 64.5%
+  Predicted Winner: home
+----------------------------------------
+CR Vasco da Gama vs Clube do Remo
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-10
+  Muda: 20:00
+  Confidence: 52.9%
+  Predicted Winner: home
+----------------------------------------
+Real Madrid CF vs Villarreal CF
+  Liga: La Liga
+  Tarehe: 2026-10-11
+  Muda: 00:00
+  Confidence: 68.4%
+  Predicted Winner: home
+----------------------------------------
+Real Betis Balompié vs CA Osasuna
+  Liga: La Liga
+  Tarehe: 2026-10-11
+  Muda: 00:00
+  Confidence: 62.1%
+  Predicted Winner: home
+----------------------------------------
+São Paulo FC vs EC Vitória
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-11
+  Muda: 00:00
+  Confidence: 54.0%
+  Predicted Winner: home
+----------------------------------------
+FC Barcelona vs Getafe CF
+  Liga: La Liga
+  Tarehe: 2026-10-11
+  Muda: 00:00
+  Confidence: 81.5%
+  Predicted Winner: home
+----------------------------------------
+Southampton FC vs Portsmouth FC
+  Liga: Championship
+  Tarehe: 2026-10-11
+  Muda: 11:00
+  Confidence: 69.1%
+  Predicted Winner: home
+----------------------------------------
+SS Lazio vs AC Monza
+  Liga: Serie A
+  Tarehe: 2026-10-11
+  Muda: 13:00
+  Confidence: 71.3%
+  Predicted Winner: home
+----------------------------------------
+Stade Rennais FC 1901 vs AJ Auxerre
+  Liga: Ligue 1
+  Tarehe: 2026-10-11
+  Muda: 15:15
+  Confidence: 54.9%
+  Predicted Winner: home
+----------------------------------------
+Cagliari Calcio vs Juventus FC
+  Liga: Serie A
+  Tarehe: 2026-10-11
+  Muda: 18:45
+  Confidence: 53.2%
+  Predicted Winner: away
+----------------------------------------
+ES Troyes AC vs Olympique de Marseille
+  Liga: Ligue 1
+  Tarehe: 2026-10-11
+  Muda: 18:45
+  Confidence: 53.3%
+  Predicted Winner: away
+----------------------------------------
+CA Mineiro vs Santos FC
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-11
+  Muda: 19:00
+  Confidence: 52.6%
+  Predicted Winner: home
+----------------------------------------
+SE Palmeiras vs SC Corinthians Paulista
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-11
+  Muda: 20:30
+  Confidence: 67.0%
+  Predicted Winner: home
+----------------------------------------
+CR Flamengo vs Fluminense FC
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-11
+  Muda: 20:30
+  Confidence: 61.5%
+  Predicted Winner: home
+----------------------------------------
+Atalanta BC vs Venezia FC
+  Liga: Serie A
+  Tarehe: 2026-10-12
+  Muda: 16:30
+  Confidence: 73.5%
+  Predicted Winner: home
+----------------------------------------
+Sabah FK vs SK Slavia Praha
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-13
+  Muda: 16:45
+  Confidence: 53.5%
+  Predicted Winner: home
+----------------------------------------
+Birmingham City FC vs Preston North End FC
+  Liga: Championship
+  Tarehe: 2026-10-13
+  Muda: 18:45
+  Confidence: 53.9%
+  Predicted Winner: home
+----------------------------------------
+Wolverhampton Wanderers FC vs Bolton Wanderers FC
+  Liga: Championship
+  Tarehe: 2026-10-13
+  Muda: 18:45
+  Confidence: 51.8%
+  Predicted Winner: home
+----------------------------------------
+Burnley FC vs Charlton Athletic FC
+  Liga: Championship
+  Tarehe: 2026-10-13
+  Muda: 18:45
+  Confidence: 57.7%
+  Predicted Winner: home
+----------------------------------------
+Arsenal FC vs Lille OSC
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-13
+  Muda: 19:00
+  Confidence: 79.0%
+  Predicted Winner: home
+----------------------------------------
+FC Internazionale Milano vs Club Brugge KV
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-13
+  Muda: 19:00
+  Confidence: 66.2%
+  Predicted Winner: home
+----------------------------------------
+Galatasaray SK vs FC Barcelona
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-13
+  Muda: 19:00
+  Confidence: 69.0%
+  Predicted Winner: away
+----------------------------------------
+Club Atlético de Madrid vs Manchester United FC
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-13
+  Muda: 19:00
+  Confidence: 59.7%
+  Predicted Winner: home
+----------------------------------------
+Viking FK vs FC Bayern München
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-13
+  Muda: 19:00
+  Confidence: 86.0%
+  Predicted Winner: away
+----------------------------------------
+LASK Linz vs Liverpool FC
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-14
+  Muda: 16:45
+  Confidence: 59.9%
+  Predicted Winner: away
+----------------------------------------
+Real Betis Balompié vs FC Porto
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-14
+  Muda: 19:00
+  Confidence: 57.8%
+  Predicted Winner: home
+----------------------------------------
+ŠK Slovan Bratislava vs VfB Stuttgart
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-14
+  Muda: 19:00
+  Confidence: 60.1%
+  Predicted Winner: away
+----------------------------------------
+Aston Villa FC vs Fenerbahçe SK
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-14
+  Muda: 19:00
+  Confidence: 73.8%
+  Predicted Winner: home
+----------------------------------------
+Fluminense FC vs Santos FC
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-17
+  Muda: 00:00
+  Confidence: 55.6%
+  Predicted Winner: home
+----------------------------------------
+SC Corinthians Paulista vs EC Vitória
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-17
+  Muda: 00:00
+  Confidence: 52.3%
+  Predicted Winner: home
+----------------------------------------
+São Paulo FC vs CR Vasco da Gama
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-17
+  Muda: 00:00
+  Confidence: 52.5%
+  Predicted Winner: home
+----------------------------------------
+Mirassol FC vs SC Internacional
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-17
+  Muda: 00:00
+  Confidence: 52.4%
+  Predicted Winner: home
+----------------------------------------
+1. FC Union Berlin vs Borussia Dortmund
+  Liga: Bundesliga
+  Tarehe: 2026-10-17
+  Muda: 00:00
+  Confidence: 63.2%
+  Predicted Winner: away
+----------------------------------------
+FC Bayern München vs RB Leipzig
+  Liga: Bundesliga
+  Tarehe: 2026-10-17
+  Muda: 00:00
+  Confidence: 76.8%
+  Predicted Winner: home
+----------------------------------------
+Hamburger SV vs VfB Stuttgart
+  Liga: Bundesliga
+  Tarehe: 2026-10-17
+  Muda: 00:00
+  Confidence: 58.0%
+  Predicted Winner: away
+----------------------------------------
+Botafogo FR vs Chapecoense AF
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-17
+  Muda: 00:00
+  Confidence: 71.0%
+  Predicted Winner: home
+----------------------------------------
+Eintracht Frankfurt vs 1. FC Köln
+  Liga: Bundesliga
+  Tarehe: 2026-10-17
+  Muda: 00:00
+  Confidence: 60.3%
+  Predicted Winner: home
+----------------------------------------
+Bayer 04 Leverkusen vs SC Freiburg
+  Liga: Bundesliga
+  Tarehe: 2026-10-17
+  Muda: 00:00
+  Confidence: 64.4%
+  Predicted Winner: home
+----------------------------------------
+CA Mineiro vs Coritiba FBC
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-17
+  Muda: 00:00
+  Confidence: 60.8%
+  Predicted Winner: home
+----------------------------------------
+SV 07 Elversberg vs FC Augsburg
+  Liga: Bundesliga
+  Tarehe: 2026-10-17
+  Muda: 00:00
+  Confidence: 51.9%
+  Predicted Winner: home
+----------------------------------------
+Middlesbrough FC vs Cardiff City FC
+  Liga: Championship
+  Tarehe: 2026-10-17
+  Muda: 11:30
+  Confidence: 63.8%
+  Predicted Winner: home
+----------------------------------------
+Venezia FC vs SSC Napoli
+  Liga: Serie A
+  Tarehe: 2026-10-17
+  Muda: 13:00
+  Confidence: 66.8%
+  Predicted Winner: away
+----------------------------------------
+Southampton FC vs Bolton Wanderers FC
+  Liga: Championship
+  Tarehe: 2026-10-17
+  Muda: 14:00
+  Confidence: 65.9%
+  Predicted Winner: home
+----------------------------------------
+Wrexham AFC vs Preston North End FC
+  Liga: Championship
+  Tarehe: 2026-10-17
+  Muda: 14:00
+  Confidence: 55.7%
+  Predicted Winner: home
+----------------------------------------
+Norwich City FC vs Portsmouth FC
+  Liga: Championship
+  Tarehe: 2026-10-17
+  Muda: 14:00
+  Confidence: 55.9%
+  Predicted Winner: home
+----------------------------------------
+Manchester City FC vs Ipswich Town FC
+  Liga: Premier League
+  Tarehe: 2026-10-17
+  Muda: 14:00
+  Confidence: 83.3%
+  Predicted Winner: home
+----------------------------------------
+RC Strasbourg Alsace vs Paris Saint-Germain FC
+  Liga: Ligue 1
+  Tarehe: 2026-10-17
+  Muda: 15:15
+  Confidence: 58.1%
+  Predicted Winner: away
+----------------------------------------
+Bologna FC 1909 vs FC Internazionale Milano
+  Liga: Serie A
+  Tarehe: 2026-10-17
+  Muda: 16:00
+  Confidence: 63.4%
+  Predicted Winner: away
+----------------------------------------
+ES Troyes AC vs Racing Club de Lens
+  Liga: Ligue 1
+  Tarehe: 2026-10-17
+  Muda: 18:45
+  Confidence: 54.0%
+  Predicted Winner: away
+----------------------------------------
+AS Roma vs Genoa CFC
+  Liga: Serie A
+  Tarehe: 2026-10-17
+  Muda: 18:45
+  Confidence: 71.3%
+  Predicted Winner: home
+----------------------------------------
+Lille OSC vs Stade Brestois 29
+  Liga: Ligue 1
+  Tarehe: 2026-10-17
+  Muda: 18:45
+  Confidence: 57.6%
+  Predicted Winner: home
+----------------------------------------
+CA Osasuna vs Real Racing Club de Santander
+  Liga: La Liga
+  Tarehe: 2026-10-18
+  Muda: 00:00
+  Confidence: 50.0%
+  Predicted Winner: home
+----------------------------------------
+Real Madrid CF vs Sevilla FC
+  Liga: La Liga
+  Tarehe: 2026-10-18
+  Muda: 00:00
+  Confidence: 76.8%
+  Predicted Winner: home
+----------------------------------------
+Real Betis Balompié vs FC Barcelona
+  Liga: La Liga
+  Tarehe: 2026-10-18
+  Muda: 00:00
+  Confidence: 56.3%
+  Predicted Winner: away
+----------------------------------------
+RCD Espanyol de Barcelona vs Club Atlético de Madrid
+  Liga: La Liga
+  Tarehe: 2026-10-18
+  Muda: 00:00
+  Confidence: 51.6%
+  Predicted Winner: away
+----------------------------------------
+RC Deportivo La Coruña vs Levante UD
+  Liga: La Liga
+  Tarehe: 2026-10-18
+  Muda: 00:00
+  Confidence: 50.5%
+  Predicted Winner: home
+----------------------------------------
+Villarreal CF vs Elche CF
+  Liga: La Liga
+  Tarehe: 2026-10-18
+  Muda: 00:00
+  Confidence: 64.2%
+  Predicted Winner: home
+----------------------------------------
+Udinese Calcio vs US Lecce
+  Liga: Serie A
+  Tarehe: 2026-10-18
+  Muda: 10:30
+  Confidence: 50.6%
+  Predicted Winner: home
+----------------------------------------
+Brighton & Hove Albion FC vs Crystal Palace FC
+  Liga: Premier League
+  Tarehe: 2026-10-18
+  Muda: 13:00
+  Confidence: 52.1%
+  Predicted Winner: home
+----------------------------------------
+ACF Fiorentina vs Como 1907
+  Liga: Serie A
+  Tarehe: 2026-10-18
+  Muda: 13:00
+  Confidence: 52.2%
+  Predicted Winner: away
+----------------------------------------
+Angers SCO vs Olympique de Marseille
+  Liga: Ligue 1
+  Tarehe: 2026-10-18
+  Muda: 13:00
+  Confidence: 50.8%
+  Predicted Winner: away
+----------------------------------------
+FC Lorient vs AS Monaco FC
+  Liga: Ligue 1
+  Tarehe: 2026-10-18
+  Muda: 15:15
+  Confidence: 50.4%
+  Predicted Winner: away
+----------------------------------------
+Nottingham Forest FC vs Arsenal FC
+  Liga: Premier League
+  Tarehe: 2026-10-18
+  Muda: 15:30
+  Confidence: 57.5%
+  Predicted Winner: away
+----------------------------------------
+Olympique Lyonnais vs OGC Nice
+  Liga: Ligue 1
+  Tarehe: 2026-10-18
+  Muda: 18:45
+  Confidence: 56.0%
+  Predicted Winner: home
+----------------------------------------
+AC Monza vs Cagliari Calcio
+  Liga: Serie A
+  Tarehe: 2026-10-19
+  Muda: 16:30
+  Confidence: 52.3%
+  Predicted Winner: away
+----------------------------------------
+Sabah FK vs Borussia Dortmund
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-20
+  Muda: 16:45
+  Confidence: 70.6%
+  Predicted Winner: away
+----------------------------------------
+Fenerbahçe SK vs SK Slavia Praha
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-20
+  Muda: 16:45
+  Confidence: 61.8%
+  Predicted Winner: home
+----------------------------------------
+Wolverhampton Wanderers FC vs Portsmouth FC
+  Liga: Championship
+  Tarehe: 2026-10-20
+  Muda: 18:45
+  Confidence: 55.3%
+  Predicted Winner: home
+----------------------------------------
+Manchester City FC vs PAE AEK
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-20
+  Muda: 19:00
+  Confidence: 77.0%
+  Predicted Winner: home
+----------------------------------------
+Liverpool FC vs Villarreal CF
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-20
+  Muda: 19:00
+  Confidence: 82.4%
+  Predicted Winner: home
+----------------------------------------
+Paris Saint-Germain FC vs FC Barcelona
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-20
+  Muda: 19:00
+  Confidence: 61.9%
+  Predicted Winner: home
+----------------------------------------
+AS Roma vs ŠK Slovan Bratislava
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-20
+  Muda: 19:00
+  Confidence: 87.8%
+  Predicted Winner: home
+----------------------------------------
+VfB Stuttgart vs Club Atlético de Madrid
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-20
+  Muda: 19:00
+  Confidence: 54.7%
+  Predicted Winner: away
+----------------------------------------
+Como 1907 vs Manchester United FC
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-21
+  Muda: 16:45
+  Confidence: 51.8%
+  Predicted Winner: home
+----------------------------------------
+Lille OSC vs Galatasaray SK
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-21
+  Muda: 16:45
+  Confidence: 63.5%
+  Predicted Winner: home
+----------------------------------------
+Real Betis Balompié vs Feyenoord Rotterdam
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-21
+  Muda: 19:00
+  Confidence: 66.5%
+  Predicted Winner: home
+----------------------------------------
+Aston Villa FC vs Viking FK
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-21
+  Muda: 19:00
+  Confidence: 80.0%
+  Predicted Winner: home
+----------------------------------------
+Real Madrid CF vs RB Leipzig
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-21
+  Muda: 19:00
+  Confidence: 81.6%
+  Predicted Winner: home
+----------------------------------------
+FC Internazionale Milano vs FK Shakhtar Donetsk
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-21
+  Muda: 19:00
+  Confidence: 76.1%
+  Predicted Winner: home
+----------------------------------------
+Sporting Clube de Portugal vs LASK Linz
+  Liga: UEFA Champions League
+  Tarehe: 2026-10-21
+  Muda: 19:00
+  Confidence: 73.1%
+  Predicted Winner: home
+----------------------------------------
+Torino FC vs AC Monza
+  Liga: Serie A
+  Tarehe: 2026-10-23
+  Muda: 18:45
+  Confidence: 56.3%
+  Predicted Winner: home
+----------------------------------------
+RB Leipzig vs SV 07 Elversberg
+  Liga: Bundesliga
+  Tarehe: 2026-10-24
+  Muda: 00:00
+  Confidence: 53.9%
+  Predicted Winner: home
+----------------------------------------
+1. FSV Mainz 05 vs SV Werder Bremen
+  Liga: Bundesliga
+  Tarehe: 2026-10-24
+  Muda: 00:00
+  Confidence: 51.1%
+  Predicted Winner: home
+----------------------------------------
+SC Paderborn 07 vs Hamburger SV
+  Liga: Bundesliga
+  Tarehe: 2026-10-24
+  Muda: 00:00
+  Confidence: 50.2%
+  Predicted Winner: home
+----------------------------------------
+CR Flamengo vs CA Mineiro
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-24
+  Muda: 00:00
+  Confidence: 64.7%
+  Predicted Winner: home
+----------------------------------------
+VfB Stuttgart vs Borussia Mönchengladbach
+  Liga: Bundesliga
+  Tarehe: 2026-10-24
+  Muda: 00:00
+  Confidence: 68.1%
+  Predicted Winner: home
+----------------------------------------
+Cruzeiro EC vs Clube do Remo
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-24
+  Muda: 00:00
+  Confidence: 62.4%
+  Predicted Winner: home
+----------------------------------------
+Borussia Dortmund vs Eintracht Frankfurt
+  Liga: Bundesliga
+  Tarehe: 2026-10-24
+  Muda: 00:00
+  Confidence: 66.6%
+  Predicted Winner: home
+----------------------------------------
+FC Augsburg vs 1. FC Union Berlin
+  Liga: Bundesliga
+  Tarehe: 2026-10-24
+  Muda: 00:00
+  Confidence: 50.7%
+  Predicted Winner: home
+----------------------------------------
+SC Freiburg vs FC Bayern München
+  Liga: Bundesliga
+  Tarehe: 2026-10-24
+  Muda: 00:00
+  Confidence: 74.0%
+  Predicted Winner: away
+----------------------------------------
+SE Palmeiras vs RB Bragantino
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-24
+  Muda: 00:00
+  Confidence: 66.5%
+  Predicted Winner: home
+----------------------------------------
+TSG 1899 Hoffenheim vs Bayer 04 Leverkusen
+  Liga: Bundesliga
+  Tarehe: 2026-10-24
+  Muda: 00:00
+  Confidence: 53.0%
+  Predicted Winner: away
+----------------------------------------
+Sheffield United FC vs Derby County FC
+  Liga: Championship
+  Tarehe: 2026-10-24
+  Muda: 11:30
+  Confidence: 50.1%
+  Predicted Winner: home
+----------------------------------------
+Aston Villa FC vs Manchester City FC
+  Liga: Premier League
+  Tarehe: 2026-10-24
+  Muda: 11:30
+  Confidence: 53.3%
+  Predicted Winner: away
+----------------------------------------
+Como 1907 vs US Sassuolo Calcio
+  Liga: Serie A
+  Tarehe: 2026-10-24
+  Muda: 13:00
+  Confidence: 67.0%
+  Predicted Winner: home
+----------------------------------------
+Arsenal FC vs Everton FC
+  Liga: Premier League
+  Tarehe: 2026-10-24
+  Muda: 14:00
+  Confidence: 65.4%
+  Predicted Winner: home
+----------------------------------------
+Wolverhampton Wanderers FC vs Watford FC
+  Liga: Championship
+  Tarehe: 2026-10-24
+  Muda: 14:00
+  Confidence: 56.1%
+  Predicted Winner: home
+----------------------------------------
+Toulouse FC vs ES Troyes AC
+  Liga: Ligue 1
+  Tarehe: 2026-10-24
+  Muda: 15:15
+  Confidence: 54.6%
+  Predicted Winner: home
+----------------------------------------
+Chelsea FC vs Tottenham Hotspur FC
+  Liga: Premier League
+  Tarehe: 2026-10-24
+  Muda: 16:30
+  Confidence: 52.8%
+  Predicted Winner: home
+----------------------------------------
+SS Lazio vs Parma Calcio 1913
+  Liga: Serie A
+  Tarehe: 2026-10-24
+  Muda: 18:45
+  Confidence: 56.1%
+  Predicted Winner: home
+----------------------------------------
+FC Barcelona vs Real Madrid CF
+  Liga: La Liga
+  Tarehe: 2026-10-25
+  Muda: 00:00
+  Confidence: 56.2%
+  Predicted Winner: home
+----------------------------------------
+Club Atlético de Madrid vs RC Deportivo La Coruña
+  Liga: La Liga
+  Tarehe: 2026-10-25
+  Muda: 00:00
+  Confidence: 62.3%
+  Predicted Winner: home
+----------------------------------------
+FC Internazionale Milano vs ACF Fiorentina
+  Liga: Serie A
+  Tarehe: 2026-10-25
+  Muda: 11:30
+  Confidence: 74.5%
+  Predicted Winner: home
+----------------------------------------
+Liverpool FC vs Brighton & Hove Albion FC
+  Liga: Premier League
+  Tarehe: 2026-10-25
+  Muda: 14:00
+  Confidence: 52.7%
+  Predicted Winner: home
+----------------------------------------
+Genoa CFC vs Venezia FC
+  Liga: Serie A
+  Tarehe: 2026-10-25
+  Muda: 14:00
+  Confidence: 50.8%
+  Predicted Winner: home
+----------------------------------------
+Atalanta BC vs Frosinone Calcio
+  Liga: Serie A
+  Tarehe: 2026-10-25
+  Muda: 14:00
+  Confidence: 63.7%
+  Predicted Winner: home
+----------------------------------------
+Olympique de Marseille vs Le Havre AC
+  Liga: Ligue 1
+  Tarehe: 2026-10-25
+  Muda: 16:15
+  Confidence: 64.2%
+  Predicted Winner: home
+----------------------------------------
+US Lecce vs Juventus FC
+  Liga: Serie A
+  Tarehe: 2026-10-25
+  Muda: 17:00
+  Confidence: 61.4%
+  Predicted Winner: away
+----------------------------------------
+Paris Saint-Germain FC vs Olympique Lyonnais
+  Liga: Ligue 1
+  Tarehe: 2026-10-25
+  Muda: 19:45
+  Confidence: 66.2%
+  Predicted Winner: home
+----------------------------------------
+AS Roma vs Cagliari Calcio
+  Liga: Serie A
+  Tarehe: 2026-10-27
+  Muda: 19:45
+  Confidence: 68.9%
+  Predicted Winner: home
+----------------------------------------
+Torino FC vs Como 1907
+  Liga: Serie A
+  Tarehe: 2026-10-27
+  Muda: 19:45
+  Confidence: 57.8%
+  Predicted Winner: away
+----------------------------------------
+CR Vasco da Gama vs CR Flamengo
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-28
+  Muda: 00:00
+  Confidence: 53.7%
+  Predicted Winner: away
+----------------------------------------
+RB Bragantino vs Chapecoense AF
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-28
+  Muda: 00:00
+  Confidence: 62.2%
+  Predicted Winner: home
+----------------------------------------
+Fluminense FC vs SC Internacional
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-10-28
+  Muda: 00:00
+  Confidence: 54.1%
+  Predicted Winner: home
+----------------------------------------
+Venezia FC vs FC Internazionale Milano
+  Liga: Serie A
+  Tarehe: 2026-10-28
+  Muda: 17:30
+  Confidence: 83.7%
+  Predicted Winner: away
+----------------------------------------
+Genoa CFC vs Juventus FC
+  Liga: Serie A
+  Tarehe: 2026-10-28
+  Muda: 19:45
+  Confidence: 56.1%
+  Predicted Winner: away
+----------------------------------------
+AC Monza vs SSC Napoli
+  Liga: Serie A
+  Tarehe: 2026-10-28
+  Muda: 19:45
+  Confidence: 70.7%
+  Predicted Winner: away
+----------------------------------------
+Le Havre AC vs Paris Saint-Germain FC
+  Liga: Ligue 1
+  Tarehe: 2026-10-30
+  Muda: 18:00
+  Confidence: 72.7%
+  Predicted Winner: away
+----------------------------------------
+Bayer 04 Leverkusen vs VfB Stuttgart
+  Liga: Bundesliga
+  Tarehe: 2026-10-31
+  Muda: 00:00
+  Confidence: 52.2%
+  Predicted Winner: home
+----------------------------------------
+FC Bayern München vs Borussia Dortmund
+  Liga: Bundesliga
+  Tarehe: 2026-10-31
+  Muda: 00:00
+  Confidence: 67.7%
+  Predicted Winner: home
+----------------------------------------
+Eintracht Frankfurt vs Hamburger SV
+  Liga: Bundesliga
+  Tarehe: 2026-10-31
+  Muda: 00:00
+  Confidence: 58.2%
+  Predicted Winner: home
+----------------------------------------
+Norwich City FC vs Watford FC
+  Liga: Championship
+  Tarehe: 2026-10-31
+  Muda: 12:30
+  Confidence: 56.8%
+  Predicted Winner: home
+----------------------------------------
+Bologna FC 1909 vs AC Monza
+  Liga: Serie A
+  Tarehe: 2026-10-31
+  Muda: 14:00
+  Confidence: 66.7%
+  Predicted Winner: home
+----------------------------------------
+Wolverhampton Wanderers FC vs Cardiff City FC
+  Liga: Championship
+  Tarehe: 2026-10-31
+  Muda: 15:00
+  Confidence: 60.2%
+  Predicted Winner: home
+----------------------------------------
+Southampton FC vs Queens Park Rangers FC
+  Liga: Championship
+  Tarehe: 2026-10-31
+  Muda: 15:00
+  Confidence: 67.0%
+  Predicted Winner: home
+----------------------------------------
+Burnley FC vs Portsmouth FC
+  Liga: Championship
+  Tarehe: 2026-10-31
+  Muda: 15:00
+  Confidence: 57.8%
+  Predicted Winner: home
+----------------------------------------
+Middlesbrough FC vs Charlton Athletic FC
+  Liga: Championship
+  Tarehe: 2026-10-31
+  Muda: 15:00
+  Confidence: 59.4%
+  Predicted Winner: home
+----------------------------------------
+West Ham United FC vs West Bromwich Albion FC
+  Liga: Championship
+  Tarehe: 2026-10-31
+  Muda: 15:00
+  Confidence: 54.6%
+  Predicted Winner: home
+----------------------------------------
+Manchester City FC vs Brighton & Hove Albion FC
+  Liga: Premier League
+  Tarehe: 2026-10-31
+  Muda: 15:00
+  Confidence: 62.0%
+  Predicted Winner: home
+----------------------------------------
+Hull City AFC vs Ipswich Town FC
+  Liga: Premier League
+  Tarehe: 2026-10-31
+  Muda: 15:00
+  Confidence: 61.0%
+  Predicted Winner: home
+----------------------------------------
+Udinese Calcio vs AS Roma
+  Liga: Serie A
+  Tarehe: 2026-10-31
+  Muda: 17:00
+  Confidence: 60.0%
+  Predicted Winner: away
+----------------------------------------
+Olympique Lyonnais vs Angers SCO
+  Liga: Ligue 1
+  Tarehe: 2026-10-31
+  Muda: 19:45
+  Confidence: 63.5%
+  Predicted Winner: home
+----------------------------------------
+AC Milan vs FC Internazionale Milano
+  Liga: Serie A
+  Tarehe: 2026-10-31
+  Muda: 19:45
+  Confidence: 57.4%
+  Predicted Winner: away
+----------------------------------------
+Real Betis Balompié vs Málaga CF
+  Liga: La Liga
+  Tarehe: 2026-11-01
+  Muda: 00:00
+  Confidence: 64.3%
+  Predicted Winner: home
+----------------------------------------
+Villarreal CF vs RCD Espanyol de Barcelona
+  Liga: La Liga
+  Tarehe: 2026-11-01
+  Muda: 00:00
+  Confidence: 64.4%
+  Predicted Winner: home
+----------------------------------------
+Levante UD vs Club Atlético de Madrid
+  Liga: La Liga
+  Tarehe: 2026-11-01
+  Muda: 00:00
+  Confidence: 50.7%
+  Predicted Winner: away
+----------------------------------------
+RC Deportivo La Coruña vs CA Osasuna
+  Liga: La Liga
+  Tarehe: 2026-11-01
+  Muda: 00:00
+  Confidence: 52.4%
+  Predicted Winner: home
+----------------------------------------
+FC Barcelona vs Deportivo Alavés
+  Liga: La Liga
+  Tarehe: 2026-11-01
+  Muda: 00:00
+  Confidence: 82.9%
+  Predicted Winner: home
+----------------------------------------
+Real Racing Club de Santander vs Real Madrid CF
+  Liga: La Liga
+  Tarehe: 2026-11-01
+  Muda: 00:00
+  Confidence: 70.3%
+  Predicted Winner: away
+----------------------------------------
+Como 1907 vs Venezia FC
+  Liga: Serie A
+  Tarehe: 2026-11-01
+  Muda: 11:30
+  Confidence: 78.2%
+  Predicted Winner: home
+----------------------------------------
+RC Strasbourg Alsace vs AJ Auxerre
+  Liga: Ligue 1
+  Tarehe: 2026-11-01
+  Muda: 14:00
+  Confidence: 53.2%
+  Predicted Winner: home
+----------------------------------------
+SS Lazio vs Cagliari Calcio
+  Liga: Serie A
+  Tarehe: 2026-11-01
+  Muda: 14:00
+  Confidence: 52.4%
+  Predicted Winner: home
+----------------------------------------
+Olympique de Marseille vs Toulouse FC
+  Liga: Ligue 1
+  Tarehe: 2026-11-01
+  Muda: 19:45
+  Confidence: 53.4%
+  Predicted Winner: home
+----------------------------------------
+Atalanta BC vs Parma Calcio 1913
+  Liga: Serie A
+  Tarehe: 2026-11-02
+  Muda: 19:45
+  Confidence: 62.3%
+  Predicted Winner: home
+----------------------------------------
+FK Shakhtar Donetsk vs Sporting Clube de Portugal
+  Liga: UEFA Champions League
+  Tarehe: 2026-11-03
+  Muda: 17:45
+  Confidence: 58.2%
+  Predicted Winner: away
+----------------------------------------
+Club Atlético de Madrid vs FC Bayern München
+  Liga: UEFA Champions League
+  Tarehe: 2026-11-03
+  Muda: 20:00
+  Confidence: 59.5%
+  Predicted Winner: away
+----------------------------------------
+Villarreal CF vs Paris Saint-Germain FC
+  Liga: UEFA Champions League
+  Tarehe: 2026-11-03
+  Muda: 20:00
+  Confidence: 86.0%
+  Predicted Winner: away
+----------------------------------------
+LASK Linz vs ŠK Slovan Bratislava
+  Liga: UEFA Champions League
+  Tarehe: 2026-11-03
+  Muda: 20:00
+  Confidence: 68.8%
+  Predicted Winner: home
+----------------------------------------
+Feyenoord Rotterdam vs FC Internazionale Milano
+  Liga: UEFA Champions League
+  Tarehe: 2026-11-03
+  Muda: 20:00
+  Confidence: 54.4%
+  Predicted Winner: away
+----------------------------------------
+FC Barcelona vs Aston Villa FC
+  Liga: UEFA Champions League
+  Tarehe: 2026-11-03
+  Muda: 20:00
+  Confidence: 62.6%
+  Predicted Winner: home
+----------------------------------------
+Cruzeiro EC vs EC Bahia
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-11-04
+  Muda: 00:00
+  Confidence: 50.1%
+  Predicted Winner: home
+----------------------------------------
+SE Palmeiras vs Clube do Remo
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-11-04
+  Muda: 00:00
+  Confidence: 76.2%
+  Predicted Winner: home
+----------------------------------------
+CR Flamengo vs Grêmio FBPA
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-11-04
+  Muda: 00:00
+  Confidence: 72.7%
+  Predicted Winner: home
+----------------------------------------
+Botafogo FR vs CA Mineiro
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-11-04
+  Muda: 00:00
+  Confidence: 50.6%
+  Predicted Winner: home
+----------------------------------------
+CA Paranaense vs CR Vasco da Gama
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-11-04
+  Muda: 00:00
+  Confidence: 56.6%
+  Predicted Winner: home
+----------------------------------------
+SC Internacional vs Coritiba FBC
+  Liga: Campeonato Brasileiro Série A
+  Tarehe: 2026-11-04
+  Muda: 00:00
+  Confidence: 55.1%
+  Predicted Winner: home
+----------------------------------------
+PAE AEK vs Real Madrid CF
+  Liga: UEFA Champions League
+  Tarehe: 2026-11-04
+  Muda: 17:45
+  Confidence: 62.6%
+  Predicted Winner: away
+----------------------------------------
+Fenerbahçe SK vs Liverpool FC
+  Liga: UEFA Champions League
+  Tarehe: 2026-11-04
+  Muda: 17:45
+  Confidence: 56.7%
+  Predicted Winner: away
+----------------------------------------
+Cardiff City FC vs West Ham United FC
+  Liga: Championship
+  Tarehe: 2026-11-04
+  Muda: 19:45
+  Confidence: 53.6%
+  Predicted Winner: away
+----------------------------------------
+Borussia Dortmund vs Real Betis Balompié
+  Liga: UEFA Champions League
+  Tarehe: 2026-11-04
+  Muda: 20:00
+  Confidence: 65.3%
+  Predicted Winner: home
+----------------------------------------
+PSV vs Club Brugge KV
+  Liga: UEFA Champions League
+  Tarehe: 2026-11-04
+  Muda: 20:00
+  Confidence: 54.6%
+  Predicted Winner: home
+----------------------------------------
+FC Porto vs SSC Napoli
+  Liga: UEFA Champions League
+  Tarehe: 2026-11-04
+  Muda: 20:00
+  Confidence: 53.0%
+  Predicted Winner: home
+----------------------------------------
+Viking FK vs Sabah FK
+  Liga: UEFA Champions League
+  Tarehe: 2026-11-04
+  Muda: 20:00
+  Confidence: 50.8%
+  Predicted Winner: home
+----------------------------------------
+SK Slavia Praha vs Arsenal FC
+  Liga: UEFA Champions League
+  Tarehe: 2026-11-04
+  Muda: 20:00
+  Confidence: 87.6%
+  Predicted Winner: away
+----------------------------------------
+RB Leipzig vs Manchester City FC
+  Liga: UEFA Champions League
+  Tarehe: 2026-11-04
+  Muda: 20:00
+  Confidence: 60.2%
+  Predicted Winner: away
+----------------------------------------
