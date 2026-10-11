@@ -163,11 +163,11 @@ export default function HomePage() {
               </button>
               <button
                 type="button"
-                aria-label="Go to Leagues"
-                onClick={() => router.push("/leagues")}
+                aria-label="Go to Tips"
+                onClick={() => router.push("/tips")}
                 className="relative w-8 h-8 rounded-lg bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors flex-shrink-0"
               >
-                <UsersRound size={18} style={{ color: "#FF6B6B" }} />
+                <Trophy size={18} style={{ color: "#FFD700" }} />
               </button>
               <button
                 type="button"
