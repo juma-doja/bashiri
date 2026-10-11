@@ -16,6 +16,106 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
 
 
+class PredictionLeague(models.Model):
+    name = models.CharField(max_length=60)
+    description = models.CharField(max_length=280, blank=True, default="")
+    invite_code = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="owned_prediction_leagues",
+    )
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    ends_at = models.DateTimeField(db_index=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+
+    class Meta:
+        db_table = "gamification_predictionleague"
+        ordering = ["-created_at"]
+
+    @property
+    def is_open(self):
+        return self.is_active and self.ends_at > timezone.now()
+
+    def __str__(self):
+        return self.name
+
+
+class PredictionLeagueMember(models.Model):
+    league = models.ForeignKey(
+        PredictionLeague,
+        on_delete=models.CASCADE,
+        related_name="members",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="prediction_league_memberships",
+    )
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "gamification_predictionleaguemember"
+        ordering = ["joined_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["league", "user"],
+                name="unique_prediction_league_member",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user} in {self.league}"
+
+
+class LeaguePick(models.Model):
+    STATUS_CHOICES = [
+        ("PENDING", "Pending"),
+        ("CORRECT", "Correct"),
+        ("INCORRECT", "Incorrect"),
+        ("VOID", "Void"),
+    ]
+
+    member = models.ForeignKey(
+        PredictionLeagueMember,
+        on_delete=models.CASCADE,
+        related_name="picks",
+    )
+    match = models.ForeignKey(
+        "predictions.Match",
+        on_delete=models.CASCADE,
+        related_name="league_picks",
+    )
+    market_key = models.CharField(max_length=50)
+    selection_key = models.CharField(max_length=50)
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default="PENDING",
+        db_index=True,
+    )
+    points = models.PositiveSmallIntegerField(default=0)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    settled_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "gamification_leaguepick"
+        ordering = ["-submitted_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["member", "match"],
+                name="unique_league_pick_per_match",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["match", "status"]),
+            models.Index(fields=["member", "status"]),
+        ]
+
+    def __str__(self):
+        return f"{self.member.user} · {self.match} · {self.selection_key}"
+
+
 class UserAchievement(models.Model):
     """Badges and achievements earned by users"""
     ACHIEVEMENT_TYPES = [

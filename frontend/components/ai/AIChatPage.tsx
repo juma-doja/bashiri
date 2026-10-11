@@ -1,37 +1,93 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { sendChatMessage } from "@/lib/api/chat";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { getChatHistory, sendChatFeedback, sendChatMessage } from "@/lib/api/chat";
 import { AIHeader } from "./AIHeader";
 import { MessageList, Message } from "./MessageList";
 import { AIComposer } from "./AIComposer";
 import { EmptyState } from "./EmptyState";
-import { ContextChips } from "./ContextChips";
 import { X } from "lucide-react";
+import { useAuthStore } from "@/stores/auth.store";
 
 export function AIChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadedHistoryScope, setLoadedHistoryScope] = useState<string | null>(null);
+  const [historyError, setHistoryError] = useState("");
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [sessionKey, setSessionKey] = useState<string | undefined>();
   const [lastMatchContext, setLastMatchContext] = useState<{id: number, label: string} | null>(null);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const access = useAuthStore((state) => state.access);
+  const userId = useAuthStore((state) => state.user?.id);
+  const sessionReady = !!access || !!sessionKey;
+  const historyScope = access ? `user:${userId ?? "authenticated"}` : sessionKey ? `guest:${sessionKey}` : null;
+  const historyReady = historyScope !== null && loadedHistoryScope === historyScope;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = useCallback(() => {
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    });
+  }, []);
+
+  useEffect(() => {
+    if (access) return;
+    try {
+      const storedSession = window.localStorage.getItem("bashiri-ai-session");
+      const key = storedSession || crypto.randomUUID();
+      if (!storedSession) window.localStorage.setItem("bashiri-ai-session", key);
+      setSessionKey(key);
+    } catch (error) {
+      console.error("Could not persist the Bashiri AI guest session:", error);
+      setSessionKey(crypto.randomUUID());
+    }
+  }, [access]);
+
+  useEffect(() => {
+    if (!historyScope) return;
+    let active = true;
+    getChatHistory(sessionKey)
+      .then((data) => {
+        if (!active) return;
+        if (data.session_key && !access) {
+          setSessionKey(data.session_key);
+          try {
+            window.localStorage.setItem("bashiri-ai-session", data.session_key);
+          } catch (error) {
+            console.error("Could not persist the Bashiri AI guest session:", error);
+          }
+        }
+        setMessages(data.messages.map((message) => ({
+          ...message,
+          toolResult: message.tool_result,
+          timestamp: new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        })));
+        setRemaining(data.remaining_today);
+        setHistoryError("");
+      })
+      .catch((error: unknown) => {
+        if (active) setHistoryError(error instanceof Error ? error.message : "Historia ya mazungumzo halikupatikana.");
+      })
+      .finally(() => {
+        if (active) setLoadedHistoryScope(historyScope);
+      });
+    return () => {
+      active = false;
+    };
+  }, [access, historyScope, sessionKey]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
-  }, [messages, loading]);
+  }, [messages, loading, scrollToBottom]);
 
   // Keyboard detection
   useEffect(() => {
     const handleResize = () => {
-      const viewportHeight = window.innerHeight;
-      const isSmallViewport = viewportHeight < 500;
-      setIsKeyboardOpen(isSmallViewport);
-      
-      // Auto-scroll when keyboard opens/closes
+      const visualHeight = window.visualViewport?.height ?? window.innerHeight;
+      setIsKeyboardOpen(window.innerHeight - visualHeight > 140);
       if (messages.length > 0) {
         scrollToBottom();
       }
@@ -39,43 +95,46 @@ export function AIChatPage() {
 
     window.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', handleResize);
-    
-    // Initial check
+    window.visualViewport?.addEventListener("resize", handleResize);
     handleResize();
 
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
+      window.visualViewport?.removeEventListener("resize", handleResize);
     };
-  }, [messages.length]);
+  }, [messages.length, scrollToBottom]);
 
-  const scrollToBottom = () => {
-    // Use setTimeout to ensure DOM has updated
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-    }, 100);
-  };
-
-  async function handleSend() {
-    if (!input.trim()) return;
+  async function handleSend(messageText = input) {
+    const trimmedMessage = messageText.trim();
+    if (!trimmedMessage || loading || !sessionReady || !historyReady) return;
     
     const userMessage: Message = {
       role: "user",
-      content: input,
+      content: trimmedMessage,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
     
     setMessages((prev) => [...prev, userMessage]);
-    setInput("");
+    if (messageText === input) setInput("");
     setLoading(true);
     
     try {
-      const data = await sendChatMessage(input);
+      const data = await sendChatMessage(trimmedMessage, sessionKey);
+      if (data.session_key && !access) {
+        setSessionKey(data.session_key);
+        try {
+          window.localStorage.setItem("bashiri-ai-session", data.session_key);
+        } catch (error) {
+          console.error("Could not persist the Bashiri AI guest session:", error);
+        }
+      }
       const aiMessage: Message = {
         role: "assistant",
         content: data.reply,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         toolResult: data.tool_result,
+        id: data.message_id,
       };
       setMessages((prev) => [...prev, aiMessage]);
       setRemaining(data.remaining_today);
@@ -92,11 +151,13 @@ export function AIChatPage() {
           id: firstMatch.id,
           label: `${firstMatch.home_team} vs ${firstMatch.away_team}`,
         });
+      } else if (data.tool_result?.tool_name === "app_help") {
+        setLastMatchContext(null);
       }
     } catch (e: unknown) {
       const errorMessage: Message = {
         role: "assistant",
-        content: e instanceof Error ? e.message : "Something went wrong. Please try again.",
+        content: e instanceof Error ? e.message : "Imeshindikana kupata jibu. Tafadhali jaribu tena.",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -106,17 +167,12 @@ export function AIChatPage() {
   }
 
   const handleSuggestionClick = (suggestion: string) => {
-    setInput(suggestion);
-    // Auto-send the suggestion immediately
-    setTimeout(() => {
-      handleSend();
-    }, 100);
+    void handleSend(suggestion);
   };
 
   const handleHelpful = async (messageId: number) => {
     try {
-      // TODO: Call feedback API endpoint with "positive"
-      console.log(`Positive feedback for message ${messageId}`);
+      await sendChatFeedback(messageId, "positive", sessionKey);
     } catch (e) {
       console.error("Failed to submit feedback", e);
     }
@@ -124,8 +180,7 @@ export function AIChatPage() {
 
   const handleNotHelpful = async (messageId: number) => {
     try {
-      // TODO: Call feedback API endpoint with "negative"
-      console.log(`Negative feedback for message ${messageId}`);
+      await sendChatFeedback(messageId, "negative", sessionKey);
     } catch (e) {
       console.error("Failed to submit feedback", e);
     }
@@ -142,7 +197,7 @@ export function AIChatPage() {
       {/* Messages Area */}
       <div 
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto scroll-smooth"
+        className="min-h-0 flex-1 overflow-y-auto scroll-smooth"
         style={{
           paddingTop: '16px',
           paddingBottom: isKeyboardOpen ? '140px' : '100px',
@@ -150,7 +205,10 @@ export function AIChatPage() {
           paddingRight: '16px',
         }}
       >
-        {messages.length === 0 ? (
+        {historyError && <p role="status" className="mx-auto mb-4 max-w-3xl rounded-xl border border-amber-300/15 bg-amber-300/[0.05] px-4 py-3 text-xs text-amber-100/70">{historyError}</p>}
+        {!historyReady ? (
+          <p role="status" className="py-8 text-center text-xs text-white/45">Inapakia mazungumzo yako…</p>
+        ) : messages.length === 0 ? (
           <EmptyState onSuggestionClick={handleSuggestionClick} />
         ) : (
           <>
@@ -191,9 +249,9 @@ export function AIChatPage() {
         <AIComposer
           value={input}
           onChange={setInput}
-          onSend={handleSend}
+          onSend={() => void handleSend()}
           isLoading={loading}
-          disabled={loading}
+          disabled={loading || !historyReady}
         />
       </div>
     </div>

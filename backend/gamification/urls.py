@@ -7,7 +7,8 @@ from django.urls import path
 from .views import (
     UserProgressView, GenerateReferralCodeView, ValidateReferralView, CompleteReferralView,
     SocialShareView, DailyChallengesView, JoinChallengeView, UpdateChallengeProgressView,
-    AchievementListView
+    AchievementListView, PredictionLeagueListCreateView, JoinPredictionLeagueView,
+    PredictionLeagueDetailView, PredictionLeaguePickListCreateView,
 )
 
 app_name = 'gamification'
@@ -29,4 +30,10 @@ urlpatterns = [
     path('challenges/', DailyChallengesView.as_view(), name='daily_challenges'),
     path('challenges/join/', JoinChallengeView.as_view(), name='join_challenge'),
     path('challenges/update/', UpdateChallengeProgressView.as_view(), name='update_challenge'),
+
+    # Friends' prediction leagues
+    path('leagues/', PredictionLeagueListCreateView.as_view(), name='league-list-create'),
+    path('leagues/join/', JoinPredictionLeagueView.as_view(), name='league-join'),
+    path('leagues/<str:invite_code>/', PredictionLeagueDetailView.as_view(), name='league-detail'),
+    path('leagues/<str:invite_code>/picks/', PredictionLeaguePickListCreateView.as_view(), name='league-picks'),
 ]

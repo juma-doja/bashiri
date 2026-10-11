@@ -24,7 +24,7 @@ export function AIHeader({ remaining }: AIHeaderProps) {
     >
       {/* Back Button */}
       <button
-        onClick={() => router.back()}
+        onClick={() => router.push("/home")}
         className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all"
         style={{
           background: "var(--surface)",
@@ -38,7 +38,7 @@ export function AIHeader({ remaining }: AIHeaderProps) {
           e.currentTarget.style.background = "var(--surface)";
           e.currentTarget.style.borderColor = "var(--border)";
         }}
-        aria-label="Go back"
+        aria-label="Rudi nyumbani"
       >
         <ArrowLeft size={20} style={{ color: "var(--text-primary)" }} />
       </button>
@@ -66,7 +66,7 @@ export function AIHeader({ remaining }: AIHeaderProps) {
           className="text-xs font-medium mt-0.5"
           style={{ color: "var(--text-secondary)" }}
         >
-          Football Prediction Intelligence
+          Msaidizi wa Bashiri
         </p>
       </div>
 
@@ -84,7 +84,7 @@ export function AIHeader({ remaining }: AIHeaderProps) {
             className="text-xs font-semibold"
             style={{ color: "var(--brand-primary)" }}
           >
-            {remaining} left
+            {remaining} yamebaki leo
           </span>
         </div>
       )}

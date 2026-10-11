@@ -14,12 +14,12 @@ export function useRequireAuth() {
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
   const openGate = useAuthGateStore((s) => s.open);
 
-  const requireAuth = useCallback((message?: string): boolean => {
+  const requireAuth = useCallback((message?: string, returnTo?: string): boolean => {
     // Wait for hydration before checking auth
     if (!hasHydrated) return false;
     if (access) return true;
     if (typeof window !== "undefined") {
-      saveReturnTo(window.location.pathname);
+      saveReturnTo(returnTo || window.location.pathname);
     }
     openGate(message);
     return false;

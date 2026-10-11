@@ -1,49 +1,80 @@
 "use client";
-import { X, ArrowRight, CheckCircle, TrendingUp, Target, BookOpen, Bookmark, Sparkles, Lock, Trophy } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+
+import { useCallback, useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Activity,
+  BarChart3,
+  BookOpen,
+  CheckCircle,
+  CircleHelp,
+  Share2,
+  Sparkles,
+  Target,
+  TrendingUp,
+  Trophy,
+  X,
+} from "lucide-react";
 
 interface PredictionTutorialProps {
   onClose: () => void;
 }
 
+const CONFIDENCE_GUIDE = [
+  ["80–100%", "Uhakika mkubwa sana"],
+  ["65–79%", "Uhakika mzuri"],
+  ["50–64%", "Wastani; angalia kwa makini"],
+  ["Chini ya 50%", "Uhakika mdogo"],
+];
+
 export function PredictionTutorial({ onClose }: PredictionTutorialProps) {
   const [isClosing, setIsClosing] = useState(false);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
+    if (isClosing) return;
     setIsClosing(true);
-    setTimeout(onClose, 600); // Wait for closing animation to complete
-  };
+    window.setTimeout(onClose, 600);
+  }, [isClosing, onClose]);
+
+  useEffect(() => {
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") handleClose();
+    }
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [handleClose]);
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div
+        className="fixed inset-0 z-[60] grid place-items-center bg-black/70 p-3 backdrop-blur-sm sm:p-6"
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) handleClose();
+        }}
+      >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="relative w-full max-w-md"
+          className="relative w-full max-w-2xl"
           style={{ perspective: "2000px" }}
         >
-          {/* Book Container */}
-          <motion.div
+          <motion.section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="prediction-tutorial-title"
             initial={{ rotateY: -90 }}
             animate={{ rotateY: isClosing ? -90 : 0 }}
             exit={{ rotateY: -90 }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
-            className="bg-[#111111] rounded-3xl max-h-[90vh] overflow-y-auto border border-white/10"
-            style={{
-              transformStyle: "preserve-3d",
-              transformOrigin: "left center",
-            }}
+            className="flex max-h-[calc(100dvh-1.5rem)] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#111111] sm:max-h-[calc(100dvh-3rem)]"
+            style={{ transformStyle: "preserve-3d", transformOrigin: "left center" }}
           >
-            {/* Book Spine Effect */}
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[var(--brand-primary)] via-[var(--brand-accent)] to-[var(--brand-primary)] rounded-l-3xl" />
-            
-            {/* Header */}
-            <div className="sticky top-0 bg-[#111111] border-b border-white/10 p-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
+            <div className="absolute bottom-0 left-0 top-0 z-10 w-1 rounded-l-3xl bg-gradient-to-b from-[var(--brand-primary)] via-[var(--brand-accent)] to-[var(--brand-primary)]" />
+
+            <header className="flex shrink-0 items-center justify-between border-b border-white/10 bg-[#111111] p-4 sm:p-5">
+              <div className="flex min-w-0 items-center gap-3">
                 <motion.div
                   initial={{ rotate: -180 }}
                   animate={{ rotate: 0 }}
@@ -51,218 +82,158 @@ export function PredictionTutorial({ onClose }: PredictionTutorialProps) {
                 >
                   <BookOpen size={24} className="text-[var(--brand-primary)]" />
                 </motion.div>
-                <motion.h2 
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4, duration: 0.4 }}
-                  className="text-xl font-semibold text-white"
-                >
-                  Jinsi ya Kutumia Bashiri
-                </motion.h2>
+                <div className="min-w-0">
+                  <motion.h2
+                    id="prediction-tutorial-title"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4, duration: 0.4 }}
+                    className="truncate text-lg font-semibold text-white sm:text-xl"
+                  >
+                    Mwongozo wa Bashiri
+                  </motion.h2>
+                  <p className="text-xs text-white/45">Jifunze prediction, matokeo na ligi</p>
+                </div>
               </div>
-              <motion.button 
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5, duration: 0.3 }}
-                onClick={handleClose} 
-                className="p-2 rounded-full hover:bg-white/10"
+              <button
+                type="button"
+                aria-label="Funga mwongozo"
+                onClick={handleClose}
+                className="ml-2 rounded-full p-2 text-white/60 transition hover:bg-white/10 hover:text-white"
               >
-                <X size={20} className="text-white/60" />
-              </motion.button>
-            </div>
+                <X size={20} />
+              </button>
+            </header>
 
-            {/* Content */}
-            <div className="p-5 space-y-5">
-              {/* Step 1 */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
+            <div
+              className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-4 pr-3 [scrollbar-color:rgba(255,255,255,0.24)_transparent] [scrollbar-width:thin] sm:space-y-5 sm:p-6"
+              style={{ WebkitOverflowScrolling: "touch" }}
+            >
+              <motion.section
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.4 }}
+                className="rounded-2xl bg-white/5 p-4 sm:p-5"
+              >
+                <div className="mb-3 flex items-center gap-3">
+                  <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--brand-primary)] text-black"><Sparkles size={19} /></span>
+                  <h3 className="font-semibold text-white">1. AI inakadiria nini?</h3>
+                </div>
+                <p className="text-sm leading-relaxed text-white/70">
+                  Bashiri hutumia modeli ya adaptive Poisson na takwimu za timu/mechi zilizopo kukadiria matokeo yanayowezekana. Markets nyingi hutokana na score matrix hiyo hiyo. Asilimia ni uwezekano uliokadiriwa na modeli—si ahadi, uhakika wa matokeo, wala pendekezo la kuweka pesa.
+                </p>
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                  {CONFIDENCE_GUIDE.map(([range, label]) => (
+                    <div key={range} className="flex items-center gap-2 rounded-xl bg-black/20 px-3 py-2 text-xs text-white/65">
+                      <CheckCircle size={14} className="shrink-0 text-green-400" />
+                      <span><strong className="text-white">{range}</strong> · {label}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-3 text-xs leading-relaxed text-white/45">
+                  Confidence inaonyesha nguvu ya ishara ya modeli, si uwezekano wa kushinda kwa uhakika. Top Pick huonyesha chaguo linaloongoza kwa mechi; wakati mwingine hakuna ishara iliyo imara vya kutosha.
+                </p>
+              </motion.section>
+
+              <motion.section
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+                className="rounded-2xl bg-white/5 p-4 sm:p-5"
+              >
+                <div className="mb-3 flex items-center gap-3">
+                  <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--brand-primary)] text-black"><TrendingUp size={19} /></span>
+                  <h3 className="font-semibold text-white">2. Markets na selections</h3>
+                </div>
+                <p className="text-sm leading-relaxed text-white/70">
+                  Market ni swali kuhusu mechi; selection ni jibu unalochagua. Sio kila market inapatikana kwa kila mechi—tumia zilizoonyeshwa kwenye app.
+                </p>
+                <ul className="mt-3 space-y-2 text-sm leading-relaxed text-white/60">
+                  <li><strong className="text-white">1X2:</strong> ushindi wa timu ya nyumbani (1), sare (X), au ushindi wa ugenini (2).</li>
+                  <li><strong className="text-white">Double Chance:</strong> unachagua matokeo mawili kati ya matatu.</li>
+                  <li><strong className="text-white">Over/Under:</strong> jumla ya magoli iwe juu au chini ya mstari ulioonyeshwa.</li>
+                  <li><strong className="text-white">BTTS:</strong> je, timu zote mbili zitafunga? Markets nyingine zinaweza kujumuisha magoli ya timu moja au score halisi.</li>
+                </ul>
+              </motion.section>
+
+              <motion.section
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.4 }}
+                className="rounded-2xl bg-white/5 p-4 sm:p-5"
+              >
+                <div className="mb-3 flex items-center gap-3">
+                  <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--brand-primary)] text-black"><Target size={19} /></span>
+                  <h3 className="font-semibold text-white">3. Hifadhi na fuatilia</h3>
+                </div>
+                <p className="text-sm leading-relaxed text-white/70">
+                  Tumia alama ya bookmark kwenye mechi au market inapopatikana ili urudi kuiona. Mechi ikiisha, Bashiri hulinganisha pick na score ya mwisho; iliyosubiri bado haijatatuliwa, na mechi iliyofutwa au kuahirishwa inaweza kuhesabiwa void. Angalia takwimu za matokeo kwa kipindi na market husika—historia si dhamana ya matokeo yajayo.
+                </p>
+                <div className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-white/50">
+                  <BarChart3 size={15} className="mt-0.5 shrink-0 text-[var(--brand-primary)]" />
+                  <span>Accuracy huhesabiwa kwenye picks zilizopata matokeo; picks pending na void si ushindi wala kushindwa.</span>
+                </div>
+              </motion.section>
+
+              <motion.section
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.4 }}
+                className="rounded-2xl bg-white/5 p-4 sm:p-5"
+              >
+                <div className="mb-3 flex items-center gap-3">
+                  <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--brand-primary)] text-black"><Trophy size={19} /></span>
+                  <h3 className="font-semibold text-white">4. Prediction Leagues</h3>
+                </div>
+                <p className="text-sm leading-relaxed text-white/70">
+                  Tengeneza ligi ya siku 7, 30 au 90, kisha shiriki invite link na marafiki. Kila mshiriki anaweza kuweka pick moja kwa mechi kabla ya kickoff. Pick sahihi hupata pointi 3; isiyo sahihi au void hupata 0. Jedwali husasishwa matokeo halisi yanapopatikana.
+                </p>
+              </motion.section>
+
+              <motion.section
+                initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.4 }}
-                className="bg-white/5 rounded-2xl p-5"
+                className="rounded-2xl bg-white/5 p-4 sm:p-5"
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-[var(--brand-primary)] flex items-center justify-center text-black font-semibold text-base">1</div>
-                  <h3 className="text-base font-semibold text-white">Angalia AI Predictions</h3>
-                  <Sparkles size={20} className="text-[var(--brand-primary)]" />
+                <div className="mb-3 flex items-center gap-3">
+                  <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--brand-primary)] text-black"><Share2 size={19} /></span>
+                  <h3 className="font-semibold text-white">5. Shiriki, jifunze, jadili</h3>
                 </div>
-                <p className="text-sm text-white/70 leading-relaxed mb-3">
-                  AI inatoa predictions kwa kila mechi kwa kutumia data ya kihistoria, form ya timu, na takwimu za H2H.
+                <p className="text-sm leading-relaxed text-white/70">
+                  Reels hukuwezesha kushiriki picha au video fupi za michezo na kuingiliana kupitia likes, comments na shares. Tumia maudhui haya kujadili mpira na kubadilishana mawazo; usichukulie post ya mtu kama uthibitisho wa matokeo.
                 </p>
-                <div className="flex items-center gap-2 text-sm text-white/50">
-                  <CheckCircle size={14} className="text-green-400" />
-                  <span>Uhakika wa 70%+ = High confidence</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-white/50">
-                  <CheckCircle size={14} className="text-green-400" />
-                  <span>Angalia Top Pick kwa prediction bora</span>
-                </div>
-              </motion.div>
+              </motion.section>
 
-              {/* Step 2 */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
+              <motion.section
+                initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7, duration: 0.4 }}
-                className="bg-white/5 rounded-2xl p-5"
+                className="rounded-2xl border border-[var(--brand-primary)]/20 bg-[var(--brand-primary)]/5 p-4 sm:p-5"
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-[var(--brand-primary)] flex items-center justify-center text-black font-semibold text-base">2</div>
-                  <h3 className="text-base font-semibold text-white">Elewa Markets</h3>
-                  <TrendingUp size={20} className="text-[var(--brand-primary)]" />
+                <div className="mb-3 flex items-center gap-3">
+                  <CircleHelp size={20} className="text-[var(--brand-primary)]" />
+                  <h3 className="font-semibold text-[var(--brand-primary)]">Kumbuka kucheza kwa uwajibikaji</h3>
                 </div>
-                <p className="text-sm text-white/70 leading-relaxed mb-3">
-                  Tunatoa markets mbalimbali kulingana na aina ya bet unayopenda. Chagua market unayoielewa.
-                </p>
-                <div className="flex items-center gap-2 text-sm text-white/50">
-                  <CheckCircle size={14} className="text-green-400" />
-                  <span>1X2 = Matokeo ya mechi (Home/Draw/Away)</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-white/50">
-                  <CheckCircle size={14} className="text-green-400" />
-                  <span>Over/Under = Jumla ya magoli</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-white/50">
-                  <CheckCircle size={14} className="text-green-400" />
-                  <span>BTTS = Timu zote kufunga</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-white/50">
-                  <CheckCircle size={14} className="text-green-400" />
-                  <span>Double Chance = Chansi mbili</span>
-                </div>
-              </motion.div>
-
-              {/* Step 3 */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8, duration: 0.4 }}
-                className="bg-white/5 rounded-2xl p-5"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-[var(--brand-primary)] flex items-center justify-center text-black font-semibold text-base">3</div>
-                  <h3 className="text-base font-semibold text-white">Hifadhi Markets</h3>
-                  <Bookmark size={20} className="text-[var(--brand-primary)]" />
-                </div>
-                <p className="text-sm text-white/70 leading-relaxed mb-3">
-                  Unaweza kuhifadhi markets unazopenda kwa ajili ya tracking rahisi baadaye.
-                </p>
-                <div className="flex items-center gap-2 text-sm text-white/50">
-                  <CheckCircle size={14} className="text-green-400" />
-                  <span>Gonga icon ya bookmark kuhifadhi</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-white/50">
-                  <CheckCircle size={14} className="text-green-400" />
-                  <span>Use &quot;Select Markets&quot; kwa uhifadhi wa wingi</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-white/50">
-                  <CheckCircle size={14} className="text-green-400" />
-                  <span>Angalia &quot;Saved Markets&quot; kwa markets yako</span>
-                </div>
-              </motion.div>
-
-              {/* Step 4 */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9, duration: 0.4 }}
-                className="bg-white/5 rounded-2xl p-5"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-[var(--brand-primary)] flex items-center justify-center text-black font-semibold text-base">4</div>
-                  <h3 className="text-base font-semibold text-white">Premium Features</h3>
-                  <Lock size={20} className="text-[var(--brand-primary)]" />
-                </div>
-                <p className="text-sm text-white/70 leading-relaxed mb-3">
-                  Kwa watumiaji wa PRO, unapata access zaidi na features za kipekee.
-                </p>
-                <div className="flex items-center gap-2 text-sm text-white/50">
-                  <CheckCircle size={14} className="text-green-400" />
-                  <span>Access kwa predictions zote</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-white/50">
-                  <CheckCircle size={14} className="text-green-400" />
-                  <span>Top picks na high confidence markets</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-white/50">
-                  <CheckCircle size={14} className="text-green-400" />
-                  <span>AI Performance Stats kwenye profile</span>
-                </div>
-              </motion.div>
-
-              {/* Step 5 */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.0, duration: 0.4 }}
-                className="bg-white/5 rounded-2xl p-5"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-[var(--brand-primary)] flex items-center justify-center text-black font-semibold text-base">5</div>
-                  <h3 className="text-base font-semibold text-white">Track Record</h3>
-                  <Trophy size={20} className="text-[var(--brand-primary)]" />
-                </div>
-                <p className="text-sm text-white/70 leading-relaxed mb-3">
-                  Angalia track record ya predictions za AI kujua accuracy yake.
-                </p>
-                <div className="flex items-center gap-2 text-sm text-white/50">
-                  <CheckCircle size={14} className="text-green-400" />
-                  <span>Weekly trend graph kwenye profile</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-white/50">
-                  <CheckCircle size={14} className="text-green-400" />
-                  <span>AI Performance Stats za kila siku</span>
-                </div>
-              </motion.div>
-
-              {/* Tips */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.1, duration: 0.4 }}
-                className="bg-[var(--brand-primary)]/5 rounded-2xl p-5 border border-[var(--brand-primary)]/20"
-              >
-                <h3 className="text-base font-semibold text-[var(--brand-primary)] mb-3">Tips za Kuweka Bets</h3>
-                <ul className="text-sm text-white/70 space-y-2 leading-relaxed">
-                  <li>• Usitume bets kulingana na predictions pekee</li>
-                  <li>• Angalia form ya timu na majeruhi kabla</li>
-                  <li>• Tumia predictions kama reference, sio uhakikishi</li>
-                  <li>• Daima bet kwa akili yako mwenyewe na risk unaweza</li>
-                  <li>• Fuatilia track record ya AI kujifunza patterns</li>
-                  <li>• Hifadhi markets unazopenda kwa tracking rahisi</li>
-                  <li>• Angalia Top Pick kwa prediction yenye confidence ya juu</li>
+                <ul className="space-y-2 text-sm leading-relaxed text-white/70">
+                  <li>• Utabiri ni makadirio tu; hakuna matokeo yanayohakikishwa.</li>
+                  <li>• Tumia Bashiri kwa taarifa na burudani—si ushauri wa kifedha au kamari.</li>
+                  <li>• Usikimbilie kufidia hasara, na usihatarishe pesa usizoweza kumudu kupoteza.</li>
+                  <li>• Unaweza kujifunza na kushiriki kwenye ligi bila kuweka pesa.</li>
                 </ul>
-              </motion.div>
-
-              {/* Disclaimer */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.2, duration: 0.4 }}
-                className="bg-red-500/5 rounded-2xl p-5 border border-red-500/20"
-              >
-                <h3 className="text-base font-semibold text-red-400 mb-3">Muhimu Kujua</h3>
-                <ul className="text-sm text-white/70 space-y-2 leading-relaxed">
-                  <li>• Predictions ni kwa burudani tu, sio ushauri wa kamari</li>
-                  <li>• Hakuna uhakikishi wa 100% katika betting</li>
-                  <li>• Bet kwa akili yako mwenyewe na kwa wajibu</li>
-                  <li>• Usibet pesa ambazo hauwezi kuipoteza</li>
-                </ul>
-              </motion.div>
+              </motion.section>
             </div>
 
-            {/* Footer */}
-            <div className="sticky bottom-0 bg-[#111111] border-t border-white/10 p-5">
-              <motion.button
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.3, duration: 0.4 }}
+            <footer className="shrink-0 border-t border-white/10 bg-[#111111] p-4 sm:p-5">
+              <button
+                type="button"
                 onClick={handleClose}
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-accent)] text-black font-semibold text-base"
+                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-accent)] font-semibold text-black transition hover:brightness-110"
               >
-                Nimeelewa, Nitaanza
-              </motion.button>
-            </div>
-          </motion.div>
+                Nimeelewa, endelea <Activity size={17} />
+              </button>
+            </footer>
+          </motion.section>
         </motion.div>
       </div>
     </AnimatePresence>

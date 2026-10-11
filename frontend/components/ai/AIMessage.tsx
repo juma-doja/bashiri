@@ -9,7 +9,6 @@ import { PredictionCard } from "./PredictionCard";
 import { TeamCard } from "./TeamCard";
 import { FormCard } from "./FormCard";
 import { MomentumIndicator } from "./MomentumIndicator";
-import { TeamComparisonCard } from "./TeamComparisonCard";
 import { ProbabilityVisualization } from "./ProbabilityVisualization";
 import { ConfidenceIndicator } from "./ConfidenceIndicator";
 import { FollowUpActions } from "./FollowUpActions";
@@ -74,8 +73,8 @@ export const AIMessage = memo(function AIMessage({ content, timestamp, state = "
         return (
           <div className="mt-4 space-y-3">
             <PredictionCard
-              prediction={data.data.prediction || "TBD"}
-              confidence={data.data.confidence || 50}
+              prediction={data.data.prediction ?? "Prediction haipatikani"}
+              confidence={data.data.confidence ?? 0}
               teams={{
                 home: data.data.home_team,
                 away: data.data.away_team,
@@ -87,16 +86,18 @@ export const AIMessage = memo(function AIMessage({ content, timestamp, state = "
                 title="Match Probability"
               />
             )}
-            <FollowUpActions
-              actions={[
-                {
-                  id: "dashboard",
-                  label: "Ona Dashboard Kamili",
-                  icon: null,
-                  onClick: () => router.push(`/create/${data.data.match_id}/predict`),
-                },
-              ]}
-            />
+            {data.data.match_id && (
+              <FollowUpActions
+                actions={[
+                  {
+                    id: "dashboard",
+                    label: "Ona Dashboard Kamili",
+                    icon: null,
+                    onClick: () => router.push(`/create/${data.data.match_id}/predict`),
+                  },
+                ]}
+              />
+            )}
           </div>
         );
 
@@ -105,9 +106,9 @@ export const AIMessage = memo(function AIMessage({ content, timestamp, state = "
           <div className="mt-4 space-y-3">
             <TeamCard
               teamName={data.data.team_name}
-              attack={data.data.attack || 50}
-              defense={data.data.defense || 50}
-              form={data.data.form || 50}
+              attack={data.data.attack ?? 50}
+              defense={data.data.defense ?? 50}
+              form={data.data.form ?? 50}
               recentResults={data.data.sequence?.split('') || []}
             />
             {data.data.sequence && (
@@ -128,21 +129,43 @@ export const AIMessage = memo(function AIMessage({ content, timestamp, state = "
 
       case "head_to_head":
         return (
-          <div className="mt-4">
-            <TeamComparisonCard
-              homeTeam={data.data.team1_name}
-              awayTeam={data.data.team2_name}
-              homeStats={{
-                attack: data.data.home_stats?.attack || 3,
-                defense: data.data.home_stats?.defense || 3,
-                form: data.data.home_stats?.form || 3,
-              }}
-              awayStats={{
-                attack: data.data.away_stats?.attack || 3,
-                defense: data.data.away_stats?.defense || 3,
-                form: data.data.away_stats?.form || 3,
-              }}
-            />
+          <div className="mt-4 space-y-2">
+            {data.data.matches?.length ? data.data.matches.map((match: any, index: number) => (
+              <div key={`${match.date}-${index}`} className="rounded-xl border p-3 text-xs" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="min-w-0 truncate text-white/75">{match.home_team} vs {match.away_team}</span>
+                  <strong className="shrink-0 text-[var(--brand-primary)]">{match.home_score} - {match.away_score}</strong>
+                </div>
+                <p className="mt-1 text-[10px] text-white/40">{match.date}</p>
+              </div>
+            )) : (
+              <p className="rounded-xl border p-3 text-xs text-white/55" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+                Hakuna historia ya mechi za ana kwa ana iliyopatikana.
+              </p>
+            )}
+          </div>
+        );
+
+      case "app_help":
+        return (
+          <div className="mt-4 space-y-2">
+            {data.data.features?.length ? data.data.features.map((feature: any) => (
+              <button
+                key={feature.route}
+                type="button"
+                onClick={() => router.push(feature.route)}
+                className="w-full rounded-xl border p-3 text-left transition hover:border-amber-300/30"
+                style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+              >
+                <span className="block text-sm font-semibold text-white">{feature.name}</span>
+                <span className="mt-1 block text-xs leading-relaxed text-white/55">{feature.description}</span>
+                <span className="mt-2 block text-[10px] font-bold text-[var(--brand-primary)]">Fungua sehemu hii →</span>
+              </button>
+            )) : (
+              <p className="rounded-xl border p-3 text-xs text-white/55" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+                Sijapata kipengele kinacholingana. Uliza kwa jina la sehemu, mfano: ligi, reels, mechi, tips au saved markets.
+              </p>
+            )}
           </div>
         );
 
@@ -174,18 +197,20 @@ export const AIMessage = memo(function AIMessage({ content, timestamp, state = "
         return (
           <div className="mt-4 space-y-3">
             {data.data.derbies.map((derby: any) => (
-              <div
+              <button
                 key={derby.id}
+                type="button"
+                disabled={!derby.match_id}
                 className="p-4 rounded-2xl border cursor-pointer transition-all hover:border-opacity-50 w-full overflow-hidden"
                 style={{ background: "var(--surface)", borderColor: derby.theme_accent_color || "var(--border)" }}
-                onClick={() => router.push(`/create/${derby.match_id}/predict`)}
+                onClick={() => derby.match_id && router.push(`/create/${derby.match_id}/predict`)}
               >
                 <h3 className="font-bold text-sm mb-2 truncate" style={{ color: "var(--text-primary)" }} title={derby.derby_name}>{derby.derby_name}</h3>
                 <div className="flex items-center justify-between text-sm gap-2">
                   <span className="truncate" style={{ color: "var(--text-secondary)" }} title={`${derby.home_team} vs ${derby.away_team}`}>{derby.home_team} vs {derby.away_team}</span>
-                  <span className="font-bold flex-shrink-0" style={{ color: "var(--brand-primary)" }}>→</span>
+                  {derby.match_id && <span className="font-bold flex-shrink-0" style={{ color: "var(--brand-primary)" }}>→</span>}
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         );
@@ -198,7 +223,7 @@ export const AIMessage = memo(function AIMessage({ content, timestamp, state = "
                 key={match.id}
                 className="p-4 rounded-2xl border cursor-pointer transition-all w-full overflow-hidden"
                 style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-                onClick={() => router.push(`/create/${match.id}/predict`)}
+                onClick={() => router.push(match.status === "SCHEDULED" ? `/create/${match.id}/predict` : `/match/${match.id}/overview`)}
               >
                 <div className="flex items-center justify-between mb-2 gap-2">
                   <div className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }} title={`${match.home_team} vs ${match.away_team}`}>
@@ -309,7 +334,7 @@ export const AIMessage = memo(function AIMessage({ content, timestamp, state = "
           </div>
           <MessageActions onCopy={handleCopy} />
           <MessageToolbar 
-            show={showActions && state === "complete"} 
+            show={showActions && state === "complete" && messageId != null}
             onHelpful={handleHelpful}
             onNotHelpful={handleNotHelpful}
           />

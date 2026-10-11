@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Trophy, BarChart3, Target, Flame, Zap } from "lucide-react";
+import { Trophy, BarChart3, Flame, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface EmptyStateProps {
@@ -26,17 +26,17 @@ interface SuggestionCategory {
 const QUICK_ACTIONS: QuickActionCard[] = [
   {
     id: "predict",
-    title: "Fanya Prediction",
+    title: "Fanya prediction",
     icon: <Trophy size={24} style={{ color: "var(--brand-primary)" }} />,
     route: "/create",
-    description: "Pata prediction ya mechi",
+    description: "Fungua mechi uone uchambuzi wa AI",
   },
   {
     id: "track-record",
-    title: "Track Record",
+    title: "AI Track Record",
     icon: <BarChart3 size={24} style={{ color: "var(--brand-accent)" }} />,
     route: "/track-record",
-    description: "Ona utendaji wa AI",
+    description: "Angalia matokeo ya AI",
   },
   {
     id: "derby",
@@ -57,23 +57,23 @@ const QUICK_ACTIONS: QuickActionCard[] = [
 const CATEGORIES: SuggestionCategory[] = [
   {
     icon: <Trophy size={20} style={{ color: "var(--brand-primary)" }} />,
-    title: "Match Predictions",
-    description: "Get AI-powered match predictions",
+    title: "Mechi na predictions",
+    description: "Uliza kuhusu mechi na utabiri wa AI",
     suggestions: [
-      "Nani atashinda mechi kubwa ya leo?",
-      "Onesha Bashiri Track Record ya wiki hii",
-      "Kuna Derby wiki hii?",
-      "Simba wamekuwaje msimu huu?",
+      "Nisaidie kupata prediction ya mechi ya leo",
+      "Nionyeshe AI Track Record",
+      "Kuna Derby gani zinazoendelea?",
+      "Simba wamekuwaje kwenye mechi zao za karibuni?",
     ],
   },
   {
     icon: <BarChart3 size={20} style={{ color: "var(--warning)" }} />,
-    title: "Team Analysis",
-    description: "Deep dive into team performance",
+    title: "Uchambuzi wa timu",
+    description: "Uliza kuhusu form, timu na historia ya mechi",
     suggestions: [
-      "Analyze Manchester United's form",
-      "Compare Arsenal and Liverpool",
-      "Evaluate Tottenham's defense",
+      "Form ya Manchester United ikoje?",
+      "Nionyeshe head-to-head ya Arsenal na Liverpool",
+      "Mechi zijazo za Tottenham ni zipi?",
     ],
   },
 ];
@@ -104,7 +104,7 @@ export function EmptyState({ onSuggestionClick }: EmptyStateProps) {
         className="text-sm mb-6 max-w-sm"
         style={{ color: "var(--text-secondary)" }}
       >
-        Your premium football intelligence companion
+        Msaidizi wako wa soka na Bashiri app
       </p>
 
       {/* Quick Action Cards */}

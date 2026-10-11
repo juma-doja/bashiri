@@ -1,10 +1,135 @@
 """chat/tools.py — Wrapper functions za Groq function-calling."""
 
+import logging
+import re
 from django.db.models import Q
 from predictions.ml.poisson_model import predict_fixture
 from predictions.services import team_form, head_to_head
 from predictions.models import Team, Match, ActiveDerby, AITrackRecordSnapshot
 from difflib import SequenceMatcher
+
+logger = logging.getLogger(__name__)
+
+APP_FEATURES = [
+    {
+        "name": "Bashiri AI",
+        "description": "Uliza kuhusu soka, timu, mechi, AI predictions na kutumia vipengele vya Bashiri.",
+        "route": "/ai",
+        "keywords": ["ai", "assistant", "msaidizi", "msaada", "help", "app", "programu", "tumia", "how"],
+    },
+    {
+        "name": "Mechi na ratiba",
+        "description": "Tafuta mechi zijazo, zinazoendelea na zilizomalizika.",
+        "route": "/matches",
+        "keywords": ["match", "matches", "mechi", "fixture", "ratiba", "live"],
+    },
+    {
+        "name": "Prediction za mechi",
+        "description": "Fungua mechi na uone uchambuzi wa AI na masoko ya prediction yanayopatikana.",
+        "route": "/matches",
+        "keywords": ["prediction", "utabiri", "bashiri", "predict", "uchambuzi", "analysis"],
+    },
+    {
+        "name": "Bashiri Tips",
+        "description": "Tazama, tengeneza na jadili tips za jamii.",
+        "route": "/tips",
+        "keywords": ["tip", "tips", "pick", "picks", "mkeka", "mikeka", "jamii"],
+    },
+    {
+        "name": "Saved Markets",
+        "description": "Rudi kwenye markets ulizohifadhi kwa ajili ya kuzifuatilia.",
+        "route": "/saved-markets",
+        "keywords": ["saved", "save", "hifadhi", "bookmark", "market", "markets"],
+    },
+    {
+        "name": "Prediction Leagues",
+        "description": "Tengeneza ligi ya marafiki, shiriki invite link, weka picks kabla ya kickoff na fuatilia pointi.",
+        "route": "/leagues",
+        "keywords": ["league", "leagues", "ligi", "marafiki", "invite", "pointi", "standings"],
+    },
+    {
+        "name": "Reels",
+        "description": "Shiriki na tazama picha au video fupi za soka; unaweza kuweka likes, comments na shares.",
+        "route": "/reels",
+        "keywords": ["reel", "reels", "video", "picha", "share", "comment", "like", "post"],
+    },
+    {
+        "name": "AI Track Record",
+        "description": "Angalia utendaji wa predictions za AI kwenye matokeo yaliyokamilika.",
+        "route": "/track-record",
+        "keywords": ["track", "record", "accuracy", "usahihi", "utendaji", "matokeo ya ai"],
+    },
+    {
+        "name": "Bashiri Pick Analytics",
+        "description": "Chunguza takwimu na uchambuzi wa picks.",
+        "route": "/bashiri-pick-analytics",
+        "keywords": ["analytics", "takwimu", "uchambuzi wa picks", "pick analytics"],
+    },
+    {
+        "name": "Derby Hub",
+        "description": "Angalia mechi za derby zinazoangaziwa.",
+        "route": "/derby",
+        "keywords": ["derby", "rivalry", "hasimu"],
+    },
+    {
+        "name": "Bashiri Pulse",
+        "description": "Fungua sehemu ya maudhui na mijadala ya soka.",
+        "route": "/pulse",
+        "keywords": ["pulse", "habari", "news", "mjadala", "debate"],
+    },
+    {
+        "name": "Wasifu",
+        "description": "Dhibiti wasifu na taarifa zako za akaunti.",
+        "route": "/profile",
+        "keywords": ["profile", "wasifu", "akaunti", "account"],
+    },
+    {
+        "name": "Usajili",
+        "description": "Angalia maelezo ya mipango ya usajili ya Bashiri.",
+        "route": "/subscribe",
+        "keywords": ["subscription", "subscribe", "premium", "pro", "usajili"],
+    },
+]
+
+
+def tool_app_help(query: str) -> dict:
+    """Tafuta sehemu za app zinazohusiana na swali na rudisha njia sahihi ya kufungua."""
+    normalized_query = query.lower().strip()
+    if not normalized_query:
+        return {"success": False, "error": "Eleza unatafuta kipengele gani cha app."}
+
+    matches = []
+    query_words = {
+        word[:-1] if word.endswith("s") and len(word) > 3 else word
+        for word in re.findall(r"[\w]+", normalized_query)
+    }
+    for feature in APP_FEATURES:
+        feature_words = {
+            word[:-1] if word.endswith("s") and len(word) > 3 else word
+            for word in re.findall(r"[\w]+", feature["name"].lower())
+        }
+        score = 2 * len(query_words.intersection(feature_words)) + sum(
+            1 for keyword in feature["keywords"]
+            if (
+                keyword in normalized_query
+                if " " in keyword
+                else keyword in query_words
+            )
+        )
+        if score:
+            matches.append((score, feature))
+
+    matches.sort(key=lambda item: item[0], reverse=True)
+    return {
+        "success": True,
+        "data": {
+            "query": query,
+            "features": [
+                {key: value for key, value in feature.items() if key != "keywords"}
+                for _, feature in matches[:5]
+            ],
+        },
+    }
 
 
 def find_best_team_match(query: str, team_list: list, threshold: float = 0.7):
@@ -43,6 +168,7 @@ def tool_predict_fixture(league_code: str, home_team: str, away_team: str) -> di
             "data": result,
         }
     except Exception as e:
+        logger.exception("AI fixture prediction tool failed")
         return {
             "success": False,
             "error": str(e),
@@ -135,6 +261,7 @@ def tool_team_form(team_name: str) -> dict:
             },
         }
     except Exception as e:
+        logger.exception("AI team form tool failed")
         return {
             "success": False,
             "error": str(e),
@@ -181,6 +308,7 @@ def tool_head_to_head(team1_name: str, team2_name: str) -> dict:
             },
         }
     except Exception as e:
+        logger.exception("AI head-to-head tool failed")
         return {
             "success": False,
             "error": str(e),
@@ -216,6 +344,7 @@ def tool_ai_track_record(league_code: str = None) -> dict:
             "data": data,
         }
     except Exception as e:
+        logger.exception("AI track record tool failed")
         return {
             "success": False,
             "error": str(e),
@@ -232,7 +361,7 @@ def tool_active_derby() -> dict:
             is_active=True,
             starts_at__lte=now,
             ends_at__gte=now
-        ).select_related("home_team", "away_team").order_by("starts_at")
+        ).select_related("home_team", "away_team", "match").order_by("starts_at")
         
         if not derbies.exists():
             return {
@@ -252,6 +381,7 @@ def tool_active_derby() -> dict:
                 "home_team_crest": derby.home_team.crest_url,
                 "away_team": derby.away_team.name,
                 "away_team_crest": derby.away_team.crest_url,
+                "match_id": derby.match_id,
                 "starts_at": derby.starts_at.isoformat(),
                 "ends_at": derby.ends_at.isoformat(),
                 "theme_accent_color": derby.theme_accent_color,
@@ -265,6 +395,7 @@ def tool_active_derby() -> dict:
             },
         }
     except Exception as e:
+        logger.exception("AI active derby tool failed")
         return {
             "success": False,
             "error": str(e),
@@ -325,6 +456,7 @@ def tool_search_matches(query: str, status: str = None) -> dict:
             },
         }
     except Exception as e:
+        logger.exception("AI match search tool failed")
         return {
             "success": False,
             "error": str(e),

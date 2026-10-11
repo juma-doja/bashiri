@@ -1,5 +1,6 @@
 """chat/utils.py — Groq function-calling: LLM inaita tools, si kubuni jibu."""
 import json
+import logging
 
 from django.conf import settings
 from groq import Groq
@@ -11,7 +12,15 @@ from .tools import (
     tool_ai_track_record,
     tool_active_derby,
     tool_search_matches,
+    tool_app_help,
 )
+
+logger = logging.getLogger(__name__)
+
+
+class ChatProviderError(Exception):
+    """Provider haikuweza kutoa jibu la Bashiri AI."""
+
 
 TOOLS = [
     {
@@ -126,19 +135,40 @@ TOOLS = [
                 "required": ["query"]
             }
         }
-    }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "app_help",
+            "description": "Tumia wakati user anauliza jinsi ya kutumia Bashiri, kipengele kiko wapi, au anahitaji msaada wa app. Rudisha maelezo na route halisi ya app.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "description": "Swali la mtumiaji kuhusu feature au namna ya kutumia Bashiri.",
+                        "type": "string",
+                    },
+                },
+                "required": ["query"],
+            },
+        },
+    },
 ]
 
 SYSTEM_PROMPT = (
-    "Wewe ni Bashiri AI, msaidizi wa uchambuzi wa mpira wa miguu. "
-    "Jibu kwa Kiswahili, kwa ufupi na uwazi. "
-    "Muhimu sana: UNA tools 6 zinazopatikana: predict_fixture, team_form, head_to_head, ai_track_record, active_derby, search_matches. "
-    "KILA mara mtu anauliza kuhusu prediction, form, head-to-head, track record, derby, au kutafuta mechi, "
-    "LAZIMA uitie tool inayofaa. "
-    "KATIKA hali yoyote - USIBUNI data yoyote. USIBUNI asilimia. USIBUNI matokeo. "
-    "Ikiwa hakuna tool inayofaa kwa swali, jibu kwa Kiswahili tu bila kubuni data. "
-    "IMPORTANT: System inatambua fuzzy matching kwa majina ya timu - unaweza kutumia abbreviations (Man City, Spurs, Man Utd) "
-    "na spelling errors (Livrpool, Chelse) zote zitatambuliwa vizuri."
+    "Wewe ni Bashiri AI, msaidizi wa Bashiri app nzima na uchambuzi wa mpira. "
+    "Jibu kwa Kiswahili fasaha, kwa ufupi, kwa huruma na hatua zinazoweza kufuatwa. "
+    "Msaada wa app: mechi na ratiba (/matches), AI (/ai), tips (/tips), Saved Markets (/saved-markets), "
+    "Prediction Leagues (/leagues), Reels (/reels), AI Track Record (/track-record), "
+    "Pick Analytics (/bashiri-pick-analytics), Derby Hub (/derby), Pulse (/pulse), "
+    "wasifu (/profile), na usajili (/subscribe). Tumia app_help kwa swali la feature, "
+    "mahali pa kuipata, au hatua za kuitumia; usibuni uwezo ambao haupo kwenye taarifa hizi au tool. "
+    "Tumia tool husika kila mara kwa data ya prediction, form, head-to-head, track record, derby, "
+    "kutafuta mechi, au maelekezo ya app. Data ya tool ndiyo ukweli: usibuni score, ratiba, asilimia, "
+    "feature, au matokeo. "
+    "Baada ya tool, eleza matokeo yake kwa kawaida na kwa kifupi; usionyeshe JSON, majina ya tool, "
+    "au ujumbe wa ndani wa mfumo. Ikiwa tool imeshindwa au haina data, sema hivyo wazi na usikisie. "
+    "Kwa maswali ya jumla yasiyohitaji data ya sasa, eleza kwa lugha rahisi na utoe njia ya app inayofaa."
 )
 
 
@@ -149,9 +179,10 @@ def get_chat_response(user_message: str, history: list) -> tuple[str, str | None
     - tool_name: Jina la tool iliyoitwa (au None kama hakuna tool)
     - tool_data: Matokeo ya tool (au None kama hakuna tool)
     """
+    if not settings.GROQ_API_KEY:
+        raise ChatProviderError("Bashiri AI haijasanidiwa kwa sasa. Tafadhali jaribu tena baadaye.")
+
     client = Groq(api_key=settings.GROQ_API_KEY)
-    
-    # Build conversation history for Groq
     messages = []
     for msg in history:
         if msg["role"] == "user":
@@ -165,46 +196,91 @@ def get_chat_response(user_message: str, history: list) -> tuple[str, str | None
     # Add current user message
     messages.append({"role": "user", "content": user_message})
 
-    # Send message with tools
-    response = client.chat.completions.create(
-        model=settings.GROQ_MODEL,
-        messages=messages,
-        tools=TOOLS,
-        tool_choice="auto"
-    )
+    tool_functions = {
+        "predict_fixture": tool_predict_fixture,
+        "team_form": tool_team_form,
+        "head_to_head": tool_head_to_head,
+        "ai_track_record": tool_ai_track_record,
+        "active_derby": tool_active_derby,
+        "search_matches": tool_search_matches,
+        "app_help": tool_app_help,
+    }
 
-    # Check if function call was made
-    if response.choices[0].message.tool_calls:
-        tool_name = None
-        tool_data = None
+    try:
+        response = client.chat.completions.create(
+            model=settings.GROQ_MODEL,
+            messages=messages,
+            tools=TOOLS,
+            tool_choice="auto",
+        )
+        if not response.choices:
+            raise ChatProviderError("Bashiri AI haikurudisha jibu. Tafadhali jaribu tena.")
 
-        for tool_call in response.choices[0].message.tool_calls:
+        assistant_message = response.choices[0].message
+        tool_calls = assistant_message.tool_calls or []
+        if not tool_calls:
+            reply = assistant_message.content
+            if not isinstance(reply, str) or not reply.strip():
+                raise ChatProviderError("Bashiri AI haikurudisha jibu linalosomeka. Tafadhali jaribu tena.")
+            return reply.strip(), None, None
+
+        messages.append({
+            "role": "assistant",
+            "content": assistant_message.content,
+            "tool_calls": [
+                {
+                    "id": tool_call.id,
+                    "type": "function",
+                    "function": {
+                        "name": tool_call.function.name,
+                        "arguments": tool_call.function.arguments,
+                    },
+                }
+                for tool_call in tool_calls
+            ],
+        })
+
+        tool_result_name = None
+        tool_result_data = None
+        for tool_call in tool_calls:
             tool_name = tool_call.function.name
-            args = json.loads(tool_call.function.arguments)
+            tool_result_name = tool_result_name or tool_name
+            try:
+                arguments = json.loads(tool_call.function.arguments or "{}")
+                tool_function = tool_functions.get(tool_name)
+                if not tool_function:
+                    raise ValueError(f"Tool '{tool_name}' haipatikani")
+                result = tool_function(**arguments)
+            except (TypeError, ValueError, json.JSONDecodeError) as exc:
+                logger.warning("Bashiri AI returned invalid arguments for tool %s: %s", tool_name, exc)
+                result = {"success": False, "error": "Imeshindikana kutumia taarifa za swali hili."}
+            except Exception:
+                logger.exception("Bashiri AI tool %s failed", tool_name)
+                result = {"success": False, "error": "Huduma hii imeshindwa kupata taarifa kwa sasa."}
 
-            # Dictionary mapping ya tool_name -> function
-            tool_functions = {
-                "predict_fixture": tool_predict_fixture,
-                "team_form": tool_team_form,
-                "head_to_head": tool_head_to_head,
-                "ai_track_record": tool_ai_track_record,
-                "active_derby": tool_active_derby,
-                "search_matches": tool_search_matches,
-            }
+            if tool_result_data is None:
+                tool_result_data = result
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": json.dumps(result, ensure_ascii=False, default=str),
+            })
 
-            tool_func = tool_functions.get(tool_name)
-            if tool_func:
-                try:
-                    result = tool_func(**args)
-                    tool_data = result
-                except Exception as exc:
-                    result = {"error": str(exc)}
-                    tool_data = result
-            else:
-                result = {"error": f"Tool '{tool_name}' haipatikani"}
-                tool_data = result
+        final_response = client.chat.completions.create(
+            model=settings.GROQ_MODEL,
+            messages=messages,
+        )
+        if not final_response.choices:
+            raise ChatProviderError("Bashiri AI haikuweza kufafanua taarifa zilizopatikana. Tafadhali jaribu tena.")
 
-        # Return tool result directly without sending back to model
-        return f"Data kutoka tool '{tool_name}': {json.dumps(result, indent=2)}", tool_name, tool_data
-
-    return response.choices[0].message.content, None, None
+        reply = final_response.choices[0].message.content
+        if not isinstance(reply, str) or not reply.strip():
+            raise ChatProviderError("Bashiri AI haikurudisha jibu linalosomeka. Tafadhali jaribu tena.")
+        return reply.strip(), tool_result_name, tool_result_data
+    except ChatProviderError:
+        raise
+    except Exception as exc:
+        logger.exception("Bashiri AI provider request failed")
+        raise ChatProviderError(
+            "Imeshindikana kuwasiliana na Bashiri AI kwa sasa. Tafadhali jaribu tena."
+        ) from exc

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Mic } from "lucide-react";
+import { Send } from "lucide-react";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 
@@ -11,10 +11,6 @@ interface AIComposerProps {
   onSend: () => void;
   isLoading?: boolean;
   disabled?: boolean;
-  onVoiceStart?: () => void;
-  onVoiceStop?: () => void;
-  isRecording?: boolean;
-  hasVoicePermission?: boolean;
 }
 
 export function AIComposer({ 
@@ -22,11 +18,7 @@ export function AIComposer({
   onChange, 
   onSend, 
   isLoading = false, 
-  disabled = false,
-  onVoiceStart,
-  onVoiceStop,
-  isRecording = false,
-  hasVoicePermission = false
+  disabled = false
 }: AIComposerProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -44,14 +36,6 @@ export function AIComposer({
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       onSend();
-    }
-  };
-
-  const handleVoiceClick = () => {
-    if (isRecording) {
-      onVoiceStop?.();
-    } else {
-      onVoiceStart?.();
     }
   };
 
@@ -86,7 +70,7 @@ export function AIComposer({
           onKeyDown={handleKeyDown}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder="Ask about match predictions..."
+          placeholder="Uliza kuhusu mechi, prediction au kutumia Bashiri..."
           disabled={disabled}
           rows={1}
           className="flex-1 bg-transparent resize-none outline-none leading-relaxed py-1.5"
@@ -97,47 +81,6 @@ export function AIComposer({
             maxHeight: "120px",
           }}
         />
-
-        {/* Voice Button */}
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={handleVoiceClick}
-          className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all"
-          style={{
-            background: isRecording 
-              ? "rgba(239, 68, 68, 0.15)" 
-              : "rgba(255, 255, 255, 0.05)",
-            color: isRecording 
-              ? "var(--danger)" 
-              : "var(--text-secondary)",
-            border: isRecording 
-              ? "1px solid rgba(239, 68, 68, 0.25)" 
-              : "1px solid rgba(255, 255, 255, 0.08)",
-            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-          }}
-          onMouseEnter={(e) => {
-            if (!isRecording) {
-              e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
-              e.currentTarget.style.color = "var(--text-primary)";
-              e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)";
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isRecording) {
-              e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
-              e.currentTarget.style.color = "var(--text-secondary)";
-              e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.08)";
-            }
-          }}
-          aria-label={isRecording ? "Stop recording" : "Voice input"}
-        >
-          <motion.div
-            animate={isRecording ? { scale: [1, 1.15, 1] } : {}}
-            transition={{ duration: 1.2, repeat: isRecording ? Infinity : 0 }}
-          >
-            <Mic size={19} />
-          </motion.div>
-        </motion.button>
 
         {/* Send Button */}
         <motion.button

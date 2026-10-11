@@ -16,32 +16,26 @@ export function StreamingText({
   onComplete,
   isComplete = false 
 }: StreamingTextProps) {
-  const [displayedText, setDisplayedText] = useState("");
-  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamProgress, setStreamProgress] = useState({ text: "", index: 0 });
+  const textCharacters = Array.from(text);
+  const displayedText = isComplete
+    ? text
+    : streamProgress.text === text
+      ? textCharacters.slice(0, streamProgress.index).join("")
+      : "";
+  const isStreaming = !isComplete && textCharacters.length > 0 && displayedText.length < text.length;
 
   useEffect(() => {
-    if (isComplete) {
-      setDisplayedText(text);
-      setIsStreaming(false);
-      return;
-    }
-
-    if (!text) {
-      setDisplayedText("");
-      return;
-    }
-
-    setIsStreaming(true);
-    setDisplayedText("");
-
     let index = 0;
+    if (isComplete || !text) return;
+    const characters = Array.from(text);
+
     const interval = setInterval(() => {
-      if (index < text.length) {
-        setDisplayedText((prev) => prev + text[index]);
-        index++;
+      if (index < characters.length) {
+        index += 1;
+        setStreamProgress({ text, index });
       } else {
         clearInterval(interval);
-        setIsStreaming(false);
         onComplete?.();
       }
     }, 1000 / speed);
