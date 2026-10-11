@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ReviewPromptModal } from "@/components/review/ReviewPromptModal";
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { commandSearch, CommandSearchResults } from "@/lib/api/command-search";
+import { getReels, ReelPost } from "@/lib/api/mic";
 
 export default function HomePage() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function HomePage() {
   const [highConfidenceMatches, setHighConfidenceMatches] = useState<any[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [reelPreview, setReelPreview] = useState<ReelPost[]>([]);
   
   // Search state
   const [showSearch, setShowSearch] = useState(false);
@@ -30,6 +32,12 @@ export default function HomePage() {
   const [searchLoading, setSearchLoading] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    getReels(4, 0)
+      .then((data) => setReelPreview(data.results))
+      .catch((error) => console.error("Failed to load social reel preview:", error));
+  }, []);
 
   // Search logic
   useEffect(() => {
@@ -221,6 +229,89 @@ export default function HomePage() {
           <div className="pt-4 pb-8">
             <HeroCarousel />
           </div>
+
+          <motion.section
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mb-8"
+          >
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--brand-primary)" }}>
+                  Bashiri Social
+                </p>
+                <h2 className="mt-1 text-xl font-black text-white sm:text-2xl">Moments za jamii</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => router.push("/reels")}
+                className="rounded-full border px-3 py-1.5 text-xs font-semibold transition-all hover:scale-[1.02]"
+                style={{ borderColor: "rgba(212,175,55,0.3)", color: "var(--text-primary)", background: "rgba(212,175,55,0.08)" }}
+              >
+                Fungua Reels
+              </button>
+            </div>
+            {reelPreview.length > 0 ? (
+              <div className="grid gap-3 grid-cols-2 xl:grid-cols-4">
+                {reelPreview.map((post, index) => (
+                <motion.button
+                  key={post.id}
+                  type="button"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.08 + index * 0.08 }}
+                  whileHover={{ y: -4 }}
+                  onClick={() => router.push(`/reels#reel-${post.id}`)}
+                  className="group relative min-h-[180px] overflow-hidden rounded-[24px] border text-left sm:min-h-[220px]"
+                  style={{
+                    borderColor: "rgba(255,255,255,0.08)",
+                    background: "#111218",
+                    boxShadow: "0 16px 40px rgba(0,0,0,0.35)",
+                  }}
+                >
+                  {post.media_type === "VIDEO" ? (
+                    <video src={post.media_url} poster={post.thumbnail_url || undefined} muted playsInline className="absolute inset-0 h-full w-full object-cover opacity-70" />
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={post.media_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-70" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-black/5" />
+                  <div className="absolute left-3 top-3 flex items-center gap-2">
+                    {post.avatar_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={post.avatar_url} alt="" className="h-7 w-7 rounded-full border border-white/20 object-cover" />
+                    ) : (
+                      <span className="grid h-7 w-7 place-items-center rounded-full bg-amber-300 text-[10px] font-black text-black">{post.username.charAt(0).toUpperCase()}</span>
+                    )}
+                    <span className="text-[10px] font-bold text-white">@{post.username}</span>
+                  </div>
+                  <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
+                    <p className="line-clamp-2 text-sm font-bold text-white">{post.caption || (post.media_type === "VIDEO" ? "Video ya jamii" : "Picha ya jamii")}</p>
+                    <div className="mt-2 flex items-center gap-3 text-[10px] font-semibold text-white/65">
+                      <span>♥ {post.likes_count}</span>
+                      <span>◉ {post.comments_count}</span>
+                      {post.match_details && <span className="truncate">{post.match_details.home_team} vs {post.match_details.away_team}</span>}
+                    </div>
+                  </div>
+                </motion.button>
+              ))}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => router.push("/reels")}
+                className="flex min-h-36 w-full items-center justify-between gap-4 rounded-3xl border border-dashed px-5 py-6 text-left transition-colors hover:bg-white/[0.03]"
+                style={{ borderColor: "rgba(212,175,55,0.22)", background: "rgba(212,175,55,0.035)" }}
+              >
+                <span>
+                  <span className="block text-base font-bold text-white">Community feed inakusubiri</span>
+                  <span className="mt-1 block text-sm text-white/50">Shiriki screenshot, picha au video fupi kwenye Bashiri Reels.</span>
+                </span>
+                <ArrowRight size={19} className="shrink-0 text-amber-300" />
+              </button>
+            )}
+          </motion.section>
 
           {/* High Confidence Tips Section */}
           <motion.div

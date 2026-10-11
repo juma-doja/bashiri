@@ -13,7 +13,8 @@ from datetime import timedelta
 
 import cloudinary.utils
 from django.conf import settings
-from django.db.models import Q
+from django.db import transaction
+from django.db.models import BooleanField, Count, Exists, OuterRef, Q, Value
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status
@@ -22,8 +23,22 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.throttling import AnonRateThrottle
 
-from .models import MicReaction, MicReactionVote
-from .serializers import MicReactionSerializer, MicReactionVoteSerializer
+from .models import (
+    MicReaction,
+    MicReactionVote,
+    ReelPost,
+    ReelPostComment,
+    ReelPostLike,
+    ReelPostShare,
+)
+from .serializers import (
+    CreateReelPostCommentSerializer,
+    CreateReelPostSerializer,
+    MicReactionSerializer,
+    MicReactionVoteSerializer,
+    ReelPostCommentSerializer,
+    ReelPostSerializer,
+)
 from .services import extract_video_metadata, validate_video_duration
 from core.cloudinary_utils import delete_video_from_cloudinary
 
@@ -52,6 +67,162 @@ class MicUploadSignatureView(APIView):
             "cloud_name": settings.CLOUDINARY_STORAGE["CLOUD_NAME"],
             "folder": "bashiri/mic",
         })
+
+
+class ReelUploadSignatureView(APIView):
+    """Return a short-lived signed Cloudinary upload for a social reel."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        media_type = request.query_params.get("media_type", "").upper()
+        if media_type not in {"IMAGE", "VIDEO"}:
+            return Response(
+                {"detail": "media_type lazima iwe IMAGE au VIDEO."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        timestamp = int(time.time())
+        folder = "bashiri/reels"
+        signature = cloudinary.utils.api_sign_request(
+            {"timestamp": timestamp, "folder": folder},
+            settings.CLOUDINARY_STORAGE["API_SECRET"],
+        )
+        return Response({
+            "signature": signature,
+            "timestamp": timestamp,
+            "api_key": settings.CLOUDINARY_STORAGE["API_KEY"],
+            "cloud_name": settings.CLOUDINARY_STORAGE["CLOUD_NAME"],
+            "folder": folder,
+            "resource_type": media_type.lower(),
+        })
+
+
+class ReelPostListCreateView(APIView):
+    """GET /api/mic/reels/ lists public posts; POST creates an authenticated post."""
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        try:
+            limit = min(max(int(request.query_params.get("limit", 12)), 1), 24)
+            offset = max(int(request.query_params.get("offset", 0)), 0)
+        except (TypeError, ValueError):
+            return Response(
+                {"detail": "limit na offset lazima ziwe namba."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        posts = ReelPost.objects.filter(is_active=True).select_related(
+            "user", "match", "match__home_team", "match__away_team", "match__league"
+        ).annotate(
+            likes_count=Count("likes", distinct=True),
+            comments_count=Count("comments", distinct=True),
+            shares_count=Count("shares", distinct=True),
+        )
+        if request.user.is_authenticated:
+            posts = posts.annotate(
+                user_liked=Exists(
+                    ReelPostLike.objects.filter(post_id=OuterRef("pk"), user=request.user)
+                )
+            )
+        else:
+            posts = posts.annotate(user_liked=Value(False, output_field=BooleanField()))
+
+        count = posts.count()
+        page = posts[offset:offset + limit]
+        return Response({
+            "count": count,
+            "next_offset": offset + limit if offset + limit < count else None,
+            "results": ReelPostSerializer(page, many=True, context={"request": request}).data,
+        })
+
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return Response({"detail": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+        serializer = CreateReelPostSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        post = ReelPost.objects.create(user=request.user, **serializer.validated_data)
+        post = ReelPost.objects.filter(pk=post.pk).select_related(
+            "user", "match", "match__home_team", "match__away_team", "match__league"
+        ).annotate(
+            likes_count=Count("likes", distinct=True),
+            comments_count=Count("comments", distinct=True),
+            shares_count=Count("shares", distinct=True),
+            user_liked=Value(False, output_field=BooleanField()),
+        ).get()
+        return Response(
+            ReelPostSerializer(post, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class ReelPostDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, post_id):
+        post = get_object_or_404(ReelPost, pk=post_id, user=request.user)
+        post.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ReelPostLikeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, post_id):
+        post = get_object_or_404(ReelPost, pk=post_id, is_active=True)
+        with transaction.atomic():
+            like, created = ReelPostLike.objects.get_or_create(post=post, user=request.user)
+            if not created:
+                like.delete()
+        return Response({
+            "liked": created,
+            "likes_count": ReelPostLike.objects.filter(post=post).count(),
+        })
+
+
+class ReelPostCommentListCreateView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, post_id):
+        post = get_object_or_404(ReelPost, pk=post_id, is_active=True)
+        comments = post.comments.select_related("user").order_by("-created_at")[:100]
+        return Response({
+            "results": ReelPostCommentSerializer(comments, many=True).data,
+        })
+
+    def post(self, request, post_id):
+        if not request.user.is_authenticated:
+            return Response({"detail": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+        post = get_object_or_404(ReelPost, pk=post_id, is_active=True)
+        serializer = CreateReelPostCommentSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        comment = ReelPostComment.objects.create(
+            post=post,
+            user=request.user,
+            content=serializer.validated_data["content"].strip(),
+        )
+        return Response(
+            ReelPostCommentSerializer(comment).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class ReelPostShareView(APIView):
+    permission_classes = [AllowAny]
+    platforms = {choice[0] for choice in ReelPostShare.PLATFORMS}
+
+    def post(self, request, post_id):
+        post = get_object_or_404(ReelPost, pk=post_id, is_active=True)
+        platform = request.data.get("platform", "OTHER")
+        if platform not in self.platforms:
+            return Response(
+                {"detail": "platform haijaruhusiwa."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        ReelPostShare.objects.create(
+            post=post,
+            user=request.user if request.user.is_authenticated else None,
+            platform=platform,
+        )
+        return Response({"shares_count": post.shares.count()}, status=status.HTTP_201_CREATED)
 
 
 class MicCanPostView(APIView):

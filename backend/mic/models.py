@@ -59,3 +59,96 @@ class MicReactionVote(models.Model):
 
     def __str__(self):
         return f"{self.user} reacted {self.emoji}"
+
+
+class ReelPost(models.Model):
+    MEDIA_TYPES = [
+        ("IMAGE", "Image"),
+        ("VIDEO", "Video"),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="reel_posts",
+    )
+    match = models.ForeignKey(
+        "predictions.Match",
+        on_delete=models.SET_NULL,
+        related_name="reel_posts",
+        null=True,
+        blank=True,
+    )
+    media_type = models.CharField(max_length=5, choices=MEDIA_TYPES)
+    media_url = models.URLField(max_length=1000)
+    thumbnail_url = models.URLField(max_length=1000, blank=True, default="")
+    caption = models.CharField(max_length=500, blank=True, default="")
+    duration_seconds = models.PositiveSmallIntegerField(default=0)
+    is_active = models.BooleanField(default=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        db_table = "mic_reelpost"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["is_active", "-created_at"]),
+            models.Index(fields=["match", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.user} — {self.media_type} Reel"
+
+
+class ReelPostLike(models.Model):
+    post = models.ForeignKey(ReelPost, on_delete=models.CASCADE, related_name="likes")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="reel_post_likes",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "mic_reelpostlike"
+        constraints = [
+            models.UniqueConstraint(fields=["post", "user"], name="unique_reel_post_like")
+        ]
+
+
+class ReelPostComment(models.Model):
+    post = models.ForeignKey(ReelPost, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="reel_post_comments",
+    )
+    content = models.CharField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        db_table = "mic_reelpostcomment"
+        ordering = ["created_at"]
+        indexes = [models.Index(fields=["post", "created_at"])]
+
+
+class ReelPostShare(models.Model):
+    PLATFORMS = [
+        ("NATIVE", "Native"),
+        ("WHATSAPP", "WhatsApp"),
+        ("COPY", "Copy link"),
+        ("OTHER", "Other"),
+    ]
+
+    post = models.ForeignKey(ReelPost, on_delete=models.CASCADE, related_name="shares")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="reel_post_shares",
+        null=True,
+        blank=True,
+    )
+    platform = models.CharField(max_length=10, choices=PLATFORMS, default="OTHER")
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        db_table = "mic_reelpostshare"
