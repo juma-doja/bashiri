@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ListMusic, Music2, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/stores/auth.store";
 import { getMyMusicTracks, MusicTrack } from "@/lib/api/music";
 
@@ -122,6 +123,7 @@ function GlobalMiniPlayer() {
 }
 
 export function MusicPlayerProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const access = useAuthStore((state) => state.access);
   const [uploadedTracks, setUploadedTracks] = useState<Track[]>([]);
@@ -203,7 +205,7 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
     <MusicPlayerContext.Provider value={contextValue}>
       {children}
       <audio ref={audioRef} onTimeUpdate={(event) => setProgressState(event.currentTarget.currentTime)} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)} onEnded={() => stepTrack(1)} />
-      <GlobalMiniPlayer />
+      {pathname !== "/ai" && <GlobalMiniPlayer />}
     </MusicPlayerContext.Provider>
   );
 }

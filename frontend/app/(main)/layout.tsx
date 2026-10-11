@@ -73,8 +73,8 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
           <AuthRequiredSheet />
           <InstallPromptSheet />
           <CommandPaletteProvider />
-          {!isHighConfidencePage && <FloatingReviewButton onClick={() => router.push("/review")} />}
-          {!isHighConfidencePage && <FloatingWhatsAppButton />}
+          {!isAIPage && !isHighConfidencePage && <FloatingReviewButton onClick={() => router.push("/review")} />}
+          {!isAIPage && !isHighConfidencePage && <FloatingWhatsAppButton />}
           <ResultRecapProvider />
         </div>
       </MusicPlayerProvider>

@@ -8,7 +8,6 @@ import { useEffect, useState, useRef } from "react";
 const NAV_ITEMS = [
   { href: "/home", icon: Home, label: "Home" },
   { href: "/reels", icon: Clapperboard, label: "Reels" },
-  { href: "/leagues", icon: UsersRound, label: "Leagues" },
   { href: "/matches", icon: CalendarDays, label: "Matches" },
   { href: "/bashiri-pick-analytics", icon: BarChart3, label: "Analytics" },
   { href: "/tips", icon: Trophy, label: "Tips" },

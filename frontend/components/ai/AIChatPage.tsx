@@ -18,7 +18,8 @@ export function AIChatPage() {
   const [remaining, setRemaining] = useState<number | null>(null);
   const [sessionKey, setSessionKey] = useState<string | undefined>();
   const [lastMatchContext, setLastMatchContext] = useState<{id: number, label: string} | null>(null);
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [keyboardInset, setKeyboardInset] = useState(0);
+  const [composerHeight, setComposerHeight] = useState(76);
   const access = useAuthStore((state) => state.access);
   const userId = useAuthStore((state) => state.user?.id);
   const sessionReady = !!access || !!sessionKey;
@@ -30,6 +31,9 @@ export function AIChatPage() {
     requestAnimationFrame(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     });
+  }, []);
+  const handleComposerHeightChange = useCallback((height: number) => {
+    setComposerHeight(height);
   }, []);
 
   useEffect(() => {
@@ -86,8 +90,11 @@ export function AIChatPage() {
   // Keyboard detection
   useEffect(() => {
     const handleResize = () => {
-      const visualHeight = window.visualViewport?.height ?? window.innerHeight;
-      setIsKeyboardOpen(window.innerHeight - visualHeight > 140);
+      const viewport = window.visualViewport;
+      const visualHeight = viewport?.height ?? window.innerHeight;
+      const keyboardOpen = window.innerHeight - visualHeight > 140;
+      const inset = Math.max(0, window.innerHeight - visualHeight - (viewport?.offsetTop ?? 0));
+      setKeyboardInset(keyboardOpen ? inset : 0);
       if (messages.length > 0) {
         scrollToBottom();
       }
@@ -96,12 +103,14 @@ export function AIChatPage() {
     window.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', handleResize);
     window.visualViewport?.addEventListener("resize", handleResize);
+    window.visualViewport?.addEventListener("scroll", handleResize);
     handleResize();
 
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
       window.visualViewport?.removeEventListener("resize", handleResize);
+      window.visualViewport?.removeEventListener("scroll", handleResize);
     };
   }, [messages.length, scrollToBottom]);
 
@@ -188,7 +197,7 @@ export function AIChatPage() {
 
   return (
     <div 
-      className="min-h-dvh flex flex-col"
+      className="flex h-dvh min-h-0 flex-col overflow-hidden"
       style={{ background: "var(--background)" }}
     >
       {/* Header */}
@@ -200,7 +209,7 @@ export function AIChatPage() {
         className="min-h-0 flex-1 overflow-y-auto scroll-smooth"
         style={{
           paddingTop: '16px',
-          paddingBottom: isKeyboardOpen ? '140px' : '100px',
+          paddingBottom: `${composerHeight + (lastMatchContext ? 40 : 0) + 16}px`,
           paddingLeft: '16px',
           paddingRight: '16px',
         }}
@@ -224,21 +233,21 @@ export function AIChatPage() {
       </div>
 
       {/* Composer Container */}
-      <div className="fixed bottom-0 left-0 right-0 z-[100]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      <div className="fixed left-0 right-0 z-[100]" style={{ bottom: `${keyboardInset}px` }}>
         {/* Context Chips */}
         {lastMatchContext && (
           <div className="px-4 pb-2">
             <div 
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs"
+              className="inline-flex max-w-full items-center gap-2 rounded-full px-3 py-1.5 text-xs"
               style={{
                 background: "var(--surface-alt)",
                 border: "1px solid var(--border)",
               }}
             >
-              <span style={{ color: "var(--text-secondary)" }}>💬 Sasa: {lastMatchContext.label}</span>
+              <span className="min-w-0 truncate" style={{ color: "var(--text-secondary)" }}>💬 Sasa: {lastMatchContext.label}</span>
               <button
                 onClick={() => setLastMatchContext(null)}
-                className="hover:opacity-70 transition-opacity"
+                className="shrink-0 transition-opacity hover:opacity-70"
                 style={{ color: "var(--text-muted)" }}
               >
                 <X size={14} />
@@ -250,6 +259,7 @@ export function AIChatPage() {
           value={input}
           onChange={setInput}
           onSend={() => void handleSend()}
+          onHeightChange={handleComposerHeightChange}
           isLoading={loading}
           disabled={loading || !historyReady}
         />

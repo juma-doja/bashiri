@@ -8,7 +8,7 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { getNotifications } from "@/lib/api/notifications";
 import { getFeed } from "@/lib/api/feed";
 import { useAuthStore } from "@/stores/auth.store";
-import { Bell, Target, Search, X, TrendingUp, Brain, Trophy, ArrowRight } from "lucide-react";
+import { Bell, Target, Search, X, TrendingUp, Brain, Trophy, ArrowRight, UsersRound } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ReviewPromptModal } from "@/components/review/ReviewPromptModal";
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
@@ -160,6 +160,14 @@ export default function HomePage() {
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
+              </button>
+              <button
+                type="button"
+                aria-label="Go to Leagues"
+                onClick={() => router.push("/leagues")}
+                className="relative w-8 h-8 rounded-lg bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors flex-shrink-0"
+              >
+                <UsersRound size={18} style={{ color: "#FF6B6B" }} />
               </button>
               <button
                 type="button"

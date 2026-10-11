@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Send } from "lucide-react";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
+import { ArrowUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 
@@ -9,6 +9,7 @@ interface AIComposerProps {
   value: string;
   onChange: (value: string) => void;
   onSend: () => void;
+  onHeightChange?: (height: number) => void;
   isLoading?: boolean;
   disabled?: boolean;
 }
@@ -17,20 +18,45 @@ export function AIComposer({
   value, 
   onChange, 
   onSend, 
+  onHeightChange,
   isLoading = false, 
   disabled = false
 }: AIComposerProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const composerRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
-
-  // Auto-resize textarea
-  useEffect(() => {
+  const resizeTextarea = useCallback(() => {
     const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px";
-    }
-  }, [value]);
+    if (!textarea) return;
+
+    textarea.style.height = "auto";
+    const maxHeight = 200;
+    textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? "auto" : "hidden";
+  }, []);
+
+  useLayoutEffect(() => {
+    resizeTextarea();
+  }, [resizeTextarea, value]);
+
+  useEffect(() => {
+    window.addEventListener("resize", resizeTextarea);
+    window.visualViewport?.addEventListener("resize", resizeTextarea);
+    return () => {
+      window.removeEventListener("resize", resizeTextarea);
+      window.visualViewport?.removeEventListener("resize", resizeTextarea);
+    };
+  }, [resizeTextarea]);
+
+  useEffect(() => {
+    const composer = composerRef.current;
+    if (!composer || !onHeightChange) return;
+
+    const observer = new ResizeObserver(() => onHeightChange(composer.offsetHeight));
+    observer.observe(composer);
+    onHeightChange(composer.offsetHeight);
+    return () => observer.disconnect();
+  }, [onHeightChange]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -43,26 +69,21 @@ export function AIComposer({
 
   return (
     <div 
+      ref={composerRef}
+      className="mx-auto w-full max-w-3xl"
       style={{
-        paddingTop: '12px',
-        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
-        paddingLeft: '20px',
-        paddingRight: '20px',
+        padding: "10px 16px calc(env(safe-area-inset-bottom, 0px) + 12px)",
+        background: "linear-gradient(180deg, transparent, var(--background) 18%)",
       }}
     >
       <div
-        className="flex items-end gap-3 rounded-2xl px-3 py-2 transition-all duration-300"
+        className="flex min-w-0 items-end gap-2 rounded-[28px] px-3 py-2 transition-colors"
         style={{
           background: "var(--surface)",
-          border: `1px solid ${isFocused ? "rgba(212, 175, 55, 0.25)" : "var(--border)"}`,
-          boxShadow: isFocused 
-            ? "0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(212, 175, 55, 0.1)" 
-            : "0 2px 8px rgba(0, 0, 0, 0.2)",
-          backdropFilter: "blur(20px)",
-          marginBottom: "8px",
+          border: `1px solid ${isFocused ? "rgba(212, 175, 55, 0.45)" : "var(--border)"}`,
+          boxShadow: isFocused ? "0 0 0 2px rgba(212, 175, 55, 0.08)" : "0 2px 8px rgba(0, 0, 0, 0.2)",
         }}
       >
-        {/* Text Input */}
         <textarea
           ref={textareaRef}
           value={value}
@@ -72,40 +93,36 @@ export function AIComposer({
           onBlur={() => setIsFocused(false)}
           placeholder="Uliza kuhusu mechi, prediction au kutumia Bashiri..."
           disabled={disabled}
+          enterKeyHint="send"
           rows={1}
-          className="flex-1 bg-transparent resize-none outline-none leading-relaxed py-1.5"
+          className="min-w-0 flex-1 resize-none overflow-x-hidden bg-transparent py-2 leading-6 outline-none placeholder:text-white/40"
           style={{
             color: "var(--text-primary)",
             fontSize: "15px",
-            minHeight: "36px",
-            maxHeight: "120px",
+            minHeight: "40px",
+            maxHeight: "200px",
+            overflowWrap: "anywhere",
           }}
+          aria-label="Andika ujumbe kwa Bashiri AI"
         />
 
-        {/* Send Button */}
         <motion.button
           onClick={onSend}
           disabled={!canSend}
           whileTap={{ scale: 0.92 }}
-          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all"
+          className="mb-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors"
           style={{
-            background: canSend ? "var(--gradient-gold)" : "var(--surface)",
+            background: canSend ? "var(--brand-primary)" : "var(--surface-alt)",
             color: canSend ? "#000" : "var(--text-muted)",
-            opacity: canSend ? 1 : 0.5,
+            opacity: canSend ? 1 : 0.65,
             cursor: canSend ? "pointer" : "not-allowed",
-            boxShadow: canSend 
-              ? "0 4px 12px rgba(212, 175, 55, 0.3)" 
-              : "0 2px 4px rgba(0, 0, 0, 0.1)",
-            border: canSend 
-              ? "none" 
-              : "1px solid var(--border)",
           }}
-          aria-label="Send message"
+          aria-label="Tuma ujumbe"
         >
           {isLoading ? (
-            <Loader2 size={20} className="animate-spin" style={{ color: canSend ? "#000" : "var(--text-muted)" }} />
+            <Loader2 size={18} className="animate-spin" />
           ) : (
-            <Send size={20} style={{ color: canSend ? "#000" : "var(--text-muted)" }} />
+            <ArrowUp size={19} strokeWidth={2.5} />
           )}
         </motion.button>
       </div>
