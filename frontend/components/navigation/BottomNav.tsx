@@ -92,7 +92,7 @@ export function BottomNav() {
       <motion.button
         onClick={() => navigate(item)}
         onTouchStart={vibrate}
-        className="flex flex-col items-center justify-center gap-1 mx-1 sm:mx-2 shrink-0 transition-all duration-200"
+        className="flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-200"
         style={isActive ? {
           marginTop: "-24px",
         } : {
