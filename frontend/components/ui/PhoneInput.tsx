@@ -57,7 +57,7 @@ export const PhoneInput = forwardRef<HTMLInputElement, Props>(
           </label>
         )}
         <div className="relative">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-0">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10">
             <span className="text-lg">🇹🇿</span>
             <span className="text-white font-semibold text-base">+255</span>
             <span className="text-white/40 font-light">|</span>
@@ -68,29 +68,29 @@ export const PhoneInput = forwardRef<HTMLInputElement, Props>(
             onChange={handleChange}
             placeholder="650745642"
             className={clsx(
-              "w-full rounded-2xl pl-24 pr-12 py-3.5 text-white text-sm bg-[var(--glass-bg)] border border-[var(--color-gold)] outline-none",
-              error ? "border-[var(--danger)]" : "border-[var(--color-gold)] focus:border-[var(--color-gold)]",
+              "w-full rounded-2xl pl-24 pr-12 py-3.5 text-white text-sm bg-white/10 border border-[#D4AF37] outline-none relative z-0",
+              error ? "border-[#f18f75]" : "border-[#D4AF37] focus:border-[#D4AF37]",
               className
             )}
-            style={{ backdropFilter: "blur(20px)", boxShadow: "0 0 20px rgba(245,166,35,0.12)" }}
+            style={{ backdropFilter: "blur(20px)", boxShadow: "0 0 20px rgba(212,175,55,0.12)" }}
             {...rest}
           />
           {isValid !== null && (
             <div className="absolute right-4 top-1/2 -translate-y-1/2">
               {isValid ? (
-                <span className="text-bashiri-gold text-lg">✓</span>
+                <span className="text-[#D4AF37] text-lg">✓</span>
               ) : (
                 <span className="text-red-400 text-lg">❌</span>
               )}
             </div>
           )}
         </div>
-        {error && <p className="text-xs mt-1 text-bashiri-red">{error}</p>}
+        {error && <p className="text-xs mt-1 text-[#f18f75]">{error}</p>}
         {!error && isValid === false && displayValue && (
           <p className="text-xs mt-1 text-red-400">Namba si sahihi</p>
         )}
         {!error && isValid === true && (
-          <p className="text-xs mt-1 text-bashiri-gold">✓ Namba iko sahihi</p>
+          <p className="text-xs mt-1 text-[#D4AF37]">✓ Namba iko sahihi</p>
         )}
         <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>
           Andika namba bila kuanza na 0 au +255. Mfano: 650745642

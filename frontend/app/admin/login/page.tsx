@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { ArrowRight, LockKeyhole, ShieldCheck } from "lucide-react";
 import { adminLogin } from "@/lib/api/admin";
 import { useAdminAuthStore } from "@/stores/admin-auth.store";
@@ -45,10 +46,14 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-[#080d0b] px-4 py-10 text-white sm:px-6">
-      <div className="pointer-events-none absolute inset-0 opacity-30" style={{ backgroundImage: "linear-gradient(rgba(97,215,165,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(97,215,165,.055) 1px, transparent 1px)", backgroundSize: "36px 36px" }} />
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#61d7a5]/[0.07]" />
-      <section className="relative w-full max-w-[420px] rounded-2xl border border-white/[0.09] bg-[#0d1410]/95 p-6 shadow-[0_24px_90px_rgba(0,0,0,.45)] sm:p-8">
+    <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat px-4 py-10 text-white sm:px-6" style={{ backgroundImage: "url('/admin_login.jpg')" }}>
+      <div className="absolute inset-0 bg-black/60" />
+      <motion.div
+        className="relative z-10 w-full max-w-[420px] rounded-3xl p-6"
+        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(20px)" }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
         <div className="mb-7 flex items-center justify-between">
           <img src="/bashiri-logo-horizontal.svg" alt="Bashiri" className="h-7 w-auto" />
           <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#61d7a5]/20 bg-[#61d7a5]/[0.08] text-[#79e5b8]"><ShieldCheck size={19} /></span>
@@ -68,7 +73,7 @@ export default function AdminLoginPage() {
         </form>
 
         <div className="mt-6 flex items-center gap-2 border-t border-white/[0.07] pt-4 text-[10px] text-white/30"><LockKeyhole size={12} /> Protected administrator session</div>
-      </section>
+      </motion.div>
     </main>
   );
 }
