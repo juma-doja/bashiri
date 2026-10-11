@@ -89,36 +89,55 @@ export function BottomNav() {
     const isActive = pathname.startsWith(item.href);
     const Icon = item.icon;
     return (
-      <button
+      <motion.button
         onClick={() => navigate(item)}
         onTouchStart={vibrate}
         className="flex-1 flex flex-col items-center justify-center transition-all duration-200"
+        whileTap={{ scale: 0.92 }}
+        whileHover={{ scale: isActive ? 1.05 : 1 }}
       >
-        <div
-          className="inline-flex flex-col items-center gap-1 px-2 py-1.5 rounded-lg transition-all duration-200"
-          style={{
-            background: isActive ? "rgba(212,175,55,0.15)" : "transparent",
-          }}
-        >
-          <Icon
-            size={16}
-            strokeWidth={2}
-            className="transition-all duration-200"
+        {isActive ? (
+          // Active state - lifted and embellished like Plus icon
+          <motion.div
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center -mt-6 mx-1 sm:mx-2 shrink-0"
             style={{
-              color: isActive ? "var(--brand-primary)" : "rgba(255,255,255,0.9)",
-              transform: isActive ? "scale(1.05)" : "scale(1)",
+              background: "linear-gradient(135deg, var(--brand-primary), var(--brand-accent))",
+              boxShadow: "0 8px 24px rgba(212,175,55,0.3), 0 0 0 3px #0B0B0B",
             }}
-          />
-          <span
-            className="text-[8px] font-medium tracking-wide transition-all duration-200"
+            initial={{ scale: 0.8, y: 10 }}
+            animate={{ scale: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+          >
+            <Icon size={24} strokeWidth={2.5} style={{ color: "#051006" }} />
+          </motion.div>
+        ) : (
+          // Inactive state - normal icon
+          <div
+            className="inline-flex flex-col items-center gap-1 px-2 py-1.5 rounded-lg transition-all duration-200"
             style={{
-              color: isActive ? "var(--brand-primary)" : "rgba(255,255,255,0.9)",
+              background: "transparent",
             }}
           >
-            {item.label}
-          </span>
-        </div>
-      </button>
+            <Icon
+              size={16}
+              strokeWidth={2}
+              className="transition-all duration-200"
+              style={{
+                color: "rgba(255,255,255,0.9)",
+                transform: "scale(1)",
+              }}
+            />
+            <span
+              className="text-[8px] font-medium tracking-wide transition-all duration-200"
+              style={{
+                color: "rgba(255,255,255,0.9)",
+              }}
+            >
+              {item.label}
+            </span>
+          </div>
+        )}
+      </motion.button>
     );
   }
 
@@ -156,16 +175,19 @@ export function BottomNav() {
               router.push("/create");
             }}
             onTouchStart={vibrate}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center -mt-6 mx-1 sm:mx-2 shrink-0"
-            style={{
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center mx-1 sm:mx-2 shrink-0 transition-all duration-200"
+            style={pathname === "/create" ? {
               background: "linear-gradient(135deg, var(--brand-primary), var(--brand-accent))",
               boxShadow: "0 8px 24px rgba(212,175,55,0.3), 0 0 0 3px #0B0B0B",
+              marginTop: "-24px",
+            } : {
+              background: "transparent",
             }}
             whileTap={{ scale: 0.92 }}
-            whileHover={{ scale: 1.05, boxShadow: "0 12px 32px rgba(212,175,55,0.4), 0 0 0 3px #0B0B0B" }}
+            whileHover={pathname === "/create" ? { scale: 1.05, boxShadow: "0 12px 32px rgba(212,175,55,0.4), 0 0 0 3px #0B0B0B" } : { scale: 1.05 }}
             aria-label="Unda ubashiri mpya"
           >
-            <Plus size={24} strokeWidth={2.5} style={{ color: "#051006" }} />
+            <Plus size={pathname === "/create" ? 24 : 20} strokeWidth={pathname === "/create" ? 2.5 : 2} style={{ color: pathname === "/create" ? "#051006" : "rgba(255,255,255,0.9)" }} />
           </motion.button>
 
           {NAV_ITEMS.slice(2).map((item) => (
