@@ -92,51 +92,34 @@ export function BottomNav() {
       <motion.button
         onClick={() => navigate(item)}
         onTouchStart={vibrate}
-        className="flex-1 flex flex-col items-center justify-center transition-all duration-200"
+        className="flex flex-col items-center justify-center gap-1 mx-1 sm:mx-2 shrink-0 transition-all duration-200"
+        style={isActive ? {
+          marginTop: "-24px",
+        } : {
+          marginTop: "0",
+        }}
         whileTap={{ scale: 0.92 }}
-        whileHover={{ scale: isActive ? 1.05 : 1 }}
+        whileHover={isActive ? { scale: 1.05 } : { scale: 1.05 }}
       >
-        {isActive ? (
-          // Active state - lifted and embellished like Plus icon
-          <motion.div
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center -mt-6 mx-1 sm:mx-2 shrink-0"
-            style={{
-              background: "linear-gradient(135deg, var(--brand-primary), var(--brand-accent))",
-              boxShadow: "0 8px 24px rgba(212,175,55,0.3), 0 0 0 3px #0B0B0B",
-            }}
-            initial={{ scale: 0.8, y: 10 }}
-            animate={{ scale: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-          >
-            <Icon size={24} strokeWidth={2.5} style={{ color: "#051006" }} />
-          </motion.div>
-        ) : (
-          // Inactive state - normal icon
-          <div
-            className="inline-flex flex-col items-center gap-1 px-2 py-1.5 rounded-lg transition-all duration-200"
-            style={{
-              background: "transparent",
-            }}
-          >
-            <Icon
-              size={16}
-              strokeWidth={2}
-              className="transition-all duration-200"
-              style={{
-                color: "rgba(255,255,255,0.9)",
-                transform: "scale(1)",
-              }}
-            />
-            <span
-              className="text-[8px] font-medium tracking-wide transition-all duration-200"
-              style={{
-                color: "rgba(255,255,255,0.9)",
-              }}
-            >
-              {item.label}
-            </span>
-          </div>
-        )}
+        <div
+          className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all duration-200"
+          style={isActive ? {
+            background: "linear-gradient(135deg, var(--brand-primary), var(--brand-accent))",
+            boxShadow: "0 8px 24px rgba(212,175,55,0.3), 0 0 0 3px #0B0B0B",
+          } : {
+            background: "transparent",
+          }}
+        >
+          <Icon size={isActive ? 24 : 20} strokeWidth={isActive ? 2.5 : 2} style={{ color: isActive ? "#051006" : "rgba(255,255,255,0.9)" }} />
+        </div>
+        <span
+          className="text-[8px] font-medium tracking-wide transition-all duration-200"
+          style={{
+            color: isActive ? "var(--brand-primary)" : "rgba(255,255,255,0.9)",
+          }}
+        >
+          {item.label}
+        </span>
       </motion.button>
     );
   }
