@@ -8,7 +8,6 @@ import { useEffect, useState, useRef } from "react";
 const NAV_ITEMS = [
   { href: "/home", icon: Home, label: "Home" },
   { href: "/reels", icon: Clapperboard, label: "Reels" },
-  { href: "/tips", icon: Trophy, label: "Tips" },
   { href: "/matches", icon: CalendarDays, label: "Matches" },
   { href: "/bashiri-pick-analytics", icon: BarChart3, label: "Analytics" },
   { href: "/leagues", icon: UsersRound, label: "Leagues" },
@@ -176,7 +175,7 @@ export function BottomNav() {
               router.push("/create");
             }}
             onTouchStart={vibrate}
-            className="flex flex-col items-center justify-center mx-1 sm:mx-2 shrink-0 transition-all duration-200"
+            className="flex flex-col items-center justify-center gap-1 mx-1 sm:mx-2 shrink-0 transition-all duration-200"
             style={pathname === "/create" ? {
               marginTop: "-24px",
             } : {
@@ -198,7 +197,7 @@ export function BottomNav() {
               <Plus size={pathname === "/create" ? 24 : 20} strokeWidth={pathname === "/create" ? 2.5 : 2} style={{ color: pathname === "/create" ? "#051006" : "rgba(255,255,255,0.9)" }} />
             </div>
             <span
-              className="text-[8px] font-medium tracking-wide transition-all duration-200 mt-1"
+              className="text-[8px] font-medium tracking-wide transition-all duration-200"
               style={{
                 color: pathname === "/create" ? "var(--brand-primary)" : "rgba(255,255,255,0.9)",
               }}
