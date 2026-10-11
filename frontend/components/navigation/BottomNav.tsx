@@ -176,19 +176,35 @@ export function BottomNav() {
               router.push("/create");
             }}
             onTouchStart={vibrate}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center mx-1 sm:mx-2 shrink-0 transition-all duration-200"
+            className="flex flex-col items-center justify-center mx-1 sm:mx-2 shrink-0 transition-all duration-200"
             style={pathname === "/create" ? {
-              background: "linear-gradient(135deg, var(--brand-primary), var(--brand-accent))",
-              boxShadow: "0 8px 24px rgba(212,175,55,0.3), 0 0 0 3px #0B0B0B",
               marginTop: "-24px",
             } : {
-              background: "transparent",
+              marginTop: "0",
             }}
             whileTap={{ scale: 0.92 }}
-            whileHover={pathname === "/create" ? { scale: 1.05, boxShadow: "0 12px 32px rgba(212,175,55,0.4), 0 0 0 3px #0B0B0B" } : { scale: 1.05 }}
+            whileHover={pathname === "/create" ? { scale: 1.05 } : { scale: 1.05 }}
             aria-label="Unda ubashiri mpya"
           >
-            <Plus size={pathname === "/create" ? 24 : 20} strokeWidth={pathname === "/create" ? 2.5 : 2} style={{ color: pathname === "/create" ? "#051006" : "rgba(255,255,255,0.9)" }} />
+            <div
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all duration-200"
+              style={pathname === "/create" ? {
+                background: "linear-gradient(135deg, var(--brand-primary), var(--brand-accent))",
+                boxShadow: "0 8px 24px rgba(212,175,55,0.3), 0 0 0 3px #0B0B0B",
+              } : {
+                background: "transparent",
+              }}
+            >
+              <Plus size={pathname === "/create" ? 24 : 20} strokeWidth={pathname === "/create" ? 2.5 : 2} style={{ color: pathname === "/create" ? "#051006" : "rgba(255,255,255,0.9)" }} />
+            </div>
+            <span
+              className="text-[8px] font-medium tracking-wide transition-all duration-200 mt-1"
+              style={{
+                color: pathname === "/create" ? "var(--brand-primary)" : "rgba(255,255,255,0.9)",
+              }}
+            >
+              Create
+            </span>
           </motion.button>
 
           {NAV_ITEMS.slice(2).map((item) => (
